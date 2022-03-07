@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DispDICOMCMD;
 
-namespace MarchingCubes
+namespace MarchingCubes		
 {
     class Program
     {

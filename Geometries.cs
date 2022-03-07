@@ -4,161 +4,260 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing.Imaging;
+using System.Diagnostics;
+using System.Threading;
+using ILGPU.Runtime.Cuda;
+using ILGPU.Runtime.CPU;
+using ILGPU.Runtime;
+using ILGPU;
 
 namespace DispDICOMCMD
 {
-    internal class PointComparer : IEqualityComparer<Point>
-    {
-        public bool Equals(Point x, Point y)
-        {
-            if (x.Equals(y))
-            {
-                return true;
-            }
-            return false;
-        }
+    //internal class PointComparer : IEqualityComparer<Point>
+    //{
+    //    public bool Equals(Point x, Point y)
+    //    {
+    //        if (x.Equals(y))
+    //        {
+    //            return true;
+    //        }
+    //        return false;
+    //    }
 
-        public int GetHashCode(Point obj)
-        {
-            return obj.GetHashCode();
-        }
-    }
+    //    public int GetHashCode(Point obj)
+    //    {
+    //        return obj.GetHashCode();
+    //    }
+    //}
 
-    class Point
+    public struct Point
     {
-        const short epsilon = 50;
+        //const short epsilon = 0;
         public double X;
         public double Y;
         public double Z;
         public short value;
         public Normal normal;
 
-        public Point(double i, double j, double k, short val)
+        public Point(double i, double j, double k, short val, Normal norm)
         {
             X = i;
             Y = j;
             Z = k;
             value = val;
+            normal = norm;
         }
 
-        public Point(double i, double j, double k, short val, short threshold)
-        {
-            X = i;
-            Y = j;
-            Z = k;
-            if (Math.Abs(threshold - val) < epsilon)
-                val = threshold;
-            value = val;
-        }
+        //public Point(double i, double j, double k, short val, short threshold, Normal norm)
+        //{
+        //    X = i;
+        //    Y = j;
+        //    Z = k;
+        //    if (Math.Abs(threshold - val) < epsilon)
+        //        val = threshold;
+        //    value = val;
+        //    normal = norm;
+        //}
 
         public Point Interpolate(Point other, short threshold)
         {
             double p1 = other.value;
             double p2 = value;
             double x = ((threshold - p2) / (p1 - p2));
-            if (x < 0.001)
-                x = 0;
-            if (x > 0.999)
-                x = 1;
+            //if (x < 0.001)
+            //    x = 0;
+            //if (x > 0.999)
+            //    x = 1;
 
-            return this + (other - this) * x;
+            Point vertex = this + (other - this) * x;
+
+            vertex.normal = this.normal.Interpolate(other.normal, x);
+
+            return vertex;
         }
 
-        public Point FullInterpolate(Point other, short threshold)
-        {
-            //double p1 = other.value;
-            //double p2 = value;
-            //double x = ((threshold - p2) / (p1 - p2));
+        //public Point FullInterpolate(Point other, short threshold)
+        //{
+        //    //double p1 = other.value;
+        //    //double p2 = value;
+        //    //double x = ((threshold - p2) / (p1 - p2));
 
-            //double z = (this - other) * threshold + other;
-            return (this - other) * threshold + other;
-        }
+        //    //double z = (this - other) * threshold + other;
+        //    return (this - other) * threshold + other;
+        //}
+
+        //public void setNormal(double x, double y, double z)
+        //{
+        //    if (x > 0)
+        //        ;
+        //    this.normal.X = x;
+        //    this.normal.Y = y;
+        //    this.normal.Z = z;
+        //}
 
 
-        public override string ToString()
-        {
-            return base.ToString();
-        }
+        //public override string ToString()
+        //{
+        //    return base.ToString();
+        //}
 
-        public override bool Equals(object obj)
-        {
-            return ((Point)obj).X == X && ((Point)obj).Y == Y && ((Point)obj).Z == Z;
-        }
+        //public override bool Equals(object obj)
+        //{
+        //    return ((Point)obj).X == X && ((Point)obj).Y == Y && ((Point)obj).Z == Z;
+        //}
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        //public override int GetHashCode()
+        //{
+        //    return base.GetHashCode();
+        //}
 
-        public static Point operator +(Point pt1, Point pt2) => new Point(pt1.X + pt2.X, pt1.Y + pt2.Y, pt1.Z + pt2.Z, 0);
-        public static Point operator -(Point pt1, Point pt2) => new Point(pt1.X - pt2.X, pt1.Y - pt2.Y, pt1.Z - pt2.Z, 0);
-        public static Point operator *(Point pt1, double factor) => new Point(pt1.X * factor, pt1.Y * factor, pt1.Z * factor, 0);
-        public static bool operator ==(Point pt1, Point pt2) => pt1.X == pt2.X && pt1.Y == pt2.Y && pt1.Z == pt2.Z;
-        public static bool operator !=(Point pt1, Point pt2) => !(pt1.X == pt2.X && pt1.Y == pt2.Y && pt1.Z == pt2.Z);
-        public static bool operator >(Point pt1, Point pt2) => pt1.value > pt2.value;
-        public static bool operator <(Point pt1, Point pt2) => pt1.value < pt2.value;
+        public static Point operator +(Point pt1, Point pt2) => new Point(pt1.X + pt2.X, pt1.Y + pt2.Y, pt1.Z + pt2.Z, 0, new Normal());
+        public static Point operator -(Point pt1, Point pt2) => new Point(pt1.X - pt2.X, pt1.Y - pt2.Y, pt1.Z - pt2.Z, 0, new Normal());
+        public static Point operator *(Point pt1, double factor) => new Point(pt1.X * factor, pt1.Y * factor, pt1.Z * factor, 0, new Normal());
+        //public static bool operator ==(Point pt1, Point pt2) => pt1.X == pt2.X && pt1.Y == pt2.Y && pt1.Z == pt2.Z;
+        //public static bool operator !=(Point pt1, Point pt2) => !(pt1.X == pt2.X && pt1.Y == pt2.Y && pt1.Z == pt2.Z);
+        //public static bool operator >(Point pt1, Point pt2) => pt1.value > pt2.value;
+        //public static bool operator <(Point pt1, Point pt2) => pt1.value < pt2.value;
     }
 
-    struct Normal
+    public struct Normal
     {
+        public double X;
+        public double Y;
+        public double Z;
+
         public Normal(double i, double j, double k)
         {
             X = i;
             Y = j;
             Z = k;
         }
-        public double X;
-        public double Y;
-        public double Z;
-    }
 
-    class Triangle
-    {
-        public Point[] vertices;
-
-        public Triangle(Point v1, Point v2, Point v3)
+        public Normal Interpolate(Normal other, double interpolant)
         {
-            vertices = new Point[] { v1, v2, v3 };
+            double x = (other.X - this.X) * interpolant + this.X;
+            double y = (other.Y - this.Y) * interpolant + this.Y;
+            double z = (other.Z - this.Z) * interpolant + this.Z;
+            return new Normal(x, y, z);
         }
     }
 
-    class Cube
+    public struct Vertex
     {
-        public Point[] voxels;
-        public byte config = 0x00;
+        public double X;
+        public double Y;
+        public double Z;
+
+        public Vertex(double i, double j, double k)
+        {
+            X = i;
+            Y = j;
+            Z = k;
+        }
+
+        public Vertex Interpolate(Vertex other, double interpolant)
+        {
+            double x = (other.X - this.X) * interpolant + this.X;
+            double y = (other.Y - this.Y) * interpolant + this.Y;
+            double z = (other.Z - this.Z) * interpolant + this.Z;
+            return new Vertex(x, y, z);
+        }
+    }
+
+    public struct Edge
+    {
+        public short E1;
+        public short E2;
+        public short E3;
+        public short E4;
+        public short E5;
+        public short E6;
+        public short E7;
+        public short E8;
+        public short E9;
+        public short E10;
+        public short E11;
+        public short E12;
+        public short E13;
+        public short E14;
+        public short E15;
+        public short E16;
+
+        public Edge(short e1, short e2, short e3, short e4, short e5, short e6, short e7, short e8, short e9, short e10, short e11, short e12, short e13, short e14, short e15, short e16)
+        {
+            E1 = e1;
+            E2 = e2;
+            E3 = e3;
+            E4 = e4;
+            E5 = e5;
+            E6 = e6;
+            E7 = e7;
+            E8 = e8;
+            E9 = e9;
+            E10 = e10;
+            E11 = e11;
+            E12 = e12;
+            E13 = e13;
+            E14 = e14;
+            E15 = e15;
+            E16 = e16;
+        }
+
+        public short[] getAsArray()
+        {
+            return new short[] { E1, E2, E3, E4, E5, E6, E7, E8, E9, E10, E11, E12, E13, E14, E15, E16 };
+        }
+    }
+
+    public struct Cube
+    {
+        public Point V1, V2, V3, V4, V5, V6, V7, V8;
+        public byte config;
 
         public Cube(Point v1, Point v2, Point v3, Point v4, Point v5, Point v6, Point v7, Point v8)
         {
-            voxels = new Point[] { v1, v2, v3, v4, v5, v6, v7, v8 };
+            V1 = v1;
+            V2 = v2;
+            V3 = v3;
+            V4 = v4;
+            V5 = v5;
+            V6 = v6;
+            V7 = v7;
+            V8 = v8;
+            config = 0x00;
         }
 
         public void Config(double threshold)
         {
-
             config = 0;
-            config += (voxels[0].value < threshold) ? (byte)bitMask.v1 : (byte)0;
-            config += (voxels[1].value < threshold) ? (byte)bitMask.v2 : (byte)0;
-            config += (voxels[2].value < threshold) ? (byte)bitMask.v3 : (byte)0;
-            config += (voxels[3].value < threshold) ? (byte)bitMask.v4 : (byte)0;
-            config += (voxels[4].value < threshold) ? (byte)bitMask.v5 : (byte)0;
-            config += (voxels[5].value < threshold) ? (byte)bitMask.v6 : (byte)0;
-            config += (voxels[6].value < threshold) ? (byte)bitMask.v7 : (byte)0;
-            config += (voxels[7].value < threshold) ? (byte)bitMask.v8 : (byte)0;
+            config += (V1.value < threshold) ? (byte)bitMask.v1 : (byte)0;
+            config += (V2.value < threshold) ? (byte)bitMask.v2 : (byte)0;
+            config += (V3.value < threshold) ? (byte)bitMask.v3 : (byte)0;
+            config += (V4.value < threshold) ? (byte)bitMask.v4 : (byte)0;
+            config += (V5.value < threshold) ? (byte)bitMask.v5 : (byte)0;
+            config += (V6.value < threshold) ? (byte)bitMask.v6 : (byte)0;
+            config += (V7.value < threshold) ? (byte)bitMask.v7 : (byte)0;
+            config += (V8.value < threshold) ? (byte)bitMask.v8 : (byte)0;
+        }
+
+        public Point[] getAsArray() 
+        { 
+            return new Point[] { V1, V2, V3, V4, V5, V6, V7, V8 };
         }
 
         public byte getConfig() { return config; }
-        public Point getMax() { return voxels.Max(); }
-        public Point getmin() { return voxels.Min(); }
+        //public Point getMax() { return getAsArray().Max(); }
+        //public Point getmin() { return getAsArray().Min(); }
 
-        public Point[] March(short threshold)
+        public Point[] March(short threshold , Edge config)
         {
-            int[] ed = GetRow(triangleTable, config).Where(x => x >= 0).ToArray();
+            short[] ed = config.getAsArray().Where(x => x >= 0).ToArray();
             //if (ed.Length > 0)
             //{
 
             //}
             Point[] points = new Point[ed.Length];
-            if(ed.Length % 3 != 0)
+            if(ed.Length != 0)
             {
                 ;
             }
@@ -168,69 +267,69 @@ namespace DispDICOMCMD
                 switch (ed[i])
                 {
                     case (int)edgeMask.e1:
-                        points[i] = voxels[0].Interpolate(voxels[1], threshold);
+                        points[i] = V1.Interpolate(V2, threshold);
                              //points.Add(new Point3D(i + 0.5f, j, k));
                             break;
                     case (int)edgeMask.e2:
-                        points[i] = voxels[1].Interpolate(voxels[2], threshold);
+                        points[i] = V2.Interpolate(V3, threshold);
                             //points.Add(new Point3D(i + 1, j + 0.5f, k));
                            break;
                     case (int)edgeMask.e3:
-                        points[i] = voxels[3].Interpolate(voxels[2], threshold);
+                        points[i] = V4.Interpolate(V3, threshold);
                             //points.Add(new Point3D(i + 0.5f, j + 1, k));
                             break;
                     case (int)edgeMask.e4:
-                        points[i] = voxels[0].Interpolate(voxels[3], threshold);
+                        points[i] = V1.Interpolate(V4, threshold);
                             //points.Add(new Point3D(i, j + 0.5f, k));
                             break;
                     case (int)edgeMask.e5:
-                        points[i] = voxels[4].Interpolate(voxels[5], threshold);
+                        points[i] = V5.Interpolate(V6, threshold);
                             //points.Add(new Point3D(i + 0.5f, j, k + 1));
                             break;
                     case (int)edgeMask.e6:
-                        points[i] = voxels[5].Interpolate(voxels[6], threshold);
+                        points[i] = V6.Interpolate(V7, threshold);
                             //points.Add(new Point3D(i + 1, j + 0.5f, k + 1));
                             break;
                     case (int)edgeMask.e7:
-                        points[i] = voxels[7].Interpolate(voxels[6], threshold);
+                        points[i] = V8.Interpolate(V7, threshold);
                             //points.Add(new Point3D(i + 0.5f, j + 1, k + 1));
                             break;
                     case (int)edgeMask.e8:
-                        points[i] = voxels[4].Interpolate(voxels[7], threshold);
+                        points[i] = V5.Interpolate(V8, threshold);
                             //points.Add(new Point3D(i, j + 0.5f, k + 1));
                             break;
                     case (int)edgeMask.e9:
-                        points[i] = voxels[0].Interpolate(voxels[4], threshold);
+                        points[i] = V1.Interpolate(V5, threshold);
                             //points.Add(new Point3D(i, j, k+0.5f));
                             break;
                     case (int)edgeMask.e10:
-                        points[i] = voxels[1].Interpolate(voxels[5], threshold);
+                        points[i] = V2.Interpolate(V6, threshold);
                             //points.Add(new Point3D(i + 1, j, k+0.5f));
                             break;
                     case (int)edgeMask.e11:
-                        points[i] = voxels[2].Interpolate(voxels[6], threshold);
+                        points[i] = V3.Interpolate(V7, threshold);
                             //points.Add(new Point3D(i + 1, j + 1, k+0.5f));
                             break;
                     case (int)edgeMask.e12:
-                        points[i] = voxels[3].Interpolate(voxels[7], threshold);
+                        points[i] = V4.Interpolate(V8, threshold);
                             //points.Add(new Point3D(i, j + 1, k+0.5f));
                             break;
                 }
-                if(i%3==2 && i > 0)
-                {
-                    Point vx1 = points[i] - points[i - 1];
-                    Point vx2 = points[i] - points[i - 2];
-                    Normal normal = new Normal(vx1.Y * vx2.Z - vx1.Z * vx2.Y, vx1.Z * vx2.X - vx1.X * vx2.Z, vx1.X * vx2.Y - vx1.Y * vx2.X);
-                    double factor = 1 / Math.Sqrt(Math.Pow(normal.X, 2) + Math.Pow(normal.Y, 2) + Math.Pow(normal.Z, 2));
-                    normal = new Normal(normal.X * factor, normal.Y * factor, normal.Z * factor); 
-                    if (double.IsNaN(normal.X) || double.IsNaN(normal.Y) || double.IsNaN(normal.Z))
-                        ;
-                    points[i].normal = normal;
-                    points[i-1].normal = normal;
-                    points[i-2].normal = normal;
-                    if (normal.X == 0 && normal.Y == 0 && normal.Z == 0)
-                        ;
-                }
+                //if(i%3==2 && i > 0)
+                //{
+                //    Point vx1 = points[i] - points[i - 1];
+                //    Point vx2 = points[i] - points[i - 2];
+                //    Normal normal = new Normal(vx1.Y * vx2.Z - vx1.Z * vx2.Y, vx1.Z * vx2.X - vx1.X * vx2.Z, vx1.X * vx2.Y - vx1.Y * vx2.X);
+                //    double factor = 1 / Math.Sqrt(Math.Pow(normal.X, 2) + Math.Pow(normal.Y, 2) + Math.Pow(normal.Z, 2));
+                //    normal = new Normal(normal.X * factor, normal.Y * factor, normal.Z * factor); 
+                //    if (double.IsNaN(normal.X) || double.IsNaN(normal.Y) || double.IsNaN(normal.Z))
+                //        ;
+                //    points[i].normal = normal;
+                //    points[i-1].normal = normal;
+                //    points[i-2].normal = normal;
+                //    if (normal.X == 0 && normal.Y == 0 && normal.Z == 0)
+                //        ;
+                //}
             }
             if (points.Length % 3 != 0)
             {
@@ -239,10 +338,10 @@ namespace DispDICOMCMD
             return points;
         }
 
-        public int getNumber()
-        {
-            return GetRow(triangleTable, config).Where(x => x >= 0).Count();
-        }
+        //public int getNumber()
+        //{
+        //    return GetRow(triangleTable, config).Where(x => x >= 0).Count();
+        //}
 
         int[] GetRow(int[,] matrix, int rowNumber)
         {
