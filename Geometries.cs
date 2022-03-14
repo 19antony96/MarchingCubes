@@ -339,10 +339,6 @@ namespace DispDICOMCMD
 
             //}
             Point[] points = new Point[ed.Length];
-            if (ed.Length != 0)
-            {
-                ;
-            }
             int i;
             for (i = 0; i < ed.Length; i++)
             {
