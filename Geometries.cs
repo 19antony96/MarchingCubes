@@ -30,6 +30,13 @@ namespace DispDICOMCMD
     //    }
     //}
 
+    public struct Triangle
+    {
+        public Point vertex1;
+        public Point vertex2;
+        public Point vertex3;
+    }
+
     public struct Point
     {
         //const short epsilon = 0;
@@ -252,6 +259,8 @@ namespace DispDICOMCMD
         public Point[] March(short threshold , Edge config)
         {
             short[] ed = config.getAsArray().Where(x => x >= 0).ToArray();
+            if(ed.All(x => x == 0))
+                ed = new short[]{ };
             //if (ed.Length > 0)
             //{
 
@@ -315,25 +324,79 @@ namespace DispDICOMCMD
                             //points.Add(new Point3D(i, j + 1, k+0.5f));
                             break;
                 }
-                //if(i%3==2 && i > 0)
-                //{
-                //    Point vx1 = points[i] - points[i - 1];
-                //    Point vx2 = points[i] - points[i - 2];
-                //    Normal normal = new Normal(vx1.Y * vx2.Z - vx1.Z * vx2.Y, vx1.Z * vx2.X - vx1.X * vx2.Z, vx1.X * vx2.Y - vx1.Y * vx2.X);
-                //    double factor = 1 / Math.Sqrt(Math.Pow(normal.X, 2) + Math.Pow(normal.Y, 2) + Math.Pow(normal.Z, 2));
-                //    normal = new Normal(normal.X * factor, normal.Y * factor, normal.Z * factor); 
-                //    if (double.IsNaN(normal.X) || double.IsNaN(normal.Y) || double.IsNaN(normal.Z))
-                //        ;
-                //    points[i].normal = normal;
-                //    points[i-1].normal = normal;
-                //    points[i-2].normal = normal;
-                //    if (normal.X == 0 && normal.Y == 0 && normal.Z == 0)
-                //        ;
-                //}
             }
-            if (points.Length % 3 != 0)
+            return points;
+        }
+
+        public Point[] MarchGPU(short threshold, Edge config)
+        {
+            short[] ed = config.getAsArray();
+
+            //if (ed.All(x => x == 0))
+            //    ed = new short[] { };
+            //if (ed.Length > 0)
+            //{
+
+            //}
+            Point[] points = new Point[ed.Length];
+            if (ed.Length != 0)
             {
                 ;
+            }
+            int i;
+            for (i = 0; i < ed.Length; i++)
+            {
+                switch (ed[i])
+                {
+                    case 0:
+                        points[i] = V1.Interpolate(V2, threshold);
+                        //points.Add(new Point3D(i + 0.5f, j, k));
+                        break;
+                    case 1:
+                        points[i] = V2.Interpolate(V3, threshold);
+                        //points.Add(new Point3D(i + 1, j + 0.5f, k));
+                        break;
+                    case 2:
+                        points[i] = V4.Interpolate(V3, threshold);
+                        //points.Add(new Point3D(i + 0.5f, j + 1, k));
+                        break;
+                    case 3:
+                        points[i] = V1.Interpolate(V4, threshold);
+                        //points.Add(new Point3D(i, j + 0.5f, k));
+                        break;
+                    case 4:
+                        points[i] = V5.Interpolate(V6, threshold);
+                        //points.Add(new Point3D(i + 0.5f, j, k + 1));
+                        break;
+                    case 5:
+                        points[i] = V6.Interpolate(V7, threshold);
+                        //points.Add(new Point3D(i + 1, j + 0.5f, k + 1));
+                        break;
+                    case 6:
+                        points[i] = V8.Interpolate(V7, threshold);
+                        //points.Add(new Point3D(i + 0.5f, j + 1, k + 1));
+                        break;
+                    case 7:
+                        points[i] = V5.Interpolate(V8, threshold);
+                        //points.Add(new Point3D(i, j + 0.5f, k + 1));
+                        break;
+                    case 8:
+                        points[i] = V1.Interpolate(V5, threshold);
+                        //points.Add(new Point3D(i, j, k+0.5f));
+                        break;
+                    case 9:
+                        points[i] = V2.Interpolate(V6, threshold);
+                        //points.Add(new Point3D(i + 1, j, k+0.5f));
+                        break;
+                    case 10:
+                        points[i] = V3.Interpolate(V7, threshold);
+                        //points.Add(new Point3D(i + 1, j + 1, k+0.5f));
+                        break;
+                    case 11:
+                        points[i] = V4.Interpolate(V8, threshold);
+                        //points.Add(new Point3D(i, j + 1, k+0.5f));
+                        break;
+                }
             }
             return points;
         }
