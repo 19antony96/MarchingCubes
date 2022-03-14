@@ -38,7 +38,7 @@ namespace DispDICOMCMD
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
         public static MemoryBuffer3D<short, Stride3D.DenseXY> sliced;
 
-        public static readonly short threshold = 1220;
+        public static readonly short threshold = 1200;
         public static readonly int length = 128;
         public static readonly int width = 128;
         public static short[,,] slices;
@@ -107,7 +107,7 @@ namespace DispDICOMCMD
             //edges = march.edges;
             using (StreamWriter fs = fi.CreateText())
             {
-                MarchCPU(fs);
+                MarchGPU(fs);
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.Milliseconds / 10);
@@ -483,13 +483,13 @@ namespace DispDICOMCMD
             Point[] vertice = tempCube.MarchGPU(threshold, edges[index.Z * 127 * 127 + index.Y * 127 + index.X]);
             int i;
             //count[0]++;
-            for (i = 0; i < 13; i += 3)
+            for (i = 0; i < 12; i += 3)
             {
                 if ((vertice[i].X != 0 && vertice[i].Y != 0 && vertice[i].Z != 0) &&
                     (vertice[i + 1].X != 0 && vertice[i + 1].Y != 0 && vertice[i + 1].Z != 0) &&
                     (vertice[i + 2].X != 0 && vertice[i + 2].Y != 0 && vertice[i + 2].Z != 0))
                 {
-                    triangles[count[0]++] = new Triangle()
+                    triangles[127*127*127*(i/3) + (index.Z * 127 * 127 + index.Y * 127 + index.X)] = new Triangle()
                     {
                         vertex1 = vertice[i],
                         vertex2 = vertice[i + 1],
@@ -505,11 +505,10 @@ namespace DispDICOMCMD
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            Triangle[] tri = new Triangle[slices.Length];
             Index3D index = new Index3D(slices.GetLength(0) - 2, width - 2, length - 2);
-            var gradScope = accelerator.CreatePageLockFromPinned(tri);
-            PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(index.Size);
-            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(index.Size);
+            Triangle[] tri = new Triangle[index.Size*5];
+            PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(index.Size*5);
+            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(index.Size*5);
             count = 0;
             int[] n = { 0 };
 
@@ -553,9 +552,9 @@ namespace DispDICOMCMD
                     ;
                 //vertices.Add(vertex);
                 fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
-                fs.WriteLine("vn " + triangle.vertex1.normal.X + " " + triangle.vertex1.normal.Y + " " + triangle.vertex1.normal.Z);                
+                fs.WriteLine("vn " + triangle.vertex1.normal.X + " " + triangle.vertex1.normal.Y + " " + triangle.vertex1.normal.Z);
                 fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
-                fs.WriteLine("vn " + triangle.vertex2.normal.X + " " + triangle.vertex2.normal.Y + " " + triangle.vertex2.normal.Z);                
+                fs.WriteLine("vn " + triangle.vertex2.normal.X + " " + triangle.vertex2.normal.Y + " " + triangle.vertex2.normal.Z);
                 fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
                 fs.WriteLine("vn " + triangle.vertex3.normal.X + " " + triangle.vertex3.normal.Y + " " + triangle.vertex3.normal.Z);
                 //    //fs.WriteLine("vt " + vertex.X + " " + vertex.Y + " " + vertex.Z);
@@ -563,7 +562,7 @@ namespace DispDICOMCMD
                 //    //fs.WriteLine("vn " + normal.X + " " + normal.Y + " " + normal.Z);
                 //    //Point n = new Point(vertex.normal.X * 2 + normal.X, vertex.normal.Y * 2 + normal.Y, vertex.normal.Z * 2 + normal.Z, 0);
                 //    //normals.Add(normal);
-                count+=3;
+                count +=3;
             }
         }
 
@@ -661,8 +660,8 @@ namespace DispDICOMCMD
                         slice[k, j, i] = (short)(Math.Sqrt((i - 64) * (i - 64) + (j - 64) * (j - 64) + (k - 64) * (k - 64)) * 20);
                         //double h = (k + i) * 60;
                         //bool p = h > (double)threshold;
-                        //slice[j, i] = (short)(p ? threshold - 50 : threshold + 50);
-                        //slice[j, i] = (short)(((j - 64) + (i - 64) + (k - 64)) * 20);
+                        //slice[k, j, i] = (short)(p ? threshold - 50 : threshold + 50);
+                        //slice[k, j, i] = (short)(((j - 64) + (i - 64) + (k - 64)) * 20);
                     }
                 }
             }
