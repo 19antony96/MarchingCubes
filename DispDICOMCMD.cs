@@ -21,6 +21,8 @@ using ILGPU;
 using System.Diagnostics;
 using System.Threading;
 
+
+
 namespace DispDICOMCMD
 {
     class DispDICOMCMD
@@ -30,19 +32,20 @@ namespace DispDICOMCMD
         public static Action<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int> assign_edges;
         public static Action<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>> assign_normal;
         public static Action<Index3D, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int> assign_edges1D;
-        public static Action<Index3D, ArrayView1D<Normal, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int> assign1D;
+        public static Action<Index3D, ArrayView1D<Normal, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int, int, Point> assign1D;
         public static Action<Index3D, ArrayView1D<Normal, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>> assign_normal1D;
-        public static Action<Index3D, ArrayView<Triangle>, ArrayView1D<Normal, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, Point, int> get_verts;
+        public static Action<Index3D, ArrayView<Triangle>, ArrayView1D<Normal, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, Point, int, int, int> get_verts;
 
         public static MemoryBuffer1D<Edge, Stride1D.Dense> cubeConfig;
         public static MemoryBuffer1D<Normal, Stride1D.Dense> gradConfig;
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
         public static MemoryBuffer3D<short, Stride3D.DenseXY> sliced;
 
-        public static readonly short threshold = 1200;
-        public static readonly int length = 128;
-        public static readonly int width = 128;
+        public static readonly short threshold = 1350;
+        public static readonly int length = 512;
+        public static readonly int width = 512;
         public static short[,,] slices;
+        public static int batchSize = 36;
 
         public static TimeSpan ts = new TimeSpan();
         public static int xCount = 0, yCount = 0, zCount = 0, lCount = 0;
@@ -59,12 +62,12 @@ namespace DispDICOMCMD
             accelerator = context.CreateCudaAccelerator(0);
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
 
-            assign1D = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView1D<Normal, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int>(Assign1D);
-            get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView1D<Normal, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, Point, int>(getVertices);
+            assign1D = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView1D<Normal, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int, int, Point>(Assign1D);
+            get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView1D<Normal, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, Point, int, int, int>(getVertices);
 
             DicomFile dicoms;
-            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
-            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
+            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
+            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\DICOM\\DICOM\\ST000000\\SE000001\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Resources\\");
 
@@ -78,36 +81,51 @@ namespace DispDICOMCMD
 
             //int[,,] edges;
 
-            var sphere = CreateSphere();
+            //var sphere = CreateSphere();
 
-            string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest2.obj";
+            string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
             FileInfo fi = new FileInfo(fileName);
 
             short i, j, k = 0;
             slices = new short[files.Length, length, width];
             //slices = sphere;
 
-            //foreach (var file in files)
-            ////foreach (var file in sphere)
-            //{
-            //    dicoms = DicomFile.Open(file.FullName);
-            //    CreateBmp(dicoms, k);
-            //    //slices[k] = file;
-            //    k++;
-            //    //if (k * length * width > Math.Pow(2, 32)) 
-            //    //    break;
-            //    //if (k > 13) 
-            //    //    break;
-            //    //Console.WriteLine(k);
-            //}
+            foreach (var file in files)
+            //foreach (var file in sphere)
+            {
+                dicoms = DicomFile.Open(file.FullName);
+                CreateBmp(dicoms, k);
+                //slices[k] = file;
+                k++;
+                //if (k * length * width > Math.Pow(2, 32)) 
+                //    break;
+                //if (k > 13) 
+                //    break;
+                //Console.WriteLine(k);
+            }
 
             //Stopwatch stopWatch = new Stopwatch();
             //stopWatch.Start();
             sliced = accelerator.Allocate3DDenseXY<short>(slices);
 
-            var temp = MarchingCubesGPU();
+            var temp = MarchingCubesGPUX();
             //var temp = MarchingCubesCPU();
             cubes = temp.configs;
+            int sum = 0; 
+            foreach(Edge cube in cubes)
+            {
+                foreach(short n in cube.getAsArray())
+                {
+                    if (n > 0)
+                    {
+                        sum = cubes.ToList().IndexOf(cube);
+                        break;
+                    }
+                }
+                if (sum > 0)
+                    break;
+            }
+            Console.WriteLine(sum);
             normals = temp.grads;
             //edges = temp.edges;
             //edges = march.edges;
@@ -241,11 +259,11 @@ namespace DispDICOMCMD
                 {
                     for (j = 0; j < slices.GetLength(1) - 1; j++)
                     {
-                        grads[(k * 127 * 127) + (j * 127) + i] =
+                        grads[(k * (width - 1) * (width - 1)) + (j * (width - 1)) + i] =
                         new Normal(
-                             slices[k, j, Math.Min(440 - 1, i + 1)] - slices[k, j, Math.Max(i - 1, 0)],
-                             slices[k, Math.Min(440 - 1, j + 1), i] - slices[k, Math.Max(j - 1, 0), i],
-                             slices[Math.Min(250 - 1, k + 1), j, i] - slices[Math.Max(k - 1, 0), j, i]
+                             slices[k, j, Math.Min((width) - 1, i + 1)] - slices[k, j, Math.Max(i - 1, 0)],
+                             slices[k, Math.Min((width) - 1, j + 1), i] - slices[k, Math.Max(j - 1, 0), i],
+                             slices[Math.Min(slices.GetLength(0) - 1, k + 1), j, i] - slices[Math.Max(k - 1, 0), j, i]
                          );
                         cubeBytes = 0;
                         cubeBytes += (slices[k, j, i] < threshold) ? (byte)0x01 : (byte)0;
@@ -257,7 +275,7 @@ namespace DispDICOMCMD
                         cubeBytes += (slices[k + 1, j + 1, i + 1] < threshold) ? (byte)0x40 : (byte)0;
                         cubeBytes += (slices[k + 1, j + 1, i] < threshold) ? (byte)0x80 : (byte)0;
 
-                        edges[(k * 127 * 127) + (j * 127) + i] = triangleTable[cubeBytes];
+                        edges[(k * (width - 1) * (width - 1)) + (j * (width - 1)) + i] = triangleTable[cubeBytes];
                     }
                 }
             }
@@ -277,8 +295,8 @@ namespace DispDICOMCMD
         {
             normals[index] =
                 new Normal(
-                    input[index.X, index.Y, Math.Min(440 - 1, index.Z + 1)] - input[index.X, index.Y, Math.Max(index.Z - 1, 0)],
-                    input[index.X, Math.Min(440 - 1, index.Y + 1), index.Z] - input[index.X, Math.Max(index.Y - 1, 0), index.Z],
+                    input[index.X, index.Y, Math.Min((width) - 1, index.Z + 1)] - input[index.X, index.Y, Math.Max(index.Z - 1, 0)],
+                    input[index.X, Math.Min((width) - 1, index.Y + 1), index.Z] - input[index.X, Math.Max(index.Y - 1, 0), index.Z],
                     input[Math.Min(250 - 1, index.X + 1), index.Y, index.Z] - input[Math.Max(index.X - 1, 0), index.Y, index.Z]
                 );
         }
@@ -351,7 +369,7 @@ namespace DispDICOMCMD
             edges[index.X * 127 * 127 + index.Y * 127 + index.Z] = triTable[(int)config];
         }
 
-        public static void Assign1D(Index3D index, ArrayView1D<Normal, Stride1D.Dense> normals, ArrayView1D<Edge, Stride1D.Dense> edges, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh)
+        public static void Assign1D(Index3D index, ArrayView1D<Normal, Stride1D.Dense> normals, ArrayView1D<Edge, Stride1D.Dense> edges, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int width, Point offset)
         {
             //return Enumerable.Range(0, matrix.GetLength(1))
             //    .Select(x => matrix[rowNumber, x])
@@ -369,21 +387,21 @@ namespace DispDICOMCMD
             //    ((input[index.X + 1, index.Y + 1, index.Z] < thresh) ? (byte)0x80 : (byte)0))
             //    ];
             byte config = 0;
-            config += (input[index] < thresh) ? (byte)0x01 : (byte)0;
-            config += (input[index.X, index.Y, index.Z + 1] < thresh) ? (byte)0x02 : (byte)0;
-            config += (input[index.X, index.Y + 1, index.Z + 1] < thresh) ? (byte)0x04 : (byte)0;
-            config += (input[index.X, index.Y + 1, index.Z] < thresh) ? (byte)0x08 : (byte)0;
-            config += (input[index.X + 1, index.Y, index.Z] < thresh) ? (byte)0x10 : (byte)0;
-            config += (input[index.X + 1, index.Y, index.Z + 1] < thresh) ? (byte)0x20 : (byte)0;
-            config += (input[index.X + 1, index.Y + 1, index.Z + 1] < thresh) ? (byte)0x40 : (byte)0;
-            config += (input[index.X + 1, index.Y + 1, index.Z] < thresh) ? (byte)0x80 : (byte)0;
-            edges[index.X * 127 * 127 + index.Y * 127 + index.Z] = triTable[(int)config];
+            config += (input[(index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z)] < thresh) ? (byte)0x01 : (byte)0;
+            config += (input[(index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z) + 1] < thresh) ? (byte)0x02 : (byte)0;
+            config += (input[(index.X + (int)offset.X), (index.Y + (int)offset.Y) + 1, (index.Z + (int)offset.Z) + 1] < thresh) ? (byte)0x04 : (byte)0;
+            config += (input[(index.X + (int)offset.X), (index.Y + (int)offset.Y) + 1, (index.Z + (int)offset.Z)] < thresh) ? (byte)0x08 : (byte)0;
+            config += (input[(index.X + (int)offset.X) + 1, (index.Y + (int)offset.Y), (index.Z + (int)offset.Z)] < thresh) ? (byte)0x10 : (byte)0;
+            config += (input[(index.X + (int)offset.X) + 1, (index.Y + (int)offset.Y), (index.Z + (int)offset.Z) + 1] < thresh) ? (byte)0x20 : (byte)0;
+            config += (input[(index.X + (int)offset.X) + 1, (index.Y + (int)offset.Y) + 1, (index.Z + (int)offset.Z) + 1] < thresh) ? (byte)0x40 : (byte)0;
+            config += (input[(index.X + (int)offset.X) + 1, (index.Y + (int)offset.Y) + 1, (index.Z + (int)offset.Z)] < thresh) ? (byte)0x80 : (byte)0;
+            edges[index.X * (width - 1) * (width - 1) + (index.Y + (int)offset.Y) * (width - 1) + (index.Z + (int)offset.Z)] = triTable[(int)config];
 
-            normals[index.X * 127 * 127 + index.Y * 127 + index.Z] =
+            normals[index.X * (width - 1) * (width - 1) + (index.Y + (int)offset.Y) * (width - 1) + (index.Z + (int)offset.Z)] =
             new Normal(
-                input[index.X, index.Y, Math.Min(128 - 1, index.Z + 1)] - input[index.X, index.Y, Math.Max(index.Z - 1, 0)],
-                input[index.X, Math.Min(128 - 1, index.Y + 1), index.Z] - input[index.X, Math.Max(index.Y - 1, 0), index.Z],
-                input[Math.Min(128 - 1, index.X + 1), index.Y, index.Z] - input[Math.Max(index.X - 1, 0), index.Y, index.Z]
+                input[(index.X + (int)offset.X), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.Z + (int)offset.Z) + 1)] - input[(index.X + (int)offset.X), (index.Y + (int)offset.Y), Math.Max((index.Z + (int)offset.Z) - 1, 0)],
+                input[(index.X + (int)offset.X), Math.Min((width)- 1, (index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z)] - input[(index.X + (int)offset.X), Math.Max((index.Y + (int)offset.Y) - 1, 0), (index.Z + (int)offset.Z)],
+                input[Math.Min((width) - 1, (index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z)] - input[Math.Max((index.X + (int)offset.X) - 1, 0), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z)]
             );
         }
 
@@ -443,18 +461,18 @@ namespace DispDICOMCMD
             //assign_edges(num, cubeConfig.View, sliced.View, triTable.View , threshold);
             //assign_normal(num, gradConfig.View, sliced.View);
 
-            assign1D(index, gradConfig.View, cubeConfig.View, sliced.View, triTable.View, threshold);
+            assign1D(index, gradConfig.View, cubeConfig.View, sliced.View, triTable.View, threshold, width, new Point());
             //assign_edges1D(index, cubeConfig.View, sliced.View, triTable.View, threshold);
             //assign_normal1D(index, gradConfig.View, sliced.View);
 
 
             accelerator.Synchronize();
-            //gradConfig.CopyToCPU(grads);
-            //cubeConfig.CopyToCPU(cubeBytes);
-            //gradConfig.View.CopyToPageLockedAsync(gradLocked);
-            //cubeConfig.View.CopyToPageLockedAsync(cubeLocked);
-            //cubeBytes = cubeLocked.GetArray();
-            //grads = gradLocked.GetArray();
+            gradConfig.CopyToCPU(grads);
+            cubeConfig.CopyToCPU(cubeBytes);
+            gradConfig.View.CopyToPageLockedAsync(gradLocked);
+            cubeConfig.View.CopyToPageLockedAsync(cubeLocked);
+            cubeBytes = cubeLocked.GetArray();
+            grads = gradLocked.GetArray();
             stopWatch.Stop();
             // Get the elapsed time as a TimeSpan value.
             //cubeConfig.Dispose();
@@ -467,8 +485,101 @@ namespace DispDICOMCMD
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
             Console.WriteLine("RunTime " + elapsedTime);
+            //ToBuffer3D(grads, slices.GetLength(0) - 1, width - 1, length - 1)
+            return (cubeBytes, grads);
+        }
 
-            
+
+        public static (Edge[] configs, Normal[] grads) MarchingCubesGPUX()
+        {
+            int sliceSize = 50, i;
+            List<Edge> edgeList = new List<Edge>();
+            List<Normal> normalList = new List<Normal>();
+
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            //Edge[,,] cubeBytes = new Edge[slices.GetLength(0) - 1, width - 1, length - 1];
+            //Normal[,,] grads = new Normal[slices.GetLength(0) - 1, width - 1, length - 1];
+            Index3D Nindex = new Index3D(slices.GetLength(0) - 1, width - 1, length - 1);
+            int Z = slices.GetLength(0) - 1;
+            int nZ = (int)Math.Ceiling((double)(Z / sliceSize));
+            Normal[] grads = new Normal[sliceSize * (width - 1) * (length - 1)];
+            Edge[] cubeBytes = new Edge[sliceSize * (width - 1) * (length - 1)];
+            PageLockedArray1D<Edge> cubeLocked = accelerator.AllocatePageLocked1D<Edge>(sliceSize * (width - 1) * (length - 1));
+            PageLockedArray1D<Normal> gradLocked = accelerator.AllocatePageLocked1D<Normal>(sliceSize * (width - 1) * (length - 1));
+            cubeConfig = accelerator.Allocate1D<Edge>(sliceSize * (width - 1) * (length - 1));
+            gradConfig = accelerator.Allocate1D<Normal>(sliceSize * (width - 1) * (length - 1));
+            //MemoryBuffer3D<Edge, Stride3D.DenseXY> cubeConfig = accelerator.Allocate3DDenseXY<Edge>(index);
+            //MemoryBuffer3D<Normal, Stride3D.DenseXY> gradConfig = accelerator.Allocate3DDenseXY<Normal>(index);
+            ////byte[,] configBytes = new byte[511, 511];
+
+            Normal[] grad = new Normal[grads.Length];
+
+            //int[,,] edges = new int[slices.Length - 1, width - 1, length - 1];
+
+            //bit order 
+            // i,j,k 
+            // i+1,j,k
+            // i+1,j+1,k
+            // i,j+1,k
+            // i,j,k+1
+            // i+1,j,k+1
+            // i+1,j+1,k+1
+            // i,j+1,k+1
+
+            var gradScope = accelerator.CreatePageLockFromPinned(grads);
+            var cubeScope = accelerator.CreatePageLockFromPinned(cubeBytes);
+            gradConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
+            cubeConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
+
+            //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal);
+            //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
+
+            //assign_normal1D = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView1D<Normal, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal1D);
+            //assign_edges1D = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges1D);
+
+            //triTable = accelerator.Allocate1D<Edge>(triangleTable);
+            //Console.WriteLine(slices.ToString());
+            Index3D num = new Index3D(1, slices.GetLength(1) - 1, slices.GetLength(2) - 1);
+            //Index3D num = new Index3D(slices.GetLength(0) - 1, slices.GetLength(1) - 1, slices.GetLength(2) - 1);
+
+            //Console.WriteLine(num.ToString());
+            //Console.WriteLine(cubeBytes.GetLength(0) + "," + cubeBytes.GetLength(1) + "," + cubeBytes.GetLength(2));
+            //Console.WriteLine(grads.GetLength(0) + "," + grads.GetLength(1) + "," + grads.GetLength(2));
+            //Console.WriteLine(num.ToString());
+
+
+            //assign_edges(num, cubeConfig.View, sliced.View, triTable.View , threshold);
+            //assign_normal(num, gradConfig.View, sliced.View);
+            for (i = 0; i <= nZ; i++)
+            {
+                Index3D index = new Index3D(Math.Min(Nindex.X - i * sliceSize, sliceSize), width - 1, length - 1);
+                Point offset = new Point(i * sliceSize, 0, 0, 0, new Normal());
+                assign1D(index, gradConfig.View, cubeConfig.View, sliced.View, triTable.View, threshold, width, offset);
+                //assign_edges1D(index, cubeConfig.View, sliced.View, triTable.View, threshold);
+                //assign_normal1D(index, gradConfig.View, sliced.View);
+                accelerator.Synchronize();
+                gradConfig.View.CopyToPageLockedAsync(gradLocked);
+                cubeConfig.View.CopyToPageLockedAsync(cubeLocked);
+                edgeList.AddRange(cubeLocked.GetArray().ToList());
+                normalList.AddRange(gradLocked.GetArray().ToList());
+            }
+
+            stopWatch.Stop();
+            // Get the elapsed time as a TimeSpan value.
+            cubeConfig.Dispose();
+            gradConfig.Dispose();
+            triTable.Dispose();
+
+            cubeBytes = edgeList.ToArray();
+            grads = normalList.ToArray();
+
+            ts = stopWatch.Elapsed;
+
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+            Console.WriteLine("RunTime " + elapsedTime);
             //ToBuffer3D(grads, slices.GetLength(0) - 1, width - 1, length - 1)
             return (cubeBytes, grads);
         }
@@ -479,24 +590,24 @@ namespace DispDICOMCMD
             stopWatch.Start();
             int i, j, k;
             Point[] vertice;
-            for (k = 0; k < 125; k++)
+            for (k = 0; k < slices.GetLength(0) - 2; k++)
             {
-                for (i = 0; i < 125; i++)
+                for (i = 0; i < slices.GetLength(2) - 2; i++)
                 {
-                    for (j = 0; j < 125; j++)
+                    for (j = 0; j < slices.GetLength(1) - 2; j++)
                     {
                         Cube tempCube = new Cube(
-                            new Point(i, j, k, slices[k, j, i], normals[k * 127 * 127 + j * 127 + i]),
-                            new Point((short)(i + 1), j, k, slices[k, j, i + 1], normals[k * 127 * 127 + j * 127 + i + 1]),
-                            new Point((short)(i + 1), (short)(j + 1), k, slices[k, j + 1, i + 1], normals[k * 127 * 127 + (j + 1)*(127) + i + 1]),
-                            new Point(i, (short)(j + 1), k, slices[k, j + 1, i], normals[k * 127 * 127 + (j + 1)*127 + i]),
-                            new Point(i, j, (k + 1), slices[(k + 1), j, i], normals[(k + 1)*(127 * 127) + j * 127 + i]),
-                            new Point((short)(i + 1), j, (k + 1), slices[(k + 1), j, i + 1], normals[(k + 1)*(127 * 127) + j * 127 + i + 1]),
-                            new Point((short)(i + 1), (short)(j + 1), (k + 1), slices[(k + 1), j + 1, i + 1], normals[(k + 1)*(127 * 127) + (j + 1)*127 + i + 1]),
-                            new Point(i, (short)(j + 1), (k + 1), slices[(k + 1), j + 1, i], normals[(k + 1)*(127 * 127) + (j + 1)*127 + i])
+                            new Point(i, j, k, slices[k, j, i], normals[k * (width - 1) * (width - 1) + j * (width - 1) + i]),
+                            new Point((short)(i + 1), j, k, slices[k, j, i + 1], normals[k * (width - 1) * (width - 1) + j * (width - 1) + i + 1]),
+                            new Point((short)(i + 1), (short)(j + 1), k, slices[k, j + 1, i + 1], normals[k * (width - 1) * (width - 1) + (j + 1)*((width - 1)) + i + 1]),
+                            new Point(i, (short)(j + 1), k, slices[k, j + 1, i], normals[k * (width - 1) * (width - 1) + (j + 1)*(width - 1) + i]),
+                            new Point(i, j, (k + 1), slices[(k + 1), j, i], normals[(k + 1)*((width - 1) * (width - 1)) + j * (width - 1) + i]),
+                            new Point((short)(i + 1), j, (k + 1), slices[(k + 1), j, i + 1], normals[(k + 1)*((width - 1) * (width - 1)) + j * (width - 1) + i + 1]),
+                            new Point((short)(i + 1), (short)(j + 1), (k + 1), slices[(k + 1), j + 1, i + 1], normals[(k + 1)*((width - 1) * (width - 1)) + (j + 1)*(width - 1) + i + 1]),
+                            new Point(i, (short)(j + 1), (k + 1), slices[(k + 1), j + 1, i], normals[(k + 1)*((width - 1) * (width - 1)) + (j + 1)*(width - 1) + i])
                             );
-                        //var l = cubes[k * 127 * 127 + j * 127 + i];
-                        vertice = tempCube.March(threshold, cubes[k * 127 * 127 + j * 127 + i]);
+                        //var l = cubes[k * (width - 1) * (width - 1) + j * (width - 1) + i];
+                        vertice = tempCube.March(threshold, cubes[k * (width - 1) * (width - 1) + j * (width - 1) + i]);
 
                         foreach (var vertex in vertice)
                         {
@@ -526,19 +637,43 @@ namespace DispDICOMCMD
 
         }
 
-        public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView1D<Normal, Stride1D.Dense> normals, ArrayView1D<Edge, Stride1D.Dense> edges, ArrayView3D<short, Stride3D.DenseXY> input, Point offset, int thresh)
+        public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView1D<Normal, Stride1D.Dense> normals, ArrayView1D<Edge, Stride1D.Dense> edges, ArrayView3D<short, Stride3D.DenseXY> input, Point offset, int thresh, int batchSize, int width)
         {
             Cube tempCube = new Cube(
-                            new Point(index.X, index.Y, index.Z, input[index.Z, index.Y, index.X], normals[index.Z * 127 * 127 + index.Y * 127 + index.X]),
-                            new Point((short)(index.X + 1), index.Y, index.Z, input[index.Z, index.Y, index.X + 1], normals[index.Z * 127 * 127 + index.Y * 127 + index.X + 1]),
-                            new Point((short)(index.X + 1), (short)(index.Y + 1), index.Z, input[index.Z, index.Y + 1, index.X + 1], normals[index.Z * 127 * 127 + (index.Y + 1) * 127 + index.X + 1]),
-                            new Point(index.X, (short)(index.Y + 1), index.Z, input[index.Z, index.Y + 1, index.X], normals[index.Z * 127 * 127 + (index.Y + 1) * 127 + index.X]),
-                            new Point(index.X, index.Y, (index.Z + 1), input[(index.Z + 1), index.Y, index.X], normals[(index.Z + 1) * 127 * 127 + index.Y * 127 + index.X]),
-                            new Point((short)(index.X + 1), index.Y, (index.Z + 1), input[(index.Z + 1), index.Y, index.X + 1], normals[(index.Z + 1) * 127 * 127 + index.Y * 127 + index.X + 1]),
-                            new Point((short)(index.X + 1), (short)(index.Y + 1), (index.Z + 1), input[(index.Z + 1), index.Y + 1, index.X + 1], normals[(index.Z + 1) * 127 * 127 + (index.Y + 1) * 127 + index.X + 1]),
-                            new Point(index.X, (short)(index.Y + 1), (index.Z + 1), input[(index.Z + 1), index.Y + 1, index.X], normals[(index.Z + 1) * 127 * 127 + (index.Y + 1) * 127 + index.X])
+                            new Point(
+                                (index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z), 
+                                input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)], 
+                                normals[(index.Z + (int)offset.Z) * (width - 1) * (width - 1) + (index.Y + (int)offset.Y) * (width - 1) + (index.X + (int)offset.X)]),
+                            new Point(
+                                (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z), 
+                                input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X) + 1], 
+                                normals[(index.Z + (int)offset.Z) * (width - 1) * (width - 1) + (index.Y + (int)offset.Y) * (width - 1) + (index.X + (int)offset.X) + 1]),
+                            new Point(
+                                (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z), 
+                                input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1], 
+                                normals[(index.Z + (int)offset.Z) * (width - 1) * (width - 1) + ((index.Y + (int)offset.Y) + 1) * (width - 1) + (index.X + (int)offset.X) + 1]),
+                            new Point(
+                                (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z), 
+                                input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X)], 
+                                normals[(index.Z + (int)offset.Z) * (width - 1) * (width - 1) + ((index.Y + (int)offset.Y) + 1) * (width - 1) + (index.X + (int)offset.X)]),
+                            new Point(
+                                (index.X + (int)offset.X), (index.Y + (int)offset.Y), ((index.Z + (int)offset.Z) + 1), 
+                                input[((index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X)], 
+                                normals[((index.Z + (int)offset.Z) + 1) * (width - 1) * (width - 1) + (index.Y + (int)offset.Y) * (width - 1) + (index.X + (int)offset.X)]),
+                            new Point(
+                                (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), ((index.Z + (int)offset.Z) + 1), 
+                                input[((index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X) + 1], 
+                                normals[((index.Z + (int)offset.Z) + 1) * (width - 1) * (width - 1) + (index.Y + (int)offset.Y) * (width - 1) + (index.X + (int)offset.X) + 1]),
+                            new Point(
+                                (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), ((index.Z + (int)offset.Z) + 1), 
+                                input[((index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1], 
+                                normals[((index.Z + (int)offset.Z) + 1) * (width - 1) * (width - 1) + ((index.Y + (int)offset.Y) + 1) * (width - 1) + (index.X + (int)offset.X) + 1]),
+                            new Point(
+                                (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), ((index.Z + (int)offset.Z) + 1), 
+                                input[((index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X)], 
+                                normals[((index.Z + (int)offset.Z) + 1) * (width - 1) * (width - 1) + ((index.Y + (int)offset.Y) + 1) * (width - 1) + (index.X + (int)offset.X)])
                             );
-            Point[] vertice = tempCube.MarchGPU(threshold, edges[index.Z * 127 * 127 + index.Y * 127 + index.X]);
+            Point[] vertice = tempCube.MarchGPU(threshold, edges[(index.Z + (int)offset.Z) * (width - 1) * (width - 1) + (index.Y + (int)offset.Y) * (width - 1) + (index.X + (int)offset.X)]);
             int i;
             //count[0]++;
             for (i = 0; i < 12; i += 3)
@@ -547,11 +682,14 @@ namespace DispDICOMCMD
                     (vertice[i + 1].X != 0 && vertice[i + 1].Y != 0 && vertice[i + 1].Z != 0) &&
                     (vertice[i + 2].X != 0 && vertice[i + 2].Y != 0 && vertice[i + 2].Z != 0))
                 {
-                    triangles[127*127*127*(i/3) + (index.Z * 127 * 127 + index.Y * 127 + index.X)] = new Triangle()
+
+                    if (triangles[triangles.Length - 1].vertex1.value != 1)
+                        triangles[triangles.Length - 1].vertex1.value = 1;
+                    triangles[(batchSize-1)*(batchSize-1)*(batchSize-1)*(i/3) + (index.Z * (batchSize-1) * (batchSize-1) + index.Y * (batchSize-1) + index.X)] = new Triangle()
                     {
-                        vertex1 = vertice[i] + offset,
-                        vertex2 = vertice[i + 1] + offset,
-                        vertex3 = vertice[i + 2] + offset
+                        vertex1 = vertice[i],
+                        vertex2 = vertice[i + 1],
+                        vertex3 = vertice[i + 2]
                     };
                     //count[0]++;
                 }
@@ -560,94 +698,126 @@ namespace DispDICOMCMD
 
         public static void MarchGPU(StreamWriter fs)
         {
-            List<Triangle> triangleList = new List<Triangle>();
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
+            short[] sizes = {32 };
+            foreach (short size in sizes)
+            {
+                batchSize = size;
+                List<Triangle> triangleList = new List<Triangle>();
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
 
-            //gradConfig = accelerator.Allocate1D(normals);
-            //cubeConfig = accelerator.Allocate1D(cubes);
-            //var gradScope = accelerator.CreatePageLockFromPinned(normals);
-            //var cubeScope = accelerator.CreatePageLockFromPinned(cubes);
-            //gradConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
-            //cubeConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
-            int i, j, k;
-            int X = slices.GetLength(0) - 2;
-            int Y = width - 2;
-            int Z = length - 2;
-            Index3D Nindex = new Index3D(X, Y, Z);
-            int nX = (int)Math.Ceiling((double)(X / 126));
-            int nY = (int)Math.Ceiling((double)(Y / 126));
-            int nZ = (int)Math.Ceiling((double)(Z / 126));
-            
+                gradConfig = accelerator.Allocate1D(normals);
+                cubeConfig = accelerator.Allocate1D(cubes);
+                var gradScope = accelerator.CreatePageLockFromPinned(normals);
+                var cubeScope = accelerator.CreatePageLockFromPinned(cubes);
+                gradConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
+                cubeConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
 
-            Triangle[] tri = new Triangle[Math.Min(Nindex.Size * 5, 126 * 126 * 126 * 5)];
-            PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(Math.Min(Nindex.Size * 5, 126 * 126 * 126 * 5));
-            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(Math.Min(Nindex.Size * 5, 126 * 126 * 126 * 5));
-            //count = 0;
-            //int[] n = { 0 };
+                int i, j, k;
+                int Z = slices.GetLength(0) - 2;
+                int Y = width - 2;
+                int X = length - 2;
+                Index3D Nindex = new Index3D(X, Y, Z);
+                int nX = (int)Math.Ceiling((double)(X / batchSize));
+                int nY = (int)Math.Ceiling((double)(Y / batchSize));
+                int nZ = (int)Math.Ceiling((double)(Z / batchSize));
 
-            //var gradConfig = accelerator.Allocate1D(normals);
-            //var cubeConfig = accelerator.Allocate1D(cubes);
-            //Edge[] r = new Edge[cubes.Length]; 
-            //r = r.Where(x => x.E1 > 0).ToArray();
-            //var pt = accelerator.Allocate1D<int>(n);
 
-            triConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, triLocked);
-            for(i = 0; i < nX; i++) {
-                for (j = 0; j < nY; j++)
+                Triangle[] tri = new Triangle[Math.Min(Nindex.Size * 5 + 1, batchSize * batchSize * batchSize * 5 + 1)];
+                PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(Math.Min(Nindex.Size * 5, batchSize * batchSize * batchSize * 5));
+                MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(Math.Min(Nindex.Size * 5, batchSize * batchSize * batchSize * 5));
+                //count = 0;
+                //int[] n = { 0 };
+
+                //var gradConfig = accelerator.Allocate1D(normals);
+                //var cubeConfig = accelerator.Allocate1D(cubes);
+                //Edge[] r = new Edge[cubes.Length]; 
+                //r = r.Where(x => x.E1 > 0).ToArray();
+                //var pt = accelerator.Allocate1D<int>(n);
+
+                triConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, triLocked);
+                for (i = 0; i <= nX; i++)
                 {
-                    for (k = 0; k < nZ; k++)
+                    for (j = 0; j <= nY; j++)
                     {
-                        Index3D index = (Math.Min(Nindex.X - i * X, 126), Math.Min(Nindex.Y - j * Y, 126), Math.Min(Nindex.Z - k * Z, 126));
-                        Point offset = new Point() { X = i * X, Y = j * Y, Z = k * Z };
-                        //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal);
-                        //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
+                        for (k = 0; k <= nZ; k++)
+                        {
+                            //Console.WriteLine(i + "," + j + "," + k);
+                            Index3D index = (Math.Min(Nindex.X - i * batchSize, batchSize), Math.Min(Nindex.Y - j * batchSize, batchSize), Math.Min(Nindex.Z - k * batchSize, batchSize));
+                            Point offset = new Point() { X = i * batchSize, Y = j * batchSize, Z = k * batchSize };
 
-                        get_verts(index, triConfig.View, gradConfig.View, cubeConfig.View, sliced.View, offset, threshold);
+                            //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal);
+                            //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
 
-                        accelerator.Synchronize();
-                        //gradConfig.CopyToCPU(grads);
-                        //cubeConfig.CopyToCPU(cubeBytes);
-                        //cubeConfig.CopyToCPU(r);
-                        triConfig.View.CopyToPageLockedAsync(triLocked);
-                        tri = triLocked.GetArray();
-                        triangleList.AddRange(tri.ToList());
+                            get_verts(index, triConfig.View, gradConfig.View, cubeConfig.View, sliced.View, offset, threshold, batchSize, width);
+
+                            accelerator.Synchronize();
+                            //gradConfig.CopyToCPU(grads);
+                            //cubeConfig.CopyToCPU(cubeBytes);
+                            //cubeConfig.CopyToCPU(r);
+                            triConfig.View.CopyToPageLockedAsync(triLocked);
+                            tri = triLocked.GetArray();
+                            if (tri[tri.Length - 1].vertex1.value == 1)
+                            {
+                                triangleList.AddRange(tri);
+
+                                triConfig.MemSetToZero();
+                                triLocked.ArrayView.MemSetToZero();
+                            }
+                            //foreach(Triangle triangle in tri)
+                            //{
+                            //    if (!triangle.Equals(new Triangle()))
+                            //        triangleList.Add(triangle);
+                            //}
+                            //triangleList.AddRange(tri.Where(x => !x.Equals(new Triangle())).ToList());
+                            //Console.WriteLine(triangleList.Count);
+                        }
                     }
                 }
+                stopWatch.Stop();
+                ts = stopWatch.Elapsed;
+                count = 0;
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                    ts.Hours, ts.Minutes, ts.Seconds,
+                    ts.Milliseconds / 10);
+                Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
+
+                // Get the elapsed time as a TimeSpan value.
+                triConfig.Dispose();
+                cubeConfig.Dispose();
+                gradConfig.Dispose();
+                sliced.Dispose();
+            //}
+                var triC = triangleList.Where(x => !x.Equals(new Triangle())).ToList();
+                foreach (var triangle in triC)
+                {
+                    //vertices.Add(vertex);
+                    fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
+                    fs.WriteLine("vn " + triangle.vertex1.normal.X + " " + triangle.vertex1.normal.Y + " " + triangle.vertex1.normal.Z);
+                    fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
+                    fs.WriteLine("vn " + triangle.vertex2.normal.X + " " + triangle.vertex2.normal.Y + " " + triangle.vertex2.normal.Z);
+                    fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
+                    fs.WriteLine("vn " + triangle.vertex3.normal.X + " " + triangle.vertex3.normal.Y + " " + triangle.vertex3.normal.Z);
+                    //    //fs.WriteLine("vt " + vertex.X + " " + vertex.Y + " " + vertex.Z);
+                    //    //Point normal = Normal(slices[0], slices[1], slices[2], slices[3], vertex, k);
+                    //    //fs.WriteLine("vn " + normal.X + " " + normal.Y + " " + normal.Z);
+                    //    //Point n = new Point(vertex.normal.X * 2 + normal.X, vertex.normal.Y * 2 + normal.Y, vertex.normal.Z * 2 + normal.Z, 0);
+                    //    //normals.Add(normal);
+                    count += 3;
+                }
             }
-            stopWatch.Stop();
-            ts = stopWatch.Elapsed;
-            count = 0;
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-            Console.WriteLine("RunTime " + elapsedTime);
+            //List<Point> points = new List<Point>();
+            //foreach (Triangle triangle in triangleList)
+            //    points.AddRange(triangle.getV());
 
-            // Get the elapsed time as a TimeSpan value.
-            triConfig.Dispose();
-            cubeConfig.Dispose();
-            gradConfig.Dispose();
-            sliced.Dispose();
-
+            //foreach(Point point in points)
+            //{
+            //    int dup = points.Where(x => x.X == point.X && x.Y == point.Y && x.Z == point.Z).Count();
+            //    break;
+            //}
             //pt.Dispose();
             //var triC = tri;
-            var triC = triangleList.Where(x => !x.Equals(new Triangle())).ToList();
-            foreach (var triangle in triC)
-            {
-                //vertices.Add(vertex);
-                fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
-                fs.WriteLine("vn " + triangle.vertex1.normal.X + " " + triangle.vertex1.normal.Y + " " + triangle.vertex1.normal.Z);
-                fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
-                fs.WriteLine("vn " + triangle.vertex2.normal.X + " " + triangle.vertex2.normal.Y + " " + triangle.vertex2.normal.Z);
-                fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
-                fs.WriteLine("vn " + triangle.vertex3.normal.X + " " + triangle.vertex3.normal.Y + " " + triangle.vertex3.normal.Z);
-                //    //fs.WriteLine("vt " + vertex.X + " " + vertex.Y + " " + vertex.Z);
-                //    //Point normal = Normal(slices[0], slices[1], slices[2], slices[3], vertex, k);
-                //    //fs.WriteLine("vn " + normal.X + " " + normal.Y + " " + normal.Z);
-                //    //Point n = new Point(vertex.normal.X * 2 + normal.X, vertex.normal.Y * 2 + normal.Y, vertex.normal.Z * 2 + normal.Z, 0);
-                //    //normals.Add(normal);
-                count +=3;
-            }
+
         }
 
         public static Normal[] ToBuffer(Normal[,,] buffer3D, int w, int h)

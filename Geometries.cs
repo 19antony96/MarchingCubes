@@ -35,6 +35,8 @@ namespace DispDICOMCMD
         public Point vertex1;
         public Point vertex2;
         public Point vertex3;
+
+        public List<Point> getV() { return new List<Point>() { vertex1, vertex2, vertex3 }; }
     }
 
     public struct Point
