@@ -78,7 +78,7 @@ namespace DispDICOMCMD
             //if (x > 0.999)
             //    x = 1;
 
-            Point vertex = this + (other - this) * x;
+            Point vertex = other + (this - other) * x;
 
             vertex.normal = this.normal.Interpolate(other.normal, x);
 
