@@ -44,8 +44,8 @@ namespace DispDICOMCMD
         public static MemoryBuffer3D<short, Stride3D.DenseXY> sliced;
 
         public static readonly short threshold = 1280;
-        public static readonly int length = 440;
-        public static readonly int width = 440;
+        public static int length = 512;
+        public static int width = 512;
         public static short[,,] slices;
         public static short[] slices1D;
         public static int batchSize;
@@ -60,8 +60,15 @@ namespace DispDICOMCMD
         public static Edge[] edges;
         public static int count = 0;
 
-        public DispDICOMCMD()
+        public DispDICOMCMD(int size)
         {
+            length = size;
+            width = size;
+            var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
+            var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
+            var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
+            //width = size;
+            //length = size;
             context = Context.CreateDefault();
             accelerator = context.CreateCudaAccelerator(0);
             //accelerator = context.CreateCPUAccelerator(0);
@@ -73,7 +80,7 @@ namespace DispDICOMCMD
 
             DicomFile dicoms;
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
-            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
+            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\DICOM\\DICOM\\ST000000\\SE000001\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Resources\\");
 
@@ -81,36 +88,36 @@ namespace DispDICOMCMD
             //DicomPixelData pixelData = DicomPixelData.Create(p.Dataset);
 
 
-            FileInfo[] files = d.GetFiles("*.dcm");
+            //FileInfo[] files = d.GetFiles("*.dcm");
 
 
 
             //int[,,] edges;
 
-            //var sphere = CreateSphere();
+            var sphere = CreateSphere(size);
 
             string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
             FileInfo fi = new FileInfo(fileName);
 
             short i, j, k = 0;
-            //slices = sphere;
+            slices = sphere;
 
 
-            slices = new short[files.Length, length, width];
+            //slices = new short[files.Length, length, width];
 
-            foreach (var file in files)
-            //foreach (var file in sphere)
-            {
-                dicoms = DicomFile.Open(file.FullName);
-                CreateBmp(dicoms, k);
-                //slices[k] = file;
-                k++;
-                //if (k * length * width > Math.Pow(2, 32))
-                //    break;
-                //if (k > 13)
-                //    break;
-                //Console.WriteLine(k);
-            }
+            //foreach (var file in files)
+            ////foreach (var file in sphere)
+            //{
+            //    dicoms = DicomFile.Open(file.FullName);
+            //    CreateBmp(dicoms, k);
+            //    //slices[k] = file;
+            //    k++;
+            //    //if (k * length * width > Math.Pow(2, 32))
+            //    //    break;
+            //    //if (k > 13)
+            //    //    break;
+            //    //Console.WriteLine(k);
+            //}
 
             slices1D = new short[slices.Length];
 
@@ -119,7 +126,7 @@ namespace DispDICOMCMD
             sliced = accelerator.Allocate3DDenseXY<short>(slices);
             sliced.View.To1DView().CopyToCPU(slices1D);
             //var temp = MarchingCubesCPU();
-            var temp = MarchingCubesGPU();
+            var temp = MarchingCubesCPU();
             //int sum = 0;
             //foreach(Edge cube in cubes)
             //{
@@ -141,7 +148,7 @@ namespace DispDICOMCMD
             //edges = march.edges;
             using (StreamWriter fs = fi.CreateText())
             {
-                MarchGPU(fs);
+                MarchCPU(fs);
                 //MarchGPUBatchRobust(fs);
 
                 int f = 0;
@@ -150,7 +157,7 @@ namespace DispDICOMCMD
                     fs.WriteLine("f " + f + " " + (f + 1) + " " + (f + 2));
                     //fs.WriteLine("f " + f + "//" + f + " " + (f + 1) + "//" + (f + 1) + " " + (f + 2) + "//" + (f + 2));
                 }
-                Console.WriteLine(xCount + yCount + zCount + lCount);
+                Console.WriteLine(count);
             }
             //stopWatch.Stop();
             //ts = stopWatch.Elapsed;
@@ -158,7 +165,28 @@ namespace DispDICOMCMD
             //    ts.Hours, ts.Minutes, ts.Seconds,
             //    ts.Milliseconds / 10);
             //Console.WriteLine("RunTime " + elapsedTime);
-         }
+        }
+
+        public short[,,] CreateSphere(int size)
+        {
+            double factor = Math.Sqrt((size / 2) * (size / 2) * 3);
+            short[,,] slice = new short[size, size, size];
+            for (int k = 0; k < size; k++)
+            {
+                for (int i = 0; i < size; i++)
+                {
+                    for (int j = 0; j < size; j++)
+                    {
+                        slice[k, j, i] = (short)(Math.Sqrt((i - size/2) * (i - size/2) + (j - size/2) * (j - size/2) + (k - size/2) * (k - size/2)) * (2000/factor));
+                        //double h = (k + i) * 60;
+                        //bool p = h > (double)threshold;
+                        //slice[k, j, i] = (short)(p ? threshold - 50 : threshold + 50);
+                        //slice[k, j, i] = (short)(((j - size/2) + (i - size/2) + (k - size/2)) * 20);
+                    }
+                }
+            }
+            return slice;
+        }
 
         private static Cube[,] MarchingCubes(short index)
         {
@@ -374,7 +402,6 @@ namespace DispDICOMCMD
             Edge[,,] cubeBytes = new Edge[(index.X - 1), (index.Y - 1), (index.Z - 1)];
             var gradPinned = GCHandle.Alloc(grads, GCHandleType.Pinned);
             var cubePinned = GCHandle.Alloc(cubeBytes, GCHandleType.Pinned);
-
             PageLockedArray3D<Edge> cubeLocked = accelerator.AllocatePageLocked3D<Edge>(new Index3D(index.X - 1, index.Y - 1, index.Z - 1));
             PageLockedArray3D<Normal> gradLocked = accelerator.AllocatePageLocked3D<Normal>(index);
             cubeConfig = accelerator.Allocate3DDenseXY<Edge>(cubeLocked.Extent);
@@ -426,6 +453,8 @@ namespace DispDICOMCMD
             cubeConfig.Dispose();
             gradConfig.Dispose();
             triTable.Dispose();
+            gradPinned.Free();
+            cubePinned.Free();
             //sliced.Dispose();
             //GCHandle.FromIntPtr(gradIntPtr).Free();
             //GCHandle.FromIntPtr(cubeIntPtr).Free();
@@ -816,11 +845,12 @@ namespace DispDICOMCMD
         {
             //gradConfig.MemSetToZero();
             //cubeConfig.MemSetToZero();
-            short[] sizes = { 16 };
+            short[] sizes = {64};
+            if (width < 200) 
+                sizes = new short[]{(short)width};
             foreach (short size in sizes)
             {
                 batchSize = size;
-                List<Triangle> triangleList = new List<Triangle>();
 
                 //var gradScope = accelerator.CreatePageLockFromPinned(normals);
                 //var cubeScope = accelerator.CreatePageLockFromPinned(cubes);
@@ -839,19 +869,20 @@ namespace DispDICOMCMD
                 //gradConfig = accelerator.Allocate3DDenseXY<Normal>(new Index3D(X + 1, Y + 1, Z + 1));
                 //cubeConfig = accelerator.Allocate3DDenseXY<Edge>(Nindex);
 
-
+                Triangle[] triangleList = new Triangle[Math.Max(Nindex.Size, (nX + 1) * (nY + 1) * (nZ + 1) * batchSize * batchSize * batchSize) * 5];
+                int sum = 0;
                 Triangle[] tri = new Triangle[Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5 + 1, (batchSize) * (batchSize) * (batchSize) * 5 + 1)];
                 PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5 + 1, (batchSize) * (batchSize) * (batchSize) * 5 + 1));
                 MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5 + 1, (batchSize) * (batchSize) * (batchSize) * 5 + 1));
                 //count = 0;
                 //int[] n = { 0 };
-
+                
                 gradConfig = accelerator.Allocate3DDenseXY(normals);
                 cubeConfig = accelerator.Allocate3DDenseXY(cubes);
                 //Edge[] r = new Edge[cubes.Length]; 
                 //r = r.Where(x => x.E1 > 0).ToArray();
                 //var pt = accelerator.Allocate1D<int>(n);
-
+                int iX = 0;
                 triConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, triLocked);
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
@@ -880,11 +911,12 @@ namespace DispDICOMCMD
                             if (tri[tri.Length - 1].vertex1.value == 1)
                             {
                                 tri[tri.Length - 1] = new Triangle();
-                                triangleList.AddRange(tri);
-                                Console.WriteLine(triangleList.Count);
-
+                                Array.Copy(tri, 0, triangleList, iX * (tri.Length - 1), tri.Length - 1);
+                                //Console.WriteLine(triangleList.Count);
+                                sum += tri.Length;
                                 triConfig.View.MemSetToZero();
                                 triLocked.ArrayView.MemSetToZero();
+                                iX++;
                             }
                             //foreach(Triangle triangle in tri)
                             //{
@@ -910,6 +942,9 @@ namespace DispDICOMCMD
                 gradConfig.Dispose();
                 sliced.Dispose();
                 //}
+                Triangle[] temp = new Triangle[sum];
+                if (triangleList.Length > sum)
+                    Array.Copy(triangleList, temp, sum);
                 var triC = triangleList.Where(x => (x.vertex1.X != 0 && x.vertex1.Y != 0 && x.vertex1.Z != 0) &&
                 (x.vertex2.X != 0 && x.vertex2.Y != 0 && x.vertex2.Z != 0) &&
                 (x.vertex3.X != 0 && x.vertex3.Y != 0 && x.vertex3.Z != 0)).ToList();
@@ -1383,25 +1418,6 @@ namespace DispDICOMCMD
             }
         }
 
-        public short[,,] CreateSphere()
-        {
-            short[,,] slice = new short[64, 128, 128];
-            for (int k = 0; k < 64; k++)
-            {
-                for (int i = 0; i < 128; i++)
-                {
-                    for (int j = 0; j < 128; j++)
-                    {
-                        slice[k, j, i] = (short)(Math.Sqrt((i - 64) * (i - 64) + (j - 64) * (j - 64) + (k - 32) * (k - 32)) * 25);
-                        //double h = (k + i) * 60;
-                        //bool p = h > (double)threshold;
-                        //slice[k, j, i] = (short)(p ? threshold - 50 : threshold + 50);
-                        //slice[k, j, i] = (short)(((j - 64) + (i - 64) + (k - 64)) * 20);
-                    }
-                }
-            }
-            return slice;
-        }
 
         //public static Vertex Interpolate(Vertex v1, Vertex v2, double interpolant)
         //{

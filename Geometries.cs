@@ -42,13 +42,13 @@ namespace DispDICOMCMD
     public struct Point
     {
         //const short epsilon = 0;
-        public double X;
-        public double Y;
-        public double Z;
+        public float X;
+        public float Y;
+        public float Z;
         public short value;
         public Normal normal;
 
-        public Point(double i, double j, double k, short val, Normal norm)
+        public Point(float i, float j, float k, short val, Normal norm)
         {
             X = i;
             Y = j;
@@ -57,7 +57,7 @@ namespace DispDICOMCMD
             normal = norm;
         }
 
-        //public Point(double i, double j, double k, short val, short threshold, Normal norm)
+        //public Point(double i, double j, float k, short val, short threshold, Normal norm)
         //{
         //    X = i;
         //    Y = j;
@@ -70,9 +70,9 @@ namespace DispDICOMCMD
 
         public Point Interpolate(Point other, short threshold)
         {
-            double p1 = other.value;
-            double p2 = value;
-            double x = ((threshold - p2) / (p1 - p2));
+            float p1 = other.value;
+            float p2 = value;
+            float x = ((threshold - p2) / (p1 - p2));
             //if (x < 0.001)
             //    x = 0;
             //if (x > 0.999)
@@ -87,15 +87,15 @@ namespace DispDICOMCMD
 
         //public Point FullInterpolate(Point other, short threshold)
         //{
-        //    //double p1 = other.value;
-        //    //double p2 = value;
-        //    //double x = ((threshold - p2) / (p1 - p2));
+        //    //float p1 = other.value;
+        //    //float p2 = value;
+        //    //float x = ((threshold - p2) / (p1 - p2));
 
-        //    //double z = (this - other) * threshold + other;
+        //    //float z = (this - other) * threshold + other;
         //    return (this - other) * threshold + other;
         //}
 
-        //public void setNormal(double x, double y, double z)
+        //public void setNormal(float x, float y, float z)
         //{
         //    if (x > 0)
         //        ;
@@ -120,9 +120,9 @@ namespace DispDICOMCMD
         //    return base.GetHashCode();
         //}
 
-        public static Point operator +(Point pt1, Point pt2) => new Point(pt1.X + pt2.X, pt1.Y + pt2.Y, pt1.Z + pt2.Z, 0, new Normal());
+        public static Point operator +(Point pt1, Point pt2) => new Point(pt1.X + pt2.X, pt1.Y + pt2.Y, pt1.Z + pt2.Z, 0f, new Normal());
         public static Point operator -(Point pt1, Point pt2) => new Point(pt1.X - pt2.X, pt1.Y - pt2.Y, pt1.Z - pt2.Z, 0, new Normal());
-        public static Point operator *(Point pt1, double factor) => new Point(pt1.X * factor, pt1.Y * factor, pt1.Z * factor, 0, new Normal());
+        public static Point operator *(Point pt1, float factor) => new Point(pt1.X * factor, pt1.Y * factor, pt1.Z * factor, 0, new Normal());
         //public static bool operator ==(Point pt1, Point pt2) => pt1.X == pt2.X && pt1.Y == pt2.Y && pt1.Z == pt2.Z;
         //public static bool operator !=(Point pt1, Point pt2) => !(pt1.X == pt2.X && pt1.Y == pt2.Y && pt1.Z == pt2.Z);
         //public static bool operator >(Point pt1, Point pt2) => pt1.value > pt2.value;
@@ -131,68 +131,68 @@ namespace DispDICOMCMD
 
     public struct Normal
     {
-        public double X;
-        public double Y;
-        public double Z;
+        public float X;
+        public float Y;
+        public float Z;
 
-        public Normal(double i, double j, double k)
+        public Normal(float i, float j, float k)
         {
             X = i;
             Y = j;
             Z = k;
         }
 
-        public Normal Interpolate(Normal other, double interpolant)
+        public Normal Interpolate(Normal other, float interpolant)
         {
-            double x = (other.X - this.X) * interpolant + this.X;
-            double y = (other.Y - this.Y) * interpolant + this.Y;
-            double z = (other.Z - this.Z) * interpolant + this.Z;
+            float x = (other.X - this.X) * interpolant + this.X;
+            float y = (other.Y - this.Y) * interpolant + this.Y;
+            float z = (other.Z - this.Z) * interpolant + this.Z;
             return new Normal(x, y, z);
         }
     }
 
     public struct Vertex
     {
-        public double X;
-        public double Y;
-        public double Z;
+        public float X;
+        public float Y;
+        public float Z;
 
-        public Vertex(double i, double j, double k)
+        public Vertex(float i, float j, float k)
         {
             X = i;
             Y = j;
             Z = k;
         }
 
-        public Vertex Interpolate(Vertex other, double interpolant)
+        public Vertex Interpolate(Vertex other, float interpolant)
         {
-            double x = (other.X - this.X) * interpolant + this.X;
-            double y = (other.Y - this.Y) * interpolant + this.Y;
-            double z = (other.Z - this.Z) * interpolant + this.Z;
+            float x = (other.X - this.X) * interpolant + this.X;
+            float y = (other.Y - this.Y) * interpolant + this.Y;
+            float z = (other.Z - this.Z) * interpolant + this.Z;
             return new Vertex(x, y, z);
         }
     }
 
     public struct Edge
     {
-        public short E1;
-        public short E2;
-        public short E3;
-        public short E4;
-        public short E5;
-        public short E6;
-        public short E7;
-        public short E8;
-        public short E9;
-        public short E10;
-        public short E11;
-        public short E12;
-        public short E13;
-        public short E14;
-        public short E15;
-        public short E16;
+        public sbyte E1;
+        public sbyte E2;
+        public sbyte E3;
+        public sbyte E4;
+        public sbyte E5;
+        public sbyte E6;
+        public sbyte E7;
+        public sbyte E8;
+        public sbyte E9;
+        public sbyte E10;
+        public sbyte E11;
+        public sbyte E12;
+        public sbyte E13;
+        public sbyte E14;
+        public sbyte E15;
+        public sbyte E16;
 
-        public Edge(short e1, short e2, short e3, short e4, short e5, short e6, short e7, short e8, short e9, short e10, short e11, short e12, short e13, short e14, short e15, short e16)
+        public Edge(sbyte e1, sbyte e2, sbyte e3, sbyte e4, sbyte e5, sbyte e6, sbyte e7, sbyte e8, sbyte e9, sbyte e10, sbyte e11, sbyte e12, sbyte e13, sbyte e14, sbyte e15, sbyte e16)
         {
             E1 = e1;
             E2 = e2;
@@ -212,9 +212,9 @@ namespace DispDICOMCMD
             E16 = e16;
         }
 
-        public short[] getAsArray()
+        public sbyte[] getAsArray()
         {
-            return new short[] { E1, E2, E3, E4, E5, E6, E7, E8, E9, E10, E11, E12, E13, E14, E15, E16 };
+            return new sbyte[] { E1, E2, E3, E4, E5, E6, E7, E8, E9, E10, E11, E12, E13, E14, E15, E16 };
         }
     }
 
@@ -260,9 +260,9 @@ namespace DispDICOMCMD
 
         public Point[] March(short threshold , Edge config)
         {
-            short[] ed = config.getAsArray().Where(x => x >= 0).ToArray();
+            sbyte[] ed = config.getAsArray().Where(x => x >= 0).ToArray();
             if(ed.All(x => x == 0))
-                ed = new short[]{ };
+                ed = new sbyte[]{ };
             //if (ed.Length > 0)
             //{
 
@@ -332,7 +332,7 @@ namespace DispDICOMCMD
 
         public Point[] MarchGPU(short threshold, Edge config)
         {
-            short[] ed = config.getAsArray();
+            sbyte[] ed = config.getAsArray();
 
             //if (ed.All(x => x == 0))
             //    ed = new short[] { };

@@ -12,7 +12,11 @@ namespace MarchingCubes
 
         static void Main(string[] args)
         {
-            DispDICOMCMD.DispDICOMCMD run = new DispDICOMCMD.DispDICOMCMD();
+            for (int i = 425; i <= 500; i+=25) 
+            {
+                Console.WriteLine(i);
+                DispDICOMCMD.DispDICOMCMD run1 = new DispDICOMCMD.DispDICOMCMD(i);
+            }
             Console.Out.WriteLine("DONE");
         }
     }
