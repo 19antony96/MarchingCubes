@@ -30,23 +30,322 @@ namespace DispDICOMCMD
     //    }
     //}
 
+    //public class HostHistoPyramid : IDisposable
+    //{
+    //    public MemoryBuffer2D<byte, Stride2D.DenseX> layer0;
+    //    public MemoryBuffer2D<byte, Stride2D.DenseX> layer1;
+    //    public MemoryBuffer2D<byte, Stride2D.DenseX> layer2;
+    //    public MemoryBuffer2D<ushort, Stride2D.DenseX> layer3;
+    //    public MemoryBuffer2D<ushort, Stride2D.DenseX> layer4;
+    //    public MemoryBuffer2D<ushort, Stride2D.DenseX> layer5;
+    //    public MemoryBuffer2D<ushort, Stride2D.DenseX> layer6;
+    //    public MemoryBuffer2D<uint, Stride2D.DenseX> layer7;
+    //    public MemoryBuffer2D<uint, Stride2D.DenseX> layer8;
+    //    public MemoryBuffer2D<uint, Stride2D.DenseX> layer9;
+    //    public MemoryBuffer2D<uint, Stride2D.DenseX> layer10;
+    //    public MemoryBuffer2D<uint, Stride2D.DenseX> layer11;
+    //    public MemoryBuffer2D<uint, Stride2D.DenseX> layer12;
+    //    public MemoryBuffer2D<uint, Stride2D.DenseX> layer13;
+    //    public MemoryBuffer2D<uint, Stride2D.DenseX> layer14;
+    //    public MemoryBuffer2D<ulong, Stride2D.DenseX> layer15;
+    //    public byte size;
+    //    public HistoPyramid Histo;
+
+
+    //    public HostHistoPyramid(int[][,] HP, int n, Accelerator acc)
+    //    {
+    //        size = (byte)n;
+    //        byte[] tempBytes = HP[0].Cast<int>().Select(x => (byte)x).ToArray();
+    //        byte[,] temp2Dbytes = new byte[HP[0].GetLength(0), HP[0].GetLength(0)];
+    //        Buffer.BlockCopy(tempBytes, 0, temp2Dbytes, 0, tempBytes.Length);
+    //        layer0 = acc.Allocate2DDenseX<byte>(temp2Dbytes);
+
+    //        tempBytes = HP[1].Cast<int>().Select(x => (byte)x).ToArray();
+    //        temp2Dbytes = new byte[HP[1].GetLength(0), HP[1].GetLength(1)];
+    //        Buffer.BlockCopy(tempBytes, 0, temp2Dbytes, 0, tempBytes.Length);
+    //        layer1 = acc.Allocate2DDenseX<byte>(temp2Dbytes);
+
+    //        tempBytes = HP[2].Cast<int>().Select(x => (byte)x).ToArray();
+    //        temp2Dbytes = new byte[HP[2].GetLength(0), HP[2].GetLength(0)];
+    //        Buffer.BlockCopy(tempBytes, 0, temp2Dbytes, 0, tempBytes.Length);
+    //        layer2 = acc.Allocate2DDenseX<byte>(temp2Dbytes);
+
+    //        ushort[] tempUshorts = HP[3].Cast<int>().Select(x => (ushort)x).ToArray();
+    //        ushort[,] temp2DUshorts = new ushort[HP[3].GetLength(0), HP[3].GetLength(0)];
+    //        Buffer.BlockCopy(tempUshorts, 0, temp2DUshorts, 0, tempUshorts.Length);
+    //        layer3 = acc.Allocate2DDenseX<ushort>(temp2DUshorts);
+
+    //        tempUshorts = HP[4].Cast<int>().Select(x => (ushort)x).ToArray();
+    //        temp2DUshorts = new ushort[HP[4].GetLength(0), HP[4].GetLength(0)];
+    //        Buffer.BlockCopy(tempUshorts, 0, temp2DUshorts, 0, tempUshorts.Length);
+    //        layer4 = acc.Allocate2DDenseX<ushort>(temp2DUshorts);
+
+    //        tempUshorts = HP[5].Cast<int>().Select(x => (ushort)x).ToArray();
+    //        temp2DUshorts = new ushort[HP[5].GetLength(0), HP[5].GetLength(0)];
+    //        Buffer.BlockCopy(tempUshorts, 0, temp2DUshorts, 0, tempUshorts.Length);
+    //        layer5 = acc.Allocate2DDenseX<ushort>(temp2DUshorts);
+
+    //        tempUshorts = HP[6].Cast<int>().Select(x => (ushort)x).ToArray();
+    //        temp2DUshorts = new ushort[HP[6].GetLength(0), HP[6].GetLength(0)];
+    //        Buffer.BlockCopy(tempUshorts, 0, temp2DUshorts, 0, tempUshorts.Length);
+    //        layer6 = acc.Allocate2DDenseX<ushort>(temp2DUshorts);
+
+    //        uint[] tempUints = HP[7].Cast<int>().Select(x => (uint)x).ToArray();
+    //        uint[,] temp2DUints = new uint[HP[7].GetLength(0), HP[7].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, temp2DUints, 0, tempUints.Length);
+    //        layer7 = acc.Allocate2DDenseX<uint>(temp2DUints);
+
+    //        tempUints = HP[8].Cast<int>().Select(x => (uint)x).ToArray();
+    //        temp2DUints = new uint[HP[8].GetLength(0), HP[8].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, temp2DUints, 0, tempUints.Length);
+    //        layer8 = acc.Allocate2DDenseX<uint>(temp2DUints);
+
+    //        tempUints = HP[9].Cast<int>().Select(x => (uint)x).ToArray();
+    //        temp2DUints = new uint[HP[9].GetLength(0), HP[9].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, temp2DUints, 0, tempUints.Length);
+    //        layer9 = acc.Allocate2DDenseX<uint>(temp2DUints);
+
+    //        tempUints = HP[10].Cast<int>().Select(x => (uint)x).ToArray();
+    //        temp2DUints = new uint[HP[10].GetLength(0), HP[10].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, temp2DUints, 0, tempUints.Length);
+    //        layer10 = acc.Allocate2DDenseX<uint>(temp2DUints);
+
+    //        tempUints = HP[11].Cast<int>().Select(x => (uint)x).ToArray();
+    //        temp2DUints = new uint[HP[11].GetLength(0), HP[11].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, temp2DUints, 0, tempUints.Length);
+    //        layer11 = acc.Allocate2DDenseX<uint>(temp2DUints);
+
+    //        tempUints = HP[12].Cast<int>().Select(x => (uint)x).ToArray();
+    //        temp2DUints = new uint[HP[12].GetLength(0), HP[12].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, temp2DUints, 0, tempUints.Length);
+    //        layer12 = acc.Allocate2DDenseX<uint>(temp2DUints);
+
+    //        tempUints = HP[13].Cast<int>().Select(x => (uint)x).ToArray();
+    //        temp2DUints = new uint[HP[13].GetLength(0), HP[13].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, temp2DUints, 0, tempUints.Length);
+    //        layer13 = acc.Allocate2DDenseX<uint>(temp2DUints);
+
+    //        tempUints = HP[14].Cast<int>().Select(x => (uint)x).ToArray();
+    //        temp2DUints = new uint[HP[14].GetLength(0), HP[14].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, temp2DUints, 0, tempUints.Length);
+    //        layer14 = acc.Allocate2DDenseX<uint>(temp2DUints);
+
+    //        ulong[] tempUlong = HP[15].Cast<int>().Select(x => (ulong)x).ToArray();
+    //        ulong[,] temp2DUlong = new ulong[HP[15].GetLength(0), HP[15].GetLength(0)];
+    //        Buffer.BlockCopy(tempUlong, 0, temp2DUlong, 0, tempUlong.Length);
+    //        layer15 = acc.Allocate2DDenseX<ulong>(temp2DUlong);
+
+    //        Histo = new HistoPyramid(layer0.View,
+    //            layer1.View,
+    //            layer2.View,
+    //            layer3.View,
+    //            layer4.View,
+    //            layer5.View,
+    //            layer6.View,
+    //            layer7.View,
+    //            layer8.View,
+    //            layer9.View,
+    //            layer10.View,
+    //            layer11.View,
+    //            layer12.View,
+    //            layer13.View,
+    //            layer14.View,
+    //            layer15.View,
+    //            size
+    //            );
+    //    }
+
+    //    public void Dispose()
+    //    {
+    //        layer0.Dispose();
+    //        layer1.Dispose();
+    //        layer2.Dispose();
+    //        layer3.Dispose();
+    //        layer4.Dispose();
+    //        layer5.Dispose();
+    //        layer6.Dispose();
+    //        layer7.Dispose();
+    //        layer8.Dispose();
+    //        layer9.Dispose();
+    //        layer10.Dispose();
+    //        layer11.Dispose();
+    //        layer12.Dispose();
+    //        layer13.Dispose();
+    //        layer14.Dispose();
+    //        layer15.Dispose();
+    //    }
+    //}
+
+    public struct HistoPyramid
+    {
+        public byte[,] layer0;
+        public byte[,] layer1;
+        public byte[,] layer2;
+        public ushort[,] layer3;
+        public ushort[,] layer4;
+        public ushort[,] layer5;
+        public ushort[,] layer6;
+        public uint[,] layer7;
+        public uint[,] layer8;
+        public uint[,] layer9;
+        public uint[,] layer10;
+        public uint[,] layer11;
+        public uint[,] layer12;
+        public uint[,] layer13;
+        public uint[,] layer14;
+        public ulong[,] layer15;
+        public byte size;
+
+        public HistoPyramid(int[][,] HP, int n)
+        {
+            size = (byte)n;
+            byte[] tempBytes = HP[0].Cast<int>().Select(x => (byte)x).ToArray();
+            layer0 = new byte[HP[0].GetLength(0), HP[0].GetLength(0)];
+            Buffer.BlockCopy(tempBytes, 0, layer0, 0, tempBytes.Length);
+
+            tempBytes = HP[1].Cast<int>().Select(x => (byte)x).ToArray();
+            layer1 = new byte[HP[1].GetLength(0), HP[1].GetLength(1)];
+            Buffer.BlockCopy(tempBytes, 0, layer1, 0, tempBytes.Length);
+
+            tempBytes = HP[2].Cast<int>().Select(x => (byte)x).ToArray();
+            layer2 = new byte[HP[2].GetLength(0), HP[2].GetLength(0)];
+            Buffer.BlockCopy(tempBytes, 0, layer2, 0, tempBytes.Length);
+
+            ushort[] tempUshorts = HP[3].Cast<int>().Select(x => (ushort)x).ToArray();
+            layer3 = new ushort[HP[3].GetLength(0), HP[3].GetLength(0)];
+            Buffer.BlockCopy(tempUshorts, 0, layer3, 0, tempUshorts.Length);
+
+            tempUshorts = HP[4].Cast<int>().Select(x => (ushort)x).ToArray();
+            layer4 = new ushort[HP[4].GetLength(0), HP[4].GetLength(0)];
+            Buffer.BlockCopy(tempUshorts, 0, layer4, 0, tempUshorts.Length);
+
+            tempUshorts = HP[5].Cast<int>().Select(x => (ushort)x).ToArray();
+            layer5 = new ushort[HP[5].GetLength(0), HP[5].GetLength(0)];
+            Buffer.BlockCopy(tempUshorts, 0, layer5, 0, tempUshorts.Length);
+
+            tempUshorts = HP[6].Cast<int>().Select(x => (ushort)x).ToArray();
+            layer6 = new ushort[HP[6].GetLength(0), HP[6].GetLength(0)];
+            Buffer.BlockCopy(tempUshorts, 0, layer6, 0, tempUshorts.Length);
+
+            uint[] tempUints = HP[7].Cast<int>().Select(x => (uint)x).ToArray();
+            layer7 = new uint[HP[7].GetLength(0), HP[7].GetLength(0)];
+            Buffer.BlockCopy(tempUints, 0, layer7, 0, tempUints.Length);
+
+            tempUints = HP[8].Cast<int>().Select(x => (uint)x).ToArray();
+            layer8 = new uint[HP[8].GetLength(0), HP[8].GetLength(0)];
+            Buffer.BlockCopy(tempUints, 0, layer8, 0, tempUints.Length);
+
+            tempUints = HP[9].Cast<int>().Select(x => (uint)x).ToArray();
+            layer9 = new uint[HP[9].GetLength(0), HP[9].GetLength(0)];
+            Buffer.BlockCopy(tempUints, 0, layer9, 0, tempUints.Length);
+
+            tempUints = HP[10].Cast<int>().Select(x => (uint)x).ToArray();
+            layer10 = new uint[HP[10].GetLength(0), HP[10].GetLength(0)];
+            Buffer.BlockCopy(tempUints, 0, layer10, 0, tempUints.Length);
+
+            tempUints = HP[11].Cast<int>().Select(x => (uint)x).ToArray();
+            layer11 = new uint[HP[11].GetLength(0), HP[11].GetLength(0)];
+            Buffer.BlockCopy(tempUints, 0, layer11, 0, tempUints.Length);
+
+            tempUints = HP[12].Cast<int>().Select(x => (uint)x).ToArray();
+            layer12 = new uint[HP[12].GetLength(0), HP[12].GetLength(0)];
+            Buffer.BlockCopy(tempUints, 0, layer12, 0, tempUints.Length);
+
+            tempUints = HP[13].Cast<int>().Select(x => (uint)x).ToArray();
+            layer13= new uint[HP[13].GetLength(0), HP[13].GetLength(0)];
+            Buffer.BlockCopy(tempUints, 0, layer13, 0, tempUints.Length);
+
+            tempUints = HP[14].Cast<int>().Select(x => (uint)x).ToArray();
+            layer14 = new uint[HP[14].GetLength(0), HP[14].GetLength(0)];
+            Buffer.BlockCopy(tempUints, 0, layer14, 0, tempUints.Length);
+
+            ulong[] tempUlong = HP[15].Cast<int>().Select(x => (ulong)x).ToArray();
+            layer15 = new ulong[HP[15].GetLength(0), HP[15].GetLength(0)];
+            Buffer.BlockCopy(tempUlong, 0, layer15, 0, tempUlong.Length);
+
+        }
+
+        public uint this[int index, int i, int j]
+        {
+            get
+            {
+                switch (index)
+                {
+                    case 0:
+                        return layer0[i, j];
+                    case 1:
+                        return layer1[i, j];
+                    case 2:
+                        return layer2[i, j];
+                    case 3:
+                        return layer3[i, j];
+                    case 4:
+                        return layer4[i, j];
+                    case 5:
+                        return layer5[i, j];
+                    case 6:
+                        return layer6[i, j];
+                    case 7:
+                        return layer7[i, j];
+                    case 8:
+                        return layer8[i, j];
+                    case 9:
+                        return layer9[i, j];
+                    case 10:
+                        return layer10[i, j];
+                    case 11:
+                        return layer11[i, j];
+                    case 12:
+                        return layer12[i, j];
+                    case 13:
+                        return layer13[i, j];
+                    case 14:
+                        return layer14[i, j];
+                    case 15:
+                        return (uint)layer15[i, j];
+                    default:
+                        return 0;
+                }
+            }
+        }
+    }
+
     public struct Triangle
     {
-        public Point vertex1;
-        public Point vertex2;
-        public Point vertex3;
+        public Vertex vertex1;
+        public Vertex vertex2;
+        public Vertex vertex3;
 
-        public List<Point> getV() { return new List<Point>() { vertex1, vertex2, vertex3 }; }
+        public Triangle(Point i, Point j, Point k)
+        {
+            vertex1 = new Vertex(i.X, i.Y, i.Z, i.normal);
+            vertex2 = new Vertex(j.X, j.Y, j.Z, j.normal);
+            vertex3 = new Vertex(k.X, k.Y, k.Z, k.normal);
+        }
+
+        public Vertex[] getV() { return new Vertex[] { vertex1, vertex2, vertex3 }; }
+    }
+
+    public struct FlatPoint
+    {
+        public int X;
+        public int Y;
+
+        public FlatPoint(int i, int j)
+        {
+            this.X = i;
+            this.Y = j;
+        }
     }
 
     public struct Point
     {
         //const short epsilon = 0;
+        public Normal normal;
         public float X;
         public float Y;
         public float Z;
         public short value;
-        public Normal normal;
 
         public Point(float i, float j, float k, short val, Normal norm)
         {
@@ -120,7 +419,7 @@ namespace DispDICOMCMD
         //    return base.GetHashCode();
         //}
 
-        public static Point operator +(Point pt1, Point pt2) => new Point(pt1.X + pt2.X, pt1.Y + pt2.Y, pt1.Z + pt2.Z, 0f, new Normal());
+        public static Point operator +(Point pt1, Point pt2) => new Point(pt1.X + pt2.X, pt1.Y + pt2.Y, pt1.Z + pt2.Z, 0, new Normal());
         public static Point operator -(Point pt1, Point pt2) => new Point(pt1.X - pt2.X, pt1.Y - pt2.Y, pt1.Z - pt2.Z, 0, new Normal());
         public static Point operator *(Point pt1, float factor) => new Point(pt1.X * factor, pt1.Y * factor, pt1.Z * factor, 0, new Normal());
         //public static bool operator ==(Point pt1, Point pt2) => pt1.X == pt2.X && pt1.Y == pt2.Y && pt1.Z == pt2.Z;
@@ -153,15 +452,17 @@ namespace DispDICOMCMD
 
     public struct Vertex
     {
+        public Normal normal;
         public float X;
         public float Y;
         public float Z;
 
-        public Vertex(float i, float j, float k)
+        public Vertex(float i, float j, float k, Normal norm)
         {
             X = i;
             Y = j;
             Z = k;
+            normal = norm;
         }
 
         public Vertex Interpolate(Vertex other, float interpolant)
@@ -169,7 +470,7 @@ namespace DispDICOMCMD
             float x = (other.X - this.X) * interpolant + this.X;
             float y = (other.Y - this.Y) * interpolant + this.Y;
             float z = (other.Z - this.Z) * interpolant + this.Z;
-            return new Vertex(x, y, z);
+            return new Vertex(x, y, z, new Normal());
         }
     }
 
@@ -216,6 +517,16 @@ namespace DispDICOMCMD
         {
             return new sbyte[] { E1, E2, E3, E4, E5, E6, E7, E8, E9, E10, E11, E12, E13, E14, E15, E16 };
         }
+
+        public byte getn()
+        {
+            byte sum = 0;
+            foreach (sbyte e in getAsArray())
+            {
+                if (e >= 0) sum++;
+            }
+            return sum;
+        }
     }
 
     public struct Cube
@@ -249,8 +560,8 @@ namespace DispDICOMCMD
             config += (V8.value < threshold) ? (byte)bitMask.v8 : (byte)0;
         }
 
-        public Point[] getAsArray() 
-        { 
+        public Point[] getAsArray()
+        {
             return new Point[] { V1, V2, V3, V4, V5, V6, V7, V8 };
         }
 
@@ -258,73 +569,73 @@ namespace DispDICOMCMD
         //public Point getMax() { return getAsArray().Max(); }
         //public Point getmin() { return getAsArray().Min(); }
 
-        public Point[] March(short threshold , Edge config)
+        public Point[] March(short threshold, Edge config)
         {
             sbyte[] ed = config.getAsArray().Where(x => x >= 0).ToArray();
-            if(ed.All(x => x == 0))
-                ed = new sbyte[]{ };
+            if (ed.All(x => x == 0))
+                ed = new sbyte[] { };
             //if (ed.Length > 0)
             //{
 
             //}
             Point[] points = new Point[ed.Length];
-            if(ed.Length != 0)
+            if (ed.Length != 0)
             {
                 ;
             }
             int i;
-            for(i=0; i < ed.Length; i++)
+            for (i = 0; i < ed.Length; i++)
             {
                 switch (ed[i])
                 {
                     case (int)edgeMask.e1:
                         points[i] = V1.Interpolate(V2, threshold);
-                             //points.Add(new Point3D(i + 0.5f, j, k));
-                            break;
+                        //points.Add(new Point3D(i + 0.5f, j, k));
+                        break;
                     case (int)edgeMask.e2:
                         points[i] = V2.Interpolate(V3, threshold);
-                            //points.Add(new Point3D(i + 1, j + 0.5f, k));
-                           break;
+                        //points.Add(new Point3D(i + 1, j + 0.5f, k));
+                        break;
                     case (int)edgeMask.e3:
                         points[i] = V4.Interpolate(V3, threshold);
-                            //points.Add(new Point3D(i + 0.5f, j + 1, k));
-                            break;
+                        //points.Add(new Point3D(i + 0.5f, j + 1, k));
+                        break;
                     case (int)edgeMask.e4:
                         points[i] = V1.Interpolate(V4, threshold);
-                            //points.Add(new Point3D(i, j + 0.5f, k));
-                            break;
+                        //points.Add(new Point3D(i, j + 0.5f, k));
+                        break;
                     case (int)edgeMask.e5:
                         points[i] = V5.Interpolate(V6, threshold);
-                            //points.Add(new Point3D(i + 0.5f, j, k + 1));
-                            break;
+                        //points.Add(new Point3D(i + 0.5f, j, k + 1));
+                        break;
                     case (int)edgeMask.e6:
                         points[i] = V6.Interpolate(V7, threshold);
-                            //points.Add(new Point3D(i + 1, j + 0.5f, k + 1));
-                            break;
+                        //points.Add(new Point3D(i + 1, j + 0.5f, k + 1));
+                        break;
                     case (int)edgeMask.e7:
                         points[i] = V8.Interpolate(V7, threshold);
-                            //points.Add(new Point3D(i + 0.5f, j + 1, k + 1));
-                            break;
+                        //points.Add(new Point3D(i + 0.5f, j + 1, k + 1));
+                        break;
                     case (int)edgeMask.e8:
                         points[i] = V5.Interpolate(V8, threshold);
-                            //points.Add(new Point3D(i, j + 0.5f, k + 1));
-                            break;
+                        //points.Add(new Point3D(i, j + 0.5f, k + 1));
+                        break;
                     case (int)edgeMask.e9:
                         points[i] = V1.Interpolate(V5, threshold);
-                            //points.Add(new Point3D(i, j, k+0.5f));
-                            break;
+                        //points.Add(new Point3D(i, j, k+0.5f));
+                        break;
                     case (int)edgeMask.e10:
                         points[i] = V2.Interpolate(V6, threshold);
-                            //points.Add(new Point3D(i + 1, j, k+0.5f));
-                            break;
+                        //points.Add(new Point3D(i + 1, j, k+0.5f));
+                        break;
                     case (int)edgeMask.e11:
                         points[i] = V3.Interpolate(V7, threshold);
-                            //points.Add(new Point3D(i + 1, j + 1, k+0.5f));
-                            break;
+                        //points.Add(new Point3D(i + 1, j + 1, k+0.5f));
+                        break;
                     case (int)edgeMask.e12:
                         points[i] = V4.Interpolate(V8, threshold);
-                            //points.Add(new Point3D(i, j + 1, k+0.5f));
-                            break;
+                        //points.Add(new Point3D(i, j + 1, k+0.5f));
+                        break;
                 }
             }
             return points;
@@ -397,6 +708,77 @@ namespace DispDICOMCMD
                 }
             }
             return points;
+        }
+
+        public Triangle MarchHP(short threshold, Edge config, int index)
+        {
+            sbyte[] ed = config.getAsArray();
+
+            //if (ed.All(x => x == 0))
+            //    ed = new short[] { };
+            //if (ed.Length > 0)
+            //{
+
+            //}
+            Point[] points = new Point[3];
+            int i;
+            for (i = 0; i < 3; i++)
+            {
+                switch (ed[index * 3 + i])
+                {
+                    case 0:
+                        points[i] = V1.Interpolate(V2, threshold);
+                        //points.Add(new Point3D(i + 0.5f, j, k));
+                        break;
+                    case 1:
+                        points[i] = V2.Interpolate(V3, threshold);
+                        //points.Add(new Point3D(i + 1, j + 0.5f, k));
+                        break;
+                    case 2:
+                        points[i] = V4.Interpolate(V3, threshold);
+                        //points.Add(new Point3D(i + 0.5f, j + 1, k));
+                        break;
+                    case 3:
+                        points[i] = V1.Interpolate(V4, threshold);
+                        //points.Add(new Point3D(i, j + 0.5f, k));
+                        break;
+                    case 4:
+                        points[i] = V5.Interpolate(V6, threshold);
+                        //points.Add(new Point3D(i + 0.5f, j, k + 1));
+                        break;
+                    case 5:
+                        points[i] = V6.Interpolate(V7, threshold);
+                        //points.Add(new Point3D(i + 1, j + 0.5f, k + 1));
+                        break;
+                    case 6:
+                        points[i] = V8.Interpolate(V7, threshold);
+                        //points.Add(new Point3D(i + 0.5f, j + 1, k + 1));
+                        break;
+                    case 7:
+                        points[i] = V5.Interpolate(V8, threshold);
+                        //points.Add(new Point3D(i, j + 0.5f, k + 1));
+                        break;
+                    case 8:
+                        points[i] = V1.Interpolate(V5, threshold);
+                        //points.Add(new Point3D(i, j, k+0.5f));
+                        break;
+                    case 9:
+                        points[i] = V2.Interpolate(V6, threshold);
+                        //points.Add(new Point3D(i + 1, j, k+0.5f));
+                        break;
+                    case 10:
+                        points[i] = V3.Interpolate(V7, threshold);
+                        //points.Add(new Point3D(i + 1, j + 1, k+0.5f));
+                        break;
+                    case 11:
+                        points[i] = V4.Interpolate(V8, threshold);
+                        //points.Add(new Point3D(i, j + 1, k+0.5f));
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return new Triangle(points[0], points[1], points[2]);
         }
 
         //public int getNumber()
