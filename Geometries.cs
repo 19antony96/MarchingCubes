@@ -176,139 +176,139 @@ namespace DispDICOMCMD
     //    }
     //}
 
-    public struct HistoPyramid
-    {
-        public byte[,] layer0;
-        public byte[,] layer1;
-        public byte[,] layer2;
-        public ushort[,] layer3;
-        public ushort[,] layer4;
-        public ushort[,] layer5;
-        public ushort[,] layer6;
-        public uint[,] layer7;
-        public uint[,] layer8;
-        public uint[,] layer9;
-        public uint[,] layer10;
-        public uint[,] layer11;
-        public uint[,] layer12;
-        public uint[,] layer13;
-        public uint[,] layer14;
-        public ulong[,] layer15;
-        public byte size;
+    //public struct HistoPyramid
+    //{
+    //    public byte[,] layer0;
+    //    public byte[,] layer1;
+    //    public byte[,] layer2;
+    //    public ushort[,] layer3;
+    //    public ushort[,] layer4;
+    //    public ushort[,] layer5;
+    //    public ushort[,] layer6;
+    //    public uint[,] layer7;
+    //    public uint[,] layer8;
+    //    public uint[,] layer9;
+    //    public uint[,] layer10;
+    //    public uint[,] layer11;
+    //    public uint[,] layer12;
+    //    public uint[,] layer13;
+    //    public uint[,] layer14;
+    //    public ulong[,] layer15;
+    //    public byte size;
 
-        public HistoPyramid(int[][,] HP, int n)
-        {
-            size = (byte)n;
-            byte[] tempBytes = HP[0].Cast<int>().Select(x => (byte)x).ToArray();
-            layer0 = new byte[HP[0].GetLength(0), HP[0].GetLength(0)];
-            Buffer.BlockCopy(tempBytes, 0, layer0, 0, tempBytes.Length);
+    //    public HistoPyramid(int[][,] HP, int n)
+    //    {
+    //        size = (byte)n;
+    //        byte[] tempBytes = HP[0].Cast<int>().Select(x => (byte)x).ToArray();
+    //        layer0 = new byte[HP[0].GetLength(0), HP[0].GetLength(0)];
+    //        Buffer.BlockCopy(tempBytes, 0, layer0, 0, tempBytes.Length);
 
-            tempBytes = HP[1].Cast<int>().Select(x => (byte)x).ToArray();
-            layer1 = new byte[HP[1].GetLength(0), HP[1].GetLength(1)];
-            Buffer.BlockCopy(tempBytes, 0, layer1, 0, tempBytes.Length);
+    //        tempBytes = HP[1].Cast<int>().Select(x => (byte)x).ToArray();
+    //        layer1 = new byte[HP[1].GetLength(0), HP[1].GetLength(1)];
+    //        Buffer.BlockCopy(tempBytes, 0, layer1, 0, tempBytes.Length);
 
-            tempBytes = HP[2].Cast<int>().Select(x => (byte)x).ToArray();
-            layer2 = new byte[HP[2].GetLength(0), HP[2].GetLength(0)];
-            Buffer.BlockCopy(tempBytes, 0, layer2, 0, tempBytes.Length);
+    //        tempBytes = HP[2].Cast<int>().Select(x => (byte)x).ToArray();
+    //        layer2 = new byte[HP[2].GetLength(0), HP[2].GetLength(0)];
+    //        Buffer.BlockCopy(tempBytes, 0, layer2, 0, tempBytes.Length);
 
-            ushort[] tempUshorts = HP[3].Cast<int>().Select(x => (ushort)x).ToArray();
-            layer3 = new ushort[HP[3].GetLength(0), HP[3].GetLength(0)];
-            Buffer.BlockCopy(tempUshorts, 0, layer3, 0, tempUshorts.Length);
+    //        ushort[] tempUshorts = HP[3].Cast<int>().Select(x => (ushort)x).ToArray();
+    //        layer3 = new ushort[HP[3].GetLength(0), HP[3].GetLength(0)];
+    //        Buffer.BlockCopy(tempUshorts, 0, layer3, 0, tempUshorts.Length);
 
-            tempUshorts = HP[4].Cast<int>().Select(x => (ushort)x).ToArray();
-            layer4 = new ushort[HP[4].GetLength(0), HP[4].GetLength(0)];
-            Buffer.BlockCopy(tempUshorts, 0, layer4, 0, tempUshorts.Length);
+    //        tempUshorts = HP[4].Cast<int>().Select(x => (ushort)x).ToArray();
+    //        layer4 = new ushort[HP[4].GetLength(0), HP[4].GetLength(0)];
+    //        Buffer.BlockCopy(tempUshorts, 0, layer4, 0, tempUshorts.Length);
 
-            tempUshorts = HP[5].Cast<int>().Select(x => (ushort)x).ToArray();
-            layer5 = new ushort[HP[5].GetLength(0), HP[5].GetLength(0)];
-            Buffer.BlockCopy(tempUshorts, 0, layer5, 0, tempUshorts.Length);
+    //        tempUshorts = HP[5].Cast<int>().Select(x => (ushort)x).ToArray();
+    //        layer5 = new ushort[HP[5].GetLength(0), HP[5].GetLength(0)];
+    //        Buffer.BlockCopy(tempUshorts, 0, layer5, 0, tempUshorts.Length);
 
-            tempUshorts = HP[6].Cast<int>().Select(x => (ushort)x).ToArray();
-            layer6 = new ushort[HP[6].GetLength(0), HP[6].GetLength(0)];
-            Buffer.BlockCopy(tempUshorts, 0, layer6, 0, tempUshorts.Length);
+    //        tempUshorts = HP[6].Cast<int>().Select(x => (ushort)x).ToArray();
+    //        layer6 = new ushort[HP[6].GetLength(0), HP[6].GetLength(0)];
+    //        Buffer.BlockCopy(tempUshorts, 0, layer6, 0, tempUshorts.Length);
 
-            uint[] tempUints = HP[7].Cast<int>().Select(x => (uint)x).ToArray();
-            layer7 = new uint[HP[7].GetLength(0), HP[7].GetLength(0)];
-            Buffer.BlockCopy(tempUints, 0, layer7, 0, tempUints.Length);
+    //        uint[] tempUints = HP[7].Cast<int>().Select(x => (uint)x).ToArray();
+    //        layer7 = new uint[HP[7].GetLength(0), HP[7].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, layer7, 0, tempUints.Length);
 
-            tempUints = HP[8].Cast<int>().Select(x => (uint)x).ToArray();
-            layer8 = new uint[HP[8].GetLength(0), HP[8].GetLength(0)];
-            Buffer.BlockCopy(tempUints, 0, layer8, 0, tempUints.Length);
+    //        tempUints = HP[8].Cast<int>().Select(x => (uint)x).ToArray();
+    //        layer8 = new uint[HP[8].GetLength(0), HP[8].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, layer8, 0, tempUints.Length);
 
-            tempUints = HP[9].Cast<int>().Select(x => (uint)x).ToArray();
-            layer9 = new uint[HP[9].GetLength(0), HP[9].GetLength(0)];
-            Buffer.BlockCopy(tempUints, 0, layer9, 0, tempUints.Length);
+    //        tempUints = HP[9].Cast<int>().Select(x => (uint)x).ToArray();
+    //        layer9 = new uint[HP[9].GetLength(0), HP[9].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, layer9, 0, tempUints.Length);
 
-            tempUints = HP[10].Cast<int>().Select(x => (uint)x).ToArray();
-            layer10 = new uint[HP[10].GetLength(0), HP[10].GetLength(0)];
-            Buffer.BlockCopy(tempUints, 0, layer10, 0, tempUints.Length);
+    //        tempUints = HP[10].Cast<int>().Select(x => (uint)x).ToArray();
+    //        layer10 = new uint[HP[10].GetLength(0), HP[10].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, layer10, 0, tempUints.Length);
 
-            tempUints = HP[11].Cast<int>().Select(x => (uint)x).ToArray();
-            layer11 = new uint[HP[11].GetLength(0), HP[11].GetLength(0)];
-            Buffer.BlockCopy(tempUints, 0, layer11, 0, tempUints.Length);
+    //        tempUints = HP[11].Cast<int>().Select(x => (uint)x).ToArray();
+    //        layer11 = new uint[HP[11].GetLength(0), HP[11].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, layer11, 0, tempUints.Length);
 
-            tempUints = HP[12].Cast<int>().Select(x => (uint)x).ToArray();
-            layer12 = new uint[HP[12].GetLength(0), HP[12].GetLength(0)];
-            Buffer.BlockCopy(tempUints, 0, layer12, 0, tempUints.Length);
+    //        tempUints = HP[12].Cast<int>().Select(x => (uint)x).ToArray();
+    //        layer12 = new uint[HP[12].GetLength(0), HP[12].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, layer12, 0, tempUints.Length);
 
-            tempUints = HP[13].Cast<int>().Select(x => (uint)x).ToArray();
-            layer13= new uint[HP[13].GetLength(0), HP[13].GetLength(0)];
-            Buffer.BlockCopy(tempUints, 0, layer13, 0, tempUints.Length);
+    //        tempUints = HP[13].Cast<int>().Select(x => (uint)x).ToArray();
+    //        layer13= new uint[HP[13].GetLength(0), HP[13].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, layer13, 0, tempUints.Length);
 
-            tempUints = HP[14].Cast<int>().Select(x => (uint)x).ToArray();
-            layer14 = new uint[HP[14].GetLength(0), HP[14].GetLength(0)];
-            Buffer.BlockCopy(tempUints, 0, layer14, 0, tempUints.Length);
+    //        tempUints = HP[14].Cast<int>().Select(x => (uint)x).ToArray();
+    //        layer14 = new uint[HP[14].GetLength(0), HP[14].GetLength(0)];
+    //        Buffer.BlockCopy(tempUints, 0, layer14, 0, tempUints.Length);
 
-            ulong[] tempUlong = HP[15].Cast<int>().Select(x => (ulong)x).ToArray();
-            layer15 = new ulong[HP[15].GetLength(0), HP[15].GetLength(0)];
-            Buffer.BlockCopy(tempUlong, 0, layer15, 0, tempUlong.Length);
+    //        ulong[] tempUlong = HP[15].Cast<int>().Select(x => (ulong)x).ToArray();
+    //        layer15 = new ulong[HP[15].GetLength(0), HP[15].GetLength(0)];
+    //        Buffer.BlockCopy(tempUlong, 0, layer15, 0, tempUlong.Length);
 
-        }
+    //    }
 
-        public uint this[int index, int i, int j]
-        {
-            get
-            {
-                switch (index)
-                {
-                    case 0:
-                        return layer0[i, j];
-                    case 1:
-                        return layer1[i, j];
-                    case 2:
-                        return layer2[i, j];
-                    case 3:
-                        return layer3[i, j];
-                    case 4:
-                        return layer4[i, j];
-                    case 5:
-                        return layer5[i, j];
-                    case 6:
-                        return layer6[i, j];
-                    case 7:
-                        return layer7[i, j];
-                    case 8:
-                        return layer8[i, j];
-                    case 9:
-                        return layer9[i, j];
-                    case 10:
-                        return layer10[i, j];
-                    case 11:
-                        return layer11[i, j];
-                    case 12:
-                        return layer12[i, j];
-                    case 13:
-                        return layer13[i, j];
-                    case 14:
-                        return layer14[i, j];
-                    case 15:
-                        return (uint)layer15[i, j];
-                    default:
-                        return 0;
-                }
-            }
-        }
-    }
+    //    public uint this[int index, int i, int j]
+    //    {
+    //        get
+    //        {
+    //            switch (index)
+    //            {
+    //                case 0:
+    //                    return layer0[i, j];
+    //                case 1:
+    //                    return layer1[i, j];
+    //                case 2:
+    //                    return layer2[i, j];
+    //                case 3:
+    //                    return layer3[i, j];
+    //                case 4:
+    //                    return layer4[i, j];
+    //                case 5:
+    //                    return layer5[i, j];
+    //                case 6:
+    //                    return layer6[i, j];
+    //                case 7:
+    //                    return layer7[i, j];
+    //                case 8:
+    //                    return layer8[i, j];
+    //                case 9:
+    //                    return layer9[i, j];
+    //                case 10:
+    //                    return layer10[i, j];
+    //                case 11:
+    //                    return layer11[i, j];
+    //                case 12:
+    //                    return layer12[i, j];
+    //                case 13:
+    //                    return layer13[i, j];
+    //                case 14:
+    //                    return layer14[i, j];
+    //                case 15:
+    //                    return (uint)layer15[i, j];
+    //                default:
+    //                    return 0;
+    //            }
+    //        }
+    //    }
+    //}
 
     public struct Triangle
     {
@@ -778,6 +778,8 @@ namespace DispDICOMCMD
                         break;
                 }
             }
+            if ((points[0] - points[1]).X > 1)
+                ;
             return new Triangle(points[0], points[1], points[2]);
         }
 
