@@ -35,7 +35,7 @@ namespace DispDICOMCMD
         public static Action<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int> assign_edges1D;
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView2D<byte, Stride2D.DenseX>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int> assign1D;
         public static Action<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>> assign_normal1D;
-        public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, Point, int, int, int> get_verts;
+        public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, Point, int, int, int> get_verts;
         public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView1D<short, Stride1D.Dense>, Point, int, int, int> get_vertsX;
         public static Action<Index2D, ArrayView2D<uint, Stride2D.DenseX> , ArrayView2D<byte, Stride2D.DenseX> > hpFirstLayer;
         public static Action<Index2D, ArrayView2D<uint, Stride2D.DenseX> , ArrayView2D<uint, Stride2D.DenseX> > hpCreation;
@@ -121,7 +121,7 @@ namespace DispDICOMCMD
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
 
             assign1D = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView2D<byte, Stride2D.DenseX>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int>(Assign1D);
-            get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, Point, int, int, int>(getVertices);
+            get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, Point, int, int, int>(getVertices);
             hpFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index2D, ArrayView2D<uint, Stride2D.DenseX>, ArrayView2D<byte, Stride2D.DenseX>>(BuildHPFirst); 
             hpCreation = accelerator.LoadAutoGroupedStreamKernel<Index2D, ArrayView2D<uint, Stride2D.DenseX>, ArrayView2D<uint, Stride2D.DenseX>>(BuildHP); 
             traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<FlatPoint, Stride1D.Dense> , ArrayView1D<uint, Stride1D.Dense> , ArrayView2D<uint, Stride2D.DenseX>>(HPTraverseKernel);
@@ -203,7 +203,7 @@ namespace DispDICOMCMD
             //cubes = temp.configs;
             //normals = temp.grads;
             //HP = HPCreation();
-            HPCreationGPU();
+            //HPCreationGPU();
             //for (int r = 1; r < nLayers; r++)
             //{
             //    getHPLayer(r) = accelerator.Allocate2DDenseX(HP[r]);
@@ -218,8 +218,8 @@ namespace DispDICOMCMD
             //edges = march.edges;
             using (StreamWriter fs = fi.CreateText())
             {
-                HPTraversalGPU(fs);
-                //MarchGPU(fs);
+                //HPTraversal(fs);
+                MarchGPU(fs);
                 //MarchGPUBatchRobust(fs);
 
                 int f = 0;
@@ -229,6 +229,12 @@ namespace DispDICOMCMD
                     //fs.WriteLine("f " + f + "//" + f + " " + (f + 1) + "//" + (f + 1) + " " + (f + 2) + "//" + (f + 2));
                 }
                 Console.WriteLine(count);
+            }
+
+            for (i = 1; i < nLayers; i++)
+            {
+                if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
+                    getHPLayer(i).Dispose();
             }
             //stopWatch.Stop();
             //ts = stopWatch.Elapsed;
@@ -552,7 +558,7 @@ namespace DispDICOMCMD
             Triangle[] tri = new Triangle[nTri];
             PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(nTri);
             MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(nTri);
-            cubeConfig = accelerator.Allocate3DDenseXY(cubes);
+            //cubeConfig = accelerator.Allocate3DDenseXY(cubes);
             //byteLayer = accelerator.Allocate2DDenseX(HPBaseLayer);
             //k.MemSetToZero();
             p.MemSetToZero();
@@ -623,6 +629,10 @@ namespace DispDICOMCMD
             triConfig.Dispose();
             cubeConfig.Dispose();
             sliced.Dispose();
+            k.Dispose();
+            p.Dispose();
+            triTable.Dispose();
+            HPBaseConfig.Dispose();
 
             foreach (var triangle in tri)
             {
@@ -944,15 +954,19 @@ namespace DispDICOMCMD
             cubeBytes = new byte[(index.X - 1), (index.Y - 1), (index.Z - 1)];
             //var gradPinned = GCHandle.Alloc(grads, GCHandleType.Pinned);
             var cubePinned = GCHandle.Alloc(cubeBytes, GCHandleType.Pinned);
+            var HPPinned = GCHandle.Alloc(HPBaseLayer, GCHandleType.Pinned);
             PageLockedArray3D<byte> cubeLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(index.X - 1, index.Y - 1, index.Z - 1));
+            PageLockedArray2D<byte> HPLocked = accelerator.AllocatePageLocked2D<byte>(new Index2D(HPBaseLayer.GetLength(0)));
             //PageLockedArray3D<Normal> gradLocked = accelerator.AllocatePageLocked3D<Normal>(index);
             cubeConfig = accelerator.Allocate3DDenseXY<byte>(cubeLocked.Extent);
+            HPBaseConfig = accelerator.Allocate2DDenseX<byte>(HPLocked.Extent);
             //gradConfig = accelerator.Allocate3DDenseXY<Normal>(index);
             //var gradScope = accelerator.CreatePageLockFromPinned<Normal>(gradPinned.AddrOfPinnedObject(), grads.Length);
             var cubeScope = accelerator.CreatePageLockFromPinned<byte>(cubePinned.AddrOfPinnedObject(), cubeBytes.Length);
+            var HPScope = accelerator.CreatePageLockFromPinned<byte>(HPPinned.AddrOfPinnedObject(), HPBaseLayer.Length);
             //gradConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
             cubeConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
-            HPBaseConfig = accelerator.Allocate2DDenseX<byte>(HPBaseLayer);
+            HPBaseConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, HPScope);
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -962,14 +976,17 @@ namespace DispDICOMCMD
             accelerator.Synchronize();
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
-            cubeConfig.CopyToCPU(cubeBytes);
-            HPBaseConfig.CopyToCPU(HPBaseLayer);
-            //cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
-            //cubeBytes = cubeLocked.GetArray();
-            stopWatch.Stop();
+            //cubeConfig.CopyToCPU(cubeBytes);
+            //HPBaseConfig.CopyToCPU(HPBaseLayer);
+            cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
+            cubeBytes = cubeLocked.GetArray();
+            HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
+            HPBaseLayer = HPLocked.GetArray();
+            //stopWatch.Stop();
             //HPBaseConfig.Dispose();
-            cubeConfig.Dispose();
+            //cubeConfig.Dispose();
             cubePinned.Free();
+            HPPinned.Free();
             //sliced.Dispose();
             //GCHandle.FromIntPtr(gradIntPtr).Free();
             //GCHandle.FromIntPtr(cubeIntPtr).Free();
@@ -1183,7 +1200,7 @@ namespace DispDICOMCMD
 
         }
 
-        public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<Edge, Stride1D.Dense> triTable, ArrayView3D<short, Stride3D.DenseXY> input, Point offset, int thresh, int batchSize, int width)
+        public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<Edge, Stride1D.Dense> triTable, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView1D<byte, Stride1D.Dense> flag,Point offset, int thresh, int batchSize, int width)
         {
             if (edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != 0 && edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != byte.MaxValue)
             {
@@ -1268,8 +1285,8 @@ namespace DispDICOMCMD
                     {
 
                         //triangles[triangles.Length - 1].vertex1.value = 1;
-                        if (triangles[triangles.Length - 1].vertex1.X != -1)
-                            triangles[triangles.Length - 1].vertex1.X = -1;
+                        if (flag[0] == 0)
+                            flag[0] = 1;
                         //if (triangles[(batchSize * batchSize * batchSize * 0) + (index.Z * batchSize * batchSize) + (index.Y * batchSize) + index.X].vertex1.X > 0)
                         ////if (triangles.Length < 32 * 32 * 32 * 4 + 32 * 32 * 31 + 32 * 31 + 31 + 3)
                         //{
@@ -1288,7 +1305,7 @@ namespace DispDICOMCMD
         {
             //gradConfig.MemSetToZero();
             //cubeConfig.MemSetToZero();
-            short[] sizes = { 32 };
+            short[] sizes = { 12,16,18,20,22,24,26,28,30,32,34 };
             if (width < 200)
                 sizes = new short[] { (short)width };
             foreach (short size in sizes)
@@ -1317,6 +1334,7 @@ namespace DispDICOMCMD
                 Triangle[] tri = new Triangle[Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5 + 1, (batchSize) * (batchSize) * (batchSize) * 5 + 1)];
                 PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5 + 1, (batchSize) * (batchSize) * (batchSize) * 5 + 1));
                 MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5 + 1, (batchSize) * (batchSize) * (batchSize) * 5 + 1));
+                MemoryBuffer1D<byte, Stride1D.Dense> flag = accelerator.Allocate1D<byte>(1);
                 //count = 0;
                 //int[] n = { 0 };
 
@@ -1344,17 +1362,14 @@ namespace DispDICOMCMD
                                 //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal);
                                 //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
 
-                                get_verts(index, triConfig.View, cubeConfig.View, triTable, sliced.View, offset, threshold, batchSize, width);
+                                get_verts(index, triConfig.View, cubeConfig.View, triTable, sliced.View, flag.View, offset, threshold, batchSize, width);
 
                                 accelerator.Synchronize();
-                                //gradConfig.CopyToCPU(grads);
-                                //cubeConfig.CopyToCPU(cubeBytes);
-                                //cubeConfig.CopyToCPU(r);
-                                triConfig.View.CopyToPageLockedAsync(triLocked);
-                                accelerator.Synchronize();
-                                tri = triLocked.GetArray();
-                                if (tri[tri.Length - 1].vertex1.X < 0)
+                                if (flag.GetAsArray1D()[0] > 0)
                                 {
+                                    triConfig.View.CopyToPageLockedAsync(triLocked);
+                                    accelerator.Synchronize();
+                                    tri = triLocked.GetArray();
                                     tri[tri.Length - 1] = new Triangle();
                                     Array.Copy(tri, 0, triangleList, iX * (tri.Length - 1), tri.Length - 1);
                                     //Console.WriteLine(triangleList.Count);
@@ -1362,6 +1377,7 @@ namespace DispDICOMCMD
                                     triConfig.View.MemSetToZero();
                                     triLocked.ArrayView.MemSetToZero();
                                     iX++;
+                                    flag.MemSetToZero();
                                 }
                                 //foreach(Triangle triangle in tri)
                                 //{
@@ -1385,12 +1401,12 @@ namespace DispDICOMCMD
                 // Get the elapsed time as a TimeSpan value.
                 triConfig.Dispose();
                 cubeConfig.Dispose();
-                //gradConfig.Dispose();
+                triTable.Dispose();
                 sliced.Dispose();
                 //}
-                Triangle[] temp = new Triangle[sum];
-                if (triangleList.Length > sum)
-                    Array.Copy(triangleList, temp, sum);
+                //Triangle[] temp = new Triangle[sum];
+                //if (triangleList.Length > sum)
+                //    Array.Copy(triangleList, temp, sum);
                 var triC = triangleList.Where(x => (x.vertex1.X != 0 && x.vertex1.Y != 0 && x.vertex1.Z != 0) &&
                 (x.vertex2.X != 0 && x.vertex2.Y != 0 && x.vertex2.Z != 0) &&
                 (x.vertex3.X != 0 && x.vertex3.Y != 0 && x.vertex3.Z != 0)).ToList();
