@@ -76,7 +76,7 @@ namespace DispDICOMCMD
         public static MemoryBuffer3D<ulong, Stride3D.DenseXY> ulongLayer;
         //public HistoPyramid HPGPU;
 
-        public static readonly short threshold = 1280;
+        public static readonly short threshold = 0;
         public static int length = 512;
         public static int width = 512;
         public static short[,,] slices;
@@ -101,10 +101,10 @@ namespace DispDICOMCMD
 
         public DispDICOMCMD(int size)
         {
-            //length = size;
-            //width = size;
-            //var sphere = CreateSphere(size);
-            //slices = sphere;
+            length = size;
+            width = size;
+            var sphere = CreateCayley(size);
+            slices = sphere;
 
             HPsize = width;
             if (Math.Log(width - 1, 2) % 1 > 0)
@@ -153,7 +153,7 @@ namespace DispDICOMCMD
 
 
 
-            //int[,,] edges;
+            ////int[,,] edges;
 
 
             string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
@@ -162,21 +162,21 @@ namespace DispDICOMCMD
             short i, j, k = 0;
 
 
-            slices = new short[files.Length, length, width];
+            //slices = new short[files.Length, length, width];
 
-            foreach (var file in files)
-            //foreach (var file in sphere)
-            {
-                dicoms = DicomFile.Open(file.FullName);
-                CreateBmp(dicoms, k);
-                //slices[k] = file;
-                k++;
-                //if (k * length * width > Math.Pow(2, 32))
-                //    break;
-                //if (k > 13)
-                //    break;
-                //Console.WriteLine(k);
-            }
+            //foreach (var file in files)
+            ////foreach (var file in sphere)
+            //{
+            //    dicoms = DicomFile.Open(file.FullName);
+            //    CreateBmp(dicoms, k);
+            //    //slices[k] = file;
+            //    k++;
+            //    //if (k * length * width > Math.Pow(2, 32))
+            //    //    break;
+            //    //if (k > 13)
+            //    //    break;
+            //    //Console.WriteLine(k);
+            //}
 
             slices1D = new short[slices.Length];
 
@@ -186,7 +186,6 @@ namespace DispDICOMCMD
             //sliced.View.To1DView().CopyToCPU(slices1D);
             //var temp = MarchingCubesCPU();
             cubes = MarchingCubesGPU();
-            byte l = cubes[23, 2, 125];
             //int sum = 0;
             //foreach(Edge cube in cubes)
             //{
@@ -261,6 +260,25 @@ namespace DispDICOMCMD
                         //bool p = h > (double)threshold;
                         //slice[k, j, i] = (short)(p ? threshold - 50 : threshold + 50);
                         //slice[k, j, i] = (short)(((j - size / 2) + (i - size / 2) + (k - size / 2)) * 20);
+                    }
+                }
+            }
+            return slice;
+        }
+        public short[,,] CreateCayley(int size)
+        {
+            double factor = Math.Sqrt((size / 2) * (size / 2) * 5);
+            short[,,] slice = new short[size, size, size];
+            for (int k = 0; k < size; k++)
+            {
+                for (int i = 0; i < size; i++)
+                {
+                    for (int j = 0; j < size; j++)
+                    {
+                        float x = (float)i / size;
+                        float y = (float)j / size;
+                        float z = (float)k / size;
+                        slice[k, j, i] = (short)(16 * x * y * z + 4 * (x + y + z) - 14) ;
                     }
                 }
             }
@@ -1078,10 +1096,6 @@ namespace DispDICOMCMD
             //cubeBytes = cubeLocked.GetArray();
             //HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
             //HPBaseLayer = HPLocked.GetArray();
-            byte q = cubeBytes[2, 23, 125];
-            //byte q = cubeBytes.Cast<byte>().Min();
-            q = cubeBytes.Cast<byte>().Max();
-            byte l = HPBaseLayer[2, 23, 125];
             //stopWatch.Stop();
             //HPBaseConfig.Dispose();
             //cubeConfig.Dispose();
@@ -1097,111 +1111,6 @@ namespace DispDICOMCMD
             Console.WriteLine("RunTime " + elapsedTime);
             //ToBuffer3D(grads, slices.GetLength(0) - 1, width - 1, length - 1)
             return (cubeBytes);
-        }
-
-
-        public static (byte[] configs, Normal[] grads) MarchingCubesGPUX()
-        {
-            int slicePre = 251, i;
-
-            //byte[,,] cubeBytes = new byte[slices.GetLength(0) - 1, width - 1, length - 1];
-            //Normal[,,] grads = new Normal[slices.GetLength(0) - 1, width - 1, length - 1];
-            Index3D Nindex = new Index3D(slices.GetLength(0), width, length);
-            int Z = slices.GetLength(0);
-            int nZ = (int)Math.Ceiling((double)Z / (double)slicePre);
-            Normal[] grads = new Normal[Z * (width) * (length)];
-            byte[] cubeBytes = new byte[(Z - 1) * (width - 1) * (length - 1)];
-            Normal[] gradsSlice = new Normal[Math.Min(slicePre, Z) * (width) * (length)];
-            byte[] cubeBytesSlice = new byte[Math.Min(slicePre, Z - 1) * (width - 1) * (length - 1)];
-            List<byte> byteList = new List<byte>(cubeBytes.Length);
-            List<Normal> normalList = new List<Normal>(grads.Length);
-            PageLockedArray3D<byte> cubeLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(Math.Min(slicePre, Z - 1), (width - 1), (length - 1)));
-            PageLockedArray3D<Normal> gradLocked = accelerator.AllocatePageLocked3D<Normal>(new Index3D(Math.Min(slicePre, Z) * (width) * (length)));
-            cubeConfig = accelerator.Allocate3DDenseXY<byte>(cubeLocked.Extent);
-            gradConfig = accelerator.Allocate3DDenseXY<Normal>(gradLocked.Extent);
-            //MemoryBuffer3D<byte, Stride3D.DenseXY> cubeConfig = accelerator.Allocate3DDenseXY<byte>(index);
-            //MemoryBuffer3D<Normal, Stride3D.DenseXY> gradConfig = accelerator.Allocate3DDenseXY<Normal>(index);
-            ////byte[,] configBytes = new byte[511, 511];
-
-            //Normal[] grad = new Normal[grads.Length];
-
-            //int[,,] bytes = new int[slices.Length - 1, width - 1, length - 1];
-
-            //bit order 
-            // i,j,k 
-            // i+1,j,k
-            // i+1,j+1,k
-            // i,j+1,k
-            // i,j,k+1
-            // i+1,j,k+1
-            // i+1,j+1,k+1
-            // i,j+1,k+1
-
-            var gradScope = accelerator.CreatePageLockFromPinned(gradsSlice);
-            var cubeScope = accelerator.CreatePageLockFromPinned(cubeBytesSlice);
-            gradConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
-            cubeConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
-
-            //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal);
-            //assign_bytes= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<byte>, int>(Assignbytes);
-
-            //assign_normal1D = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView1D<Normal, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal1D);
-            //assign_bytes1D = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView1D<byte, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<byte>, int>(Assignbytes1D);
-
-            //triTable = accelerator.Allocate1D<byte>(triangleTable);
-            //Console.WriteLine(slices.ToString());
-            //Index3D num = new Index3D(slices.GetLength(0) - 1, slices.GetLength(1) - 1, slices.GetLength(2) - 1);
-
-            //Console.WriteLine(num.ToString());
-            //Console.WriteLine(cubeBytes.GetLength(0) + "," + cubeBytes.GetLength(1) + "," + cubeBytes.GetLength(2));
-            //Console.WriteLine(grads.GetLength(0) + "," + grads.GetLength(1) + "," + grads.GetLength(2));
-            //Console.WriteLine(num.ToString());
-
-
-            //assign_bytes(num, cubeConfig.View, sliced.View, triTable.View , threshold);
-            //assign_normal(num, gradConfig.View, sliced.View);
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            for (i = 0; i < nZ; i++)
-            {
-                Index3D index = new Index3D(Math.Min(Nindex.X - i * slicePre, slicePre), width, length);
-                if (index.Size == 0)
-                    break;
-                Point offset = new Point(i * slicePre, 0, 0, 0, new Normal());
-                assign1D(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, threshold, width, 0);
-                //assign_bytes1D(index, cubeConfig.View, sliced.View, triTable.View, threshold);
-                //assign_normal1D(index, gradConfig.View, sliced.View);
-                accelerator.Synchronize();
-                gradConfig.AsContiguous().CopyToPageLockedAsync(gradLocked);
-                cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
-
-                Array.Copy(gradLocked.GetArray(), 0, grads, (int)offset.Z * width * width, index.Size);
-                Array.Copy(cubeLocked.GetArray(), 0, cubeBytes, (int)offset.Z * (width - 1) * (width - 1), (index.X - 1) * (index.Y - 1) * (index.Z - 1));
-            }
-            stopWatch.Stop();
-            // Get the elapsed time as a TimeSpan value.
-            cubeConfig.Dispose();
-            gradConfig.Dispose();
-            triTable.Dispose();
-            //sliced.Dispose();
-
-
-            //byteList.RemoveRange((Z - 1) * (width - 1) * (length- 1),byteList.Count - (Z - 1) * (width - 1) * (length - 1));
-            //normalList.RemoveRange(Z * width * length, normalList.Count - Z * width * length);
-
-
-
-            //cubeBytes = byteList.ToArray();
-            //grads = normalList.ToArray();
-
-            ts = stopWatch.Elapsed;
-
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-            Console.WriteLine("RunTime " + elapsedTime);
-            //ToBuffer3D(grads, slices.GetLength(0) - 1, width - 1, length - 1)
-            return (cubeBytes, grads);
         }
 
         public static void MarchCPU(StreamWriter fs)
