@@ -19,6 +19,7 @@ using ILGPU.Runtime.CPU;
 using ILGPU.Runtime;
 using ILGPU;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Runtime.InteropServices;
 
@@ -185,6 +186,7 @@ namespace DispDICOMCMD
             //sliced.View.To1DView().CopyToCPU(slices1D);
             //var temp = MarchingCubesCPU();
             cubes = MarchingCubesGPU();
+            byte l = cubes[23, 2, 125];
             //int sum = 0;
             //foreach(Edge cube in cubes)
             //{
@@ -202,8 +204,9 @@ namespace DispDICOMCMD
             ////Console.WriteLine(sum);
             //cubes = temp.configs;
             //normals = temp.grads;
-            HP = HPCreation();
-            //HPCreationGPU();
+            //HP = HPCreation();
+
+            HPCreationGPU();
             //for (int r = 1; r < nLayers; r++)
             //{
             //    getHPLayer(r) = accelerator.Allocate2DDenseX(HP[r]);
@@ -213,12 +216,11 @@ namespace DispDICOMCMD
             //    HP[r] = getHPLayer(r).GetAsArray2D();
             //}
             //HPGPU = new HistoPyramid(HP, n, accelerator);
-
             //edges = temp.edges;
             //edges = march.edges;
             using (StreamWriter fs = fi.CreateText())
             {
-                HPTraversal(fs);
+                HPTraversalGPU(fs);
                 //MarchGPU(fs);
                 //MarchGPUBatchRobust(fs);
 
@@ -639,7 +641,7 @@ namespace DispDICOMCMD
                            );
             //if (triTable[edges[index3D.Z, index3D.Y, index3D.X]].getn() / 3 != HPLayer[p[index].X, p[index].Y])
             //    ;
-            triangles[index] = tempCube.MarchHP(threshold, triTable[edges[index3D.X, index3D.Y, index3D.Z]], (int)k[index]);
+            triangles[index] = tempCube.MarchHP(threshold, triTable[edges[index3D.Z, index3D.Y, index3D.X]], (int)k[index]);
         }
 
         private static void HPTraversalGPU(StreamWriter fs)
@@ -756,13 +758,20 @@ namespace DispDICOMCMD
         private static void HPTraversal(StreamWriter fs)
         {
 
+            byte q = cubes.Cast<byte>().Min();
+            //uint q = HP[0].Cast<uint>().Max();
             //for (int o = 0; o < nLayers; o++)
             //{
             //    for (int i = 0; i < HP[o].GetLength(0); i++)
             //    {
             //        for (int j = 0; j < HP[o].GetLength(0); j++)
             //        {
-            //            Console.Write(HP[o][j, i]);
+            //            for (int k = 0; k < HP[o].GetLength(0); k++)
+            //            {
+            //                Console.Write(HP[o][i, j, k]);
+
+            //            }
+            //            Console.WriteLine();
             //        }
             //        Console.WriteLine();
             //    }
@@ -899,7 +908,9 @@ namespace DispDICOMCMD
                                );
                 //var l = cubes[k, j, i];
                 tempCube.getConfig();
-                triangles[i] = tempCube.MarchHP(threshold, triangleTable[cubes[index3D.X, index3D.Y, index3D.Z]], (int)k);
+                q = cubes.Cast<byte>().Min();
+                tempCube.Config(threshold);
+                triangles[i] = tempCube.MarchHP(threshold, triangleTable[cubes[index3D.Z, index3D.Y, index3D.X]], (int)k);
             }
             stopWatch.Stop();
             // Get the elapsed time as a TimeSpan value.
@@ -995,23 +1006,23 @@ namespace DispDICOMCMD
         public static void Assign1D(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView3D<byte, Stride3D.DenseXY> HPindices, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int width, int HPsizeFator)
         {
             byte config = 0;
-            config += (input[(index.X), (index.Y), (index.Z)] < thresh) ? (byte)0x01 : (byte)0;
-            config += (input[(index.X), (index.Y), (index.Z) + 1] < thresh) ? (byte)0x02 : (byte)0;
-            config += (input[(index.X), (index.Y) + 1, (index.Z) + 1] < thresh) ? (byte)0x04 : (byte)0;
-            config += (input[(index.X), (index.Y) + 1, (index.Z)] < thresh) ? (byte)0x08 : (byte)0;
-            config += (input[(index.X) + 1, (index.Y), (index.Z)] < thresh) ? (byte)0x10 : (byte)0;
-            config += (input[(index.X) + 1, (index.Y), (index.Z) + 1] < thresh) ? (byte)0x20 : (byte)0;
-            config += (input[(index.X) + 1, (index.Y) + 1, (index.Z) + 1] < thresh) ? (byte)0x40 : (byte)0;
-            config += (input[(index.X) + 1, (index.Y) + 1, (index.Z)] < thresh) ? (byte)0x80 : (byte)0;
-            edges[index.X, index.Y, (index.Z)] = config;
-            HPindices[index] = (byte)(triTable[(int)config].getn() / 3);
+            config += (input[(index.Z), (index.Y), (index.X)] < thresh) ? (byte)0x01 : (byte)0;
+            config += (input[(index.Z), (index.Y), (index.X) + 1] < thresh) ? (byte)0x02 : (byte)0;
+            config += (input[(index.Z), (index.Y) + 1, (index.X) + 1] < thresh) ? (byte)0x04 : (byte)0;
+            config += (input[(index.Z), (index.Y) + 1, (index.X)] < thresh) ? (byte)0x08 : (byte)0;
+            config += (input[(index.Z) + 1, (index.Y), (index.X)] < thresh) ? (byte)0x10 : (byte)0;
+            config += (input[(index.Z) + 1, (index.Y), (index.X) + 1] < thresh) ? (byte)0x20 : (byte)0;
+            config += (input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1] < thresh) ? (byte)0x40 : (byte)0;
+            config += (input[(index.Z) + 1, (index.Y) + 1, (index.X)] < thresh) ? (byte)0x80 : (byte)0;
+            edges[index.Z, index.Y, (index.X)] = config;
+            HPindices[index.X, index.Y, index.Z] = (byte)(triTable[(int)edges[index.Z, index.Y, (index.X)]].getn() / 3);
         }
 
         public static byte[,,] MarchingCubesGPU()
         {
             //Edge[,,] cubeBytes = new Edge[slices.GetLength(0) - 1, width - 1, length - 1];
             //Normal[,,] grads = new Normal[slices.GetLength(0) - 1, width - 1, length - 1];
-            Index3D index = new Index3D(slices.GetLength(0) - 1, slices.GetLength(1) - 1, slices.GetLength(2) - 1);
+            Index3D index = new Index3D(slices.GetLength(2) - 1, slices.GetLength(1) - 1, slices.GetLength(0) - 1);
             List<byte> edgeList = new List<byte>();
             //List<Normal> normalList = new List<Normal>();
             //MemoryBuffer3D<Edge, Stride3D.DenseXY> cubeConfig = accelerator.Allocate3DDenseXY<Edge>(index);
@@ -1035,11 +1046,11 @@ namespace DispDICOMCMD
             HPBaseLayer = new byte[HPsize, HPsize, HPsize];
 
             //Normal[,,] grads = new Normal[index.X, index.Y, index.Z];
-            cubeBytes = new byte[(index.X), (index.Y), (index.Z)];
+            cubeBytes = new byte[(index.Z), (index.Y), (index.X)];
             //var gradPinned = GCHandle.Alloc(grads, GCHandleType.Pinned);
             var cubePinned = GCHandle.Alloc(cubeBytes, GCHandleType.Pinned);
             var HPPinned = GCHandle.Alloc(HPBaseLayer, GCHandleType.Pinned);
-            PageLockedArray3D<byte> cubeLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(index.X, index.Y, index.Z));
+            PageLockedArray3D<byte> cubeLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(index.Z, index.Y, index.X));
             PageLockedArray3D<byte> HPLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(HPBaseLayer.GetLength(0)));
             //PageLockedArray3D<Normal> gradLocked = accelerator.AllocatePageLocked3D<Normal>(index);
             cubeConfig = accelerator.Allocate3DDenseXY<byte>(cubeLocked.Extent);
@@ -1060,12 +1071,17 @@ namespace DispDICOMCMD
             accelerator.Synchronize();
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
-            //cubeConfig.CopyToCPU(cubeBytes);
-            //HPBaseConfig.CopyToCPU(HPBaseLayer);
-            cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
-            cubeBytes = cubeLocked.GetArray();
-            HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
-            HPBaseLayer = HPLocked.GetArray();
+            cubeConfig.CopyToCPU(cubeBytes);
+            HPBaseConfig.CopyToCPU(HPBaseLayer);
+            //cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
+            //accelerator.Synchronize();
+            //cubeBytes = cubeLocked.GetArray();
+            //HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
+            //HPBaseLayer = HPLocked.GetArray();
+            byte q = cubeBytes[2, 23, 125];
+            //byte q = cubeBytes.Cast<byte>().Min();
+            q = cubeBytes.Cast<byte>().Max();
+            byte l = HPBaseLayer[2, 23, 125];
             //stopWatch.Stop();
             //HPBaseConfig.Dispose();
             //cubeConfig.Dispose();
