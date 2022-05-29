@@ -76,7 +76,7 @@ namespace DispDICOMCMD
         public static MemoryBuffer3D<ulong, Stride3D.DenseXY> ulongLayer;
         //public HistoPyramid HPGPU;
 
-        public static readonly short threshold = 0;
+        public static readonly short threshold = 600;
         public static int length = 512;
         public static int width = 512;
         public static short[,,] slices;
@@ -103,7 +103,7 @@ namespace DispDICOMCMD
         {
             length = size;
             width = size;
-            var sphere = CreateCayley(size);
+            var sphere = CreateSphere(size);
             slices = sphere;
 
             HPsize = width;
