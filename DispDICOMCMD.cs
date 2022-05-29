@@ -35,7 +35,7 @@ namespace DispDICOMCMD
         public static CudaAccelerator accelerator;
         //public static CPUAccelerator accelerator;
         //public static Action<Index1D, HistoPyramid> testHP;
-        public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>> assign;
+        public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<uint, Stride3D.DenseXY>> assign;
         public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<short, Stride1D.Dense>, Point, int, int, int> get_verts;
         public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY> , ArrayView3D<short, Stride3D.DenseXY> > octreeFirstLayer;
         public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY> , ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>> octreeCreation;
@@ -53,6 +53,7 @@ namespace DispDICOMCMD
 
         public static MemoryBuffer3D<short, Stride3D.DenseXY> minConfig;
         public static MemoryBuffer3D<short, Stride3D.DenseXY> maxConfig;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysConfig;
         private static MemoryBuffer3D<short, Stride3D.DenseXY> OctreeBaseConfig;
         public static MemoryBuffer3D<Normal, Stride3D.DenseXY> gradConfig;
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
@@ -88,6 +89,21 @@ namespace DispDICOMCMD
         public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer3;
         public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer2;
         public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer1;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer15;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer14;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer13;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer12;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer11;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer10;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer9;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer8;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer7;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer6;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer5;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer4;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer3;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer2;
+        public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer1;
         //public HistoPyramid HPGPU;
 
         public static readonly short threshold = 600;
@@ -111,6 +127,7 @@ namespace DispDICOMCMD
         public static List<Point> vertices = new List<Point>();
         public static short[,,] octreeMin;
         public static short[,,] octreeMax;
+        public static uint[,,] octreeKeys;
         public static Edge[] edges;
         public static int count = 0;
 
@@ -131,11 +148,12 @@ namespace DispDICOMCMD
             var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
             //width = size;
             //length = size;
-            context = Context.CreateDefault();
+            context = Context.Create(builder => builder.Default().EnableAlgorithms());
             accelerator = context.CreateCudaAccelerator(0);
+            
             //accelerator = context.CreateCPUAccelerator(0);
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
-            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(Assign);
+            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<uint, Stride3D.DenseXY>>(Assign);
             //get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<short, Stride1D.Dense>, Point, int, int, int>(getVertices);
             //octreeFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(BuildOctreeFirst); 
             octreeCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(BuildOctree); 
@@ -302,27 +320,27 @@ namespace DispDICOMCMD
         public static void BuildOctree(Index3D index, ArrayView3D<short, Stride3D.DenseXY> minPrev, ArrayView3D<short, Stride3D.DenseXY> maxPrev, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max)
         {
 
-            short[] temp = new[] {max[(index.Z)*2, (index.Y)*2, (index.X)*2],
-                max[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
-                max[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
-                max[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
-                max[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
-                max[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
-                max[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
-                max[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2],
-                min[(index.Z)*2, (index.Y)*2, (index.X)*2],
-                min[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
-                min[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
-                min[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
-                min[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
-                min[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
-                min[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
-                min[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2]};
+            short[] tempMax = new[] {maxPrev[(index.Z)*2, (index.Y)*2, (index.X)*2],
+                maxPrev[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
+                maxPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
+                maxPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
+                maxPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
+                maxPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
+                maxPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
+                maxPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2] };
 
-            short[] sort = findMinMax(temp, 0, 15);
+            short[] tempMin = new[] {minPrev[(index.Z)*2, (index.Y)*2, (index.X)*2],
+                minPrev[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
+                minPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
+                minPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
+                minPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
+                minPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
+                minPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
+                minPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2]};
 
-            min[index] = sort[1];
-            max[index] = sort[0];
+            max[index] = findMax(tempMax, 0, 7);
+            min[index] = findMin(tempMin, 0, 7);
+
         }
 
 
@@ -363,7 +381,8 @@ namespace DispDICOMCMD
                     getMinOctreeLayer(i) = accelerator.Allocate3DDenseXY<short>(index);
                     getMaxOctreeLayer(i) = accelerator.Allocate3DDenseXY<short>(index);
 
-                    octreeCreation(index, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View);
+
+                    octreeCreation(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i).View);
                     accelerator.Synchronize();
                 }
                 //else
@@ -763,9 +782,8 @@ namespace DispDICOMCMD
             return cubeBytes;
         }
 
-        public static void Assign(Index3D index, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max, ArrayView3D<short, Stride3D.DenseXY> input)
+        public static void Assign(Index3D index, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView3D<uint, Stride3D.DenseXY> keys)
         {
-
             var temp = new[] {input[(index.Z), (index.Y), (index.X)],
             input[(index.Z), (index.Y), (index.X) + 1],
             input[(index.Z), (index.Y) + 1, (index.X) + 1],
@@ -776,6 +794,8 @@ namespace DispDICOMCMD
             input[(index.Z) + 1, (index.Y) + 1, (index.X)]};
 
             short[] sort = findMinMax(temp, 0, 7);
+
+            keys[(index.Z), (index.Y), (index.X)] = getShuffleXYZ(index);
 
             min[index] = sort[1];
             max[index] = sort[0];
@@ -811,32 +831,39 @@ namespace DispDICOMCMD
             //Normal[,,] grads = new Normal[index.X, index.Y, index.Z];
             octreeMin = new short[OctreeSize, OctreeSize, OctreeSize];
             octreeMax = new short[OctreeSize, OctreeSize, OctreeSize];
+            octreeKeys = new uint[OctreeSize, OctreeSize, OctreeSize];
             //var gradPinned = GCHandle.Alloc(grads, GCHandleType.Pinned);
             var minPinned = GCHandle.Alloc(octreeMin, GCHandleType.Pinned);
             var maxPinned = GCHandle.Alloc(octreeMax, GCHandleType.Pinned);
+            var keysPinned = GCHandle.Alloc(octreeKeys, GCHandleType.Pinned);
             PageLockedArray3D<short> minLocked = accelerator.AllocatePageLocked3D<short>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
             PageLockedArray3D<short> maxLocked = accelerator.AllocatePageLocked3D<short>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
+            PageLockedArray3D<uint> keysLocked = accelerator.AllocatePageLocked3D<uint>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
             //PageLockedArray3D<Normal> gradLocked = accelerator.AllocatePageLocked3D<Normal>(index);
             minConfig = accelerator.Allocate3DDenseXY<short>(minLocked.Extent);
             maxConfig = accelerator.Allocate3DDenseXY<short>(maxLocked.Extent);
+            keysConfig = accelerator.Allocate3DDenseXY<uint>(keysLocked.Extent);
             //gradConfig = accelerator.Allocate3DDenseXY<Normal>(index);
             //var gradScope = accelerator.CreatePageLockFromPinned<Normal>(gradPinned.AddrOfPinnedObject(), grads.Length);
             var minScope = accelerator.CreatePageLockFromPinned<short>(minPinned.AddrOfPinnedObject(), octreeMin.Length);
             var maxScope = accelerator.CreatePageLockFromPinned<short>(maxPinned.AddrOfPinnedObject(), octreeMax.Length);
+            var keysScope = accelerator.CreatePageLockFromPinned<uint>(keysPinned.AddrOfPinnedObject(), octreeKeys.Length);
             //gradConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
             minConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, minScope);
             maxConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, maxScope);
+            keysConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, keysScope);
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            assign(index, minConfig.View, maxConfig.View, sliced.View);
+            assign(index, minConfig.View, maxConfig.View, sliced.View, keysConfig.View);
 
             accelerator.Synchronize();
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
             minConfig.CopyToCPU(octreeMin);
             maxConfig.CopyToCPU(octreeMax);
+            keysConfig.CopyToCPU(octreeKeys);
             //cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
             //accelerator.Synchronize();
             //cubeBytes = cubeLocked.GetArray();
@@ -847,6 +874,7 @@ namespace DispDICOMCMD
             //cubeConfig.Dispose();
             minPinned.Free();
             maxPinned.Free();
+            keysPinned.Free();
             //sliced.Dispose();
             //GCHandle.FromIntPtr(gradIntPtr).Free();
             //GCHandle.FromIntPtr(cubeIntPtr).Free();
@@ -936,6 +964,45 @@ namespace DispDICOMCMD
                 default:
                     return ref maxConfig;
             }
+        }       
+        
+        public static ref MemoryBuffer3D<uint, Stride3D.DenseXY> getKeysOctreeLayer(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    return ref keysLayer1;
+                case 2:
+                    return ref keysLayer2;
+                case 3:
+                    return ref keysLayer3;
+                case 4:
+                    return ref keysLayer4;
+                case 5:
+                    return ref keysLayer5;
+                case 6:
+                    return ref keysLayer6;
+                case 7:
+                    return ref keysLayer7;
+                case 8:
+                    return ref keysLayer8;
+                case 9:
+                    return ref keysLayer9;
+                case 10:
+                    return ref keysLayer10;
+                case 11:
+                    return ref keysLayer11;
+                case 12:
+                    return ref keysLayer12;
+                case 13:
+                    return ref keysLayer13;
+                case 14:
+                    return ref keysLayer14;
+                case 15:
+                    return ref keysLayer15;
+                default:
+                    return ref keysConfig;
+            }
         }
 
         static short binarySearch(short[] a, short item, short low, short high)
@@ -979,13 +1046,13 @@ namespace DispDICOMCMD
         static short[] findMinMax(short[] A, short start, short end)
         {
             short max;
-            short min;
-            if (start == end)
-            {
-                max = A[start];
-                min = A[start];
-            }
-            else if (start + 1 == end)
+            short min; 
+            //if (start == end)
+            //{
+            //    max = A[start];
+            //    min = A[start];
+            //}
+            if (start + 1 == end)
             {
                 if (A[start] < A[end])
                 {
@@ -1015,7 +1082,86 @@ namespace DispDICOMCMD
             // By convention, we assume ans[0] as max and ans[1] as min
             short[] ans = { max, min };
             return ans;
-}
+        }
+        
+        static short findMin(short[] A, short start, short end)
+        {
+            short min;
+            //if (start == end)
+            //{
+            //    min = A[start];
+            //}
+            if (start + 1 == end)
+            {
+                if (A[start] < A[end])
+                {
+                    min = A[start];
+                }
+                else
+                {
+                    min = A[end];
+                }
+            }
+            else
+            {
+                short mid = (short)(start + (end - start) / 2);
+                short[] left = findMinMax(A, start, mid);
+                short[] right = findMinMax(A, (short)(mid + 1), end);
+                if (left[1] < right[1])
+                    min = left[1];
+                else
+                    min = right[1];
+            }
+            // By convention, we assume ans[0] as max and ans[1] as min
+            return min;
+        }
+
+        static short findMax(short[] A, short start, short end)
+        {
+            short max;
+            //if (start == end)
+            //{
+            //    max = A[start];
+            //}
+            if (start + 1 == end)
+            {
+                if (A[start] < A[end])
+                {
+                    max = A[end];
+                }
+                else
+                {
+                    max = A[start];
+                }
+            }
+            else
+            {
+                short mid = (short)(start + (end - start) / 2);
+                short[] left = findMinMax(A, start, mid);
+                short[] right = findMinMax(A, (short)(mid + 1), end);
+                if (left[0] > right[0])
+                    max = left[0];
+                else
+                    max = right[0];
+            }
+            // By convention, we assume ans[0] as max and ans[1] as min
+            return max;
+        }
+
+        static uint getShuffleXYZ(Index3D index)
+        {
+            uint X, Y, Z, key = 0;
+            X = (uint)index.X;
+            Y = (uint)index.Y;
+            Z = (uint)index.Z;
+            for (int i = 0; i < 10; i++)
+            {
+                key += (Z <<= 1) * (uint)XMath.Pow(2, i * 3);
+                key += (Y <<= 1) * (uint)XMath.Pow(2, (i + 1) * 3);
+                key += (X <<= 1) * (uint)XMath.Pow(2, (i + 2) * 3);
+            }
+            return 0;
+        }
 
         //private static void HPTraversalGPU(StreamWriter fs)
         //{
