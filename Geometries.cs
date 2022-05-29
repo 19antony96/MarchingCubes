@@ -227,9 +227,11 @@ namespace DispDICOMCMD
         public byte getn()
         {
             byte sum = 0;
-            foreach (sbyte e in getAsArray())
+            foreach (sbyte e in new sbyte[] {E1, E4, E7, E8, E11})
             {
                 if (e >= 0) sum++;
+                else 
+                    break;
             }
             return sum;
         }
@@ -480,7 +482,7 @@ namespace DispDICOMCMD
                         points[i] = V4.Interpolate(V8, threshold);
                         //points.Add(new Point3D(i, j + 1, k+0.5f));
                         break;
-                    default:
+                    default: 
                         break;
                 }
             }

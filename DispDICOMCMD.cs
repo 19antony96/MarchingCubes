@@ -925,9 +925,7 @@ namespace DispDICOMCMD
                                 ))
                                );
                 //var l = cubes[k, j, i];
-                tempCube.getConfig();
-                q = cubes.Cast<byte>().Min();
-                tempCube.Config(threshold);
+
                 triangles[i] = tempCube.MarchHP(threshold, triangleTable[cubes[index3D.Z, index3D.Y, index3D.X]], (int)k);
             }
             stopWatch.Stop();
@@ -1033,7 +1031,8 @@ namespace DispDICOMCMD
             config += (input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1] < thresh) ? (byte)0x40 : (byte)0;
             config += (input[(index.Z) + 1, (index.Y) + 1, (index.X)] < thresh) ? (byte)0x80 : (byte)0;
             edges[index.Z, index.Y, (index.X)] = config;
-            HPindices[index.X, index.Y, index.Z] = (byte)(triTable[(int)edges[index.Z, index.Y, (index.X)]].getn() / 3);
+            if(config > 0 && config < 255)
+                HPindices[index.X, index.Y, index.Z] = (byte)(triTable[(int)edges[index.Z, index.Y, (index.X)]].getn());
         }
 
         public static byte[,,] MarchingCubesGPU()
@@ -1080,6 +1079,7 @@ namespace DispDICOMCMD
             //gradConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
             cubeConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
             HPBaseConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, HPScope);
+            HPBaseConfig.MemSetToZero();
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
