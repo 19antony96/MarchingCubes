@@ -36,44 +36,58 @@ namespace DispDICOMCMD
         //public static CPUAccelerator accelerator;
         //public static Action<Index1D, HistoPyramid> testHP;
         public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>> assign;
-        public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, Point, int, int, int> get_verts;
-        public static Action<Index3D, ArrayView3D<uint, Stride3D.DenseXY> , ArrayView3D<byte, Stride3D.DenseXY> > hpFirstLayer;
-        public static Action<Index3D, ArrayView3D<uint, Stride3D.DenseXY> , ArrayView3D<uint, Stride3D.DenseXY> > hpCreation;
-        public static Action<Index1D, ArrayView1D<FlatPoint, Stride1D.Dense> , ArrayView1D<uint, Stride1D.Dense> , ArrayView3D<uint, Stride3D.DenseXY> > traversalKernel;
+        public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<short, Stride1D.Dense>, Point, int, int, int> get_verts;
+        public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY> , ArrayView3D<short, Stride3D.DenseXY> > octreeFirstLayer;
+        public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY> , ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>> octreeCreation;
+        public static Action<Index1D, ArrayView1D<FlatPoint, Stride1D.Dense> , ArrayView1D<short, Stride1D.Dense> , ArrayView3D<short, Stride3D.DenseXY> > traversalKernel;
         public static Action<Index1D,
             ArrayView1D<FlatPoint, Stride1D.Dense>,
-            ArrayView1D<uint, Stride1D.Dense>,
-            ArrayView3D<byte, Stride3D.DenseXY>,
+            ArrayView1D<short, Stride1D.Dense>,
+            ArrayView3D<short, Stride3D.DenseXY>,
             ArrayView1D<Triangle, Stride1D.Dense>,
-            ArrayView3D<byte, Stride3D.DenseXY>,
+            ArrayView3D<short, Stride3D.DenseXY>,
             ArrayView1D<Edge, Stride1D.Dense>,
             ArrayView3D<short, Stride3D.DenseXY>,
-            int, int> hpFinalLayer;
+            int, int> octreeFinalLayer;
 
 
         public static MemoryBuffer3D<short, Stride3D.DenseXY> minConfig;
         public static MemoryBuffer3D<short, Stride3D.DenseXY> maxConfig;
-        private static MemoryBuffer3D<byte, Stride3D.DenseXY> HPBaseConfig;
+        private static MemoryBuffer3D<short, Stride3D.DenseXY> OctreeBaseConfig;
         public static MemoryBuffer3D<Normal, Stride3D.DenseXY> gradConfig;
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
         public static MemoryBuffer3D<short, Stride3D.DenseXY> sliced;
         public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer15;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer14;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer13;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer12;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer11;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer10;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer9;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer8;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer7;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer6;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer5;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer4;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer3;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer2;
-        public static MemoryBuffer3D<uint, Stride3D.DenseXY> uintLayer1;
-        public static MemoryBuffer3D<ulong, Stride3D.DenseXY> ulongLayer;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer15;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer14;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer13;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer12;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer11;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer10;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer9;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer8;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer7;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer6;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer5;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer4;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer3;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer2;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer1;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer15;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer14;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer13;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer12;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer11;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer10;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer9;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer8;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer7;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer6;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer5;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer4;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer3;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer2;
+        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer1;
         //public HistoPyramid HPGPU;
 
         public static readonly short threshold = 600;
@@ -84,9 +98,9 @@ namespace DispDICOMCMD
         public static byte[,,] cubeBytes;
         public static int batchSize;
         public static int sliceSize = 127;
-        public static byte[,,] HPBaseLayer;
-        public static uint[][,,] HP;
-        public static int HPsize;
+        public static short[,,] OctreeBaseLayer;
+        public static short[][,,] Octree;
+        public static int OctreeSize;
         public static short nLayers;
         public static int nTri;
 
@@ -107,10 +121,10 @@ namespace DispDICOMCMD
             var sphere = CreateSphere(size);
             slices = sphere;
 
-            HPsize = width;
+            OctreeSize = width;
             if (Math.Log(width - 1, 2) % 1 > 0)
             {
-                HPsize = (int)Math.Pow(2, (int)Math.Log(width, 2) + 1);
+                OctreeSize = (int)Math.Pow(2, (int)Math.Log(width, 2) + 1);
             }
             var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
@@ -122,19 +136,19 @@ namespace DispDICOMCMD
             //accelerator = context.CreateCPUAccelerator(0);
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
             assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(Assign);
-            get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, Point, int, int, int>(getVertices);
-            hpFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<uint, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>>(BuildHPFirst); 
-            hpCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<uint, Stride3D.DenseXY>, ArrayView3D<uint, Stride3D.DenseXY>>(BuildHP); 
-            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<FlatPoint, Stride1D.Dense> , ArrayView1D<uint, Stride1D.Dense> , ArrayView3D<uint, Stride3D.DenseXY>>(HPTraverseKernel);
-            hpFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D,
+            //get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<short, Stride1D.Dense>, Point, int, int, int>(getVertices);
+            //octreeFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(BuildOctreeFirst); 
+            octreeCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(BuildOctree); 
+            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<FlatPoint, Stride1D.Dense> , ArrayView1D<short, Stride1D.Dense> , ArrayView3D<short, Stride3D.DenseXY>>(OctreeTraverseKernel);
+            octreeFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D,
             ArrayView1D<FlatPoint, Stride1D.Dense>,
-            ArrayView1D<uint, Stride1D.Dense>,
-            ArrayView3D<byte, Stride3D.DenseXY>,
+            ArrayView1D<short, Stride1D.Dense>,
+            ArrayView3D<short, Stride3D.DenseXY>,
             ArrayView1D<Triangle, Stride1D.Dense>,
-            ArrayView3D<byte, Stride3D.DenseXY>,
+            ArrayView3D<short, Stride3D.DenseXY>,
             ArrayView1D<Edge, Stride1D.Dense>,
             ArrayView3D<short, Stride3D.DenseXY>,
-            int, int>(HPFinalLayer);
+            int, int>(OctreeFinalLayer);
             //testHP = accelerator.LoadAutoGroupedStreamKernel<Index1D, HistoPyramid>(TestHP);
 
             //get_vertsX = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, Point, int, int, int>(getVerticesX);
@@ -203,8 +217,8 @@ namespace DispDICOMCMD
             ////Console.WriteLine(sum);
             //cubes = temp.configs;
             //normals = temp.grads;
-            //HP = HPCreation();
-            
+            OctreeCreationGPU();
+
             //HPCreationGPU();
             //for (int r = 1; r < nLayers; r++)
             //{
@@ -234,8 +248,8 @@ namespace DispDICOMCMD
 
             for (i = 1; i < nLayers; i++)
             {
-                if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
-                    getHPLayer(i).Dispose();
+                if (getMinOctreeLayer(i) != null && !getMinOctreeLayer(i).IsDisposed)
+                    getMinOctreeLayer(i).Dispose();
             }
             //stopWatch.Stop();
             //ts = stopWatch.Elapsed;
@@ -285,25 +299,45 @@ namespace DispDICOMCMD
             return slice;
         }
 
-        public static void BuildHP(Index3D index, ArrayView3D<uint, Stride3D.DenseXY> HPLayer, ArrayView3D<uint, Stride3D.DenseXY> HPLayerPrev)
+        public static void BuildOctree(Index3D index, ArrayView3D<short, Stride3D.DenseXY> minPrev, ArrayView3D<short, Stride3D.DenseXY> maxPrev, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max)
         {
-            HPLayer[index] = HPLayerPrev[index.X * 2, index.Y * 2, index.Z * 2] + HPLayerPrev[index.X * 2 + 1, index.Y * 2, index.Z * 2] + HPLayerPrev[index.X * 2 + 1, index.Y * 2 + 1, index.Z * 2] + HPLayerPrev[index.X * 2, index.Y * 2 + 1, index.Z * 2] +
-                HPLayerPrev[index.X * 2, index.Y * 2, index.Z * 2 + 1] + HPLayerPrev[index.X * 2 + 1, index.Y * 2, index.Z * 2 + 1] + HPLayerPrev[index.X * 2 + 1, index.Y * 2 + 1, index.Z * 2 + 1] + HPLayerPrev[index.X * 2, index.Y * 2 + 1, index.Z * 2 + 1];
+
+            short[] temp = new[] {max[(index.Z)*2, (index.Y)*2, (index.X)*2],
+                max[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
+                max[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
+                max[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
+                max[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
+                max[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
+                max[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
+                max[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2],
+                min[(index.Z)*2, (index.Y)*2, (index.X)*2],
+                min[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
+                min[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
+                min[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
+                min[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
+                min[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
+                min[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
+                min[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2]};
+
+            short[] sort = findMinMax(temp, 0, 15);
+
+            min[index] = sort[1];
+            max[index] = sort[0];
         }
 
 
-        public static void BuildHPFirst(Index3D index, ArrayView3D<uint, Stride3D.DenseXY> HPLayer, ArrayView3D<byte, Stride3D.DenseXY> HPLayerBase)
-        {
-            HPLayer[index] = (uint)(HPLayerBase[index.X * 2, index.Y * 2, index.Z * 2] + HPLayerBase[index.X * 2 + 1, index.Y * 2, index.Z * 2] + HPLayerBase[index.X * 2 + 1, index.Y * 2 + 1, index.Z * 2] + HPLayerBase[index.X * 2, index.Y * 2 + 1, index.Z * 2] +
-                HPLayerBase[index.X * 2, index.Y * 2, index.Z * 2 + 1] + HPLayerBase[index.X * 2 + 1, index.Y * 2, index.Z * 2 + 1] + HPLayerBase[index.X * 2 + 1, index.Y * 2 + 1, index.Z * 2 + 1] + HPLayerBase[index.X * 2, index.Y * 2 + 1, index.Z * 2 + 1]);
-        }
+        //public static void BuildOctreeFirst(Index3D index, ArrayView3D<short, Stride3D.DenseXY> OctreeLayer, ArrayView3D<short, Stride3D.DenseXY> OctreeLayerBase)
+        //{
+        //    OctreeLayer[index] = (short)(OctreeLayerBase[index.X * 2, index.Y * 2, index.Z * 2] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2, index.Z * 2] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2 + 1, index.Z * 2] + OctreeLayerBase[index.X * 2, index.Y * 2 + 1, index.Z * 2] +
+        //        OctreeLayerBase[index.X * 2, index.Y * 2, index.Z * 2 + 1] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2, index.Z * 2 + 1] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2 + 1, index.Z * 2 + 1] + OctreeLayerBase[index.X * 2, index.Y * 2 + 1, index.Z * 2 + 1]);
+        //}
 
-        private static void HPCreationGPU()
+        private static void OctreeCreationGPU()
         {
-            nLayers = (short)(Math.Ceiling(Math.Log(HPBaseLayer.GetLength(0), 2)) + 1);
-            HP = new uint[10][,,];
-            HP[0] = new uint[HPBaseLayer.GetLength(0), HPBaseLayer.GetLength(0), HPBaseLayer.GetLength(0)];
-            Array.Copy(HPBaseLayer, HP[0], HPBaseLayer.Length);
+            nLayers = (short)(Math.Ceiling(Math.Log(OctreeSize, 2)) + 1);
+            Octree = new short[10][,,];
+            Octree[0] = new short[OctreeSize, OctreeSize, OctreeSize];
+            //Array.Copy(OctreeBaseLayer, Octree[0], OctreeBaseLayer.Length);
             //for (int i = 0; i < HPBaseLayer.GetLength(0); i++)
             //{
             //    for (int j = 0; j < HPBaseLayer.GetLength(0); j++)
@@ -315,23 +349,25 @@ namespace DispDICOMCMD
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            getHPLayer(1) = accelerator.Allocate3DDenseXY<uint>(new Index3D((int)HPBaseConfig.Extent.X / 2));
-            hpFirstLayer(getHPLayer(1).IntExtent, getHPLayer(1).View, HPBaseConfig.View);
+            //getMinOctreeLayer(0) = accelerator.Allocate3DDenseXY<short>(new Index3D((int)OctreeBaseConfig.Extent.X / 2));
+            //getMaxOctreeLayer(1) = accelerator.Allocate3DDenseXY<short>(new Index3D((int)OctreeBaseConfig.Extent.X / 2));
+            //octreeFirstLayer(getMinOctreeLayer(1).IntExtent, getMinOctreeLayer(1).View, OctreeBaseConfig.View);
             accelerator.Synchronize();
-            for (int i = 2; i < 16; i++)
+            for (int i = 1; i < 16; i++)
             {
-                int l = Math.Max(HP[0].GetLength(0) / (int)Math.Pow(2, i), 1);
-                //HP[i] = new int[l, l];
+                int l = Math.Max(Octree[0].GetLength(0) / (int)Math.Pow(2, i), 1);
+                //Octree[i] = new int[l, l];
                 if (i < nLayers)
                 {
                     Index3D index = new Index3D(l); 
-                    getHPLayer(i) = accelerator.Allocate3DDenseXY<uint>(index);
+                    getMinOctreeLayer(i) = accelerator.Allocate3DDenseXY<short>(index);
+                    getMaxOctreeLayer(i) = accelerator.Allocate3DDenseXY<short>(index);
 
-                    hpCreation(index, getHPLayer(i).View, getHPLayer(i - 1).View);
+                    octreeCreation(index, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View);
                     accelerator.Synchronize();
                 }
                 //else
-                //    HP[i] = new int[,] { { 0 } };
+                //    Octree[i] = new int[,] { { 0 } };
             }
 
 
@@ -343,7 +379,7 @@ namespace DispDICOMCMD
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
             Console.WriteLine("RunTime " + elapsedTime);
-            uint[,,] data = data = getHPLayer(nLayers - 1).GetAsArray3D();
+            short[,,] data = data = getMinOctreeLayer(nLayers - 1).GetAsArray3D();
             if (data.Length == 1)
                 nTri = (int)data[0, 0, 0];
             //for (int n = 0; n < 1; n++)
@@ -366,12 +402,12 @@ namespace DispDICOMCMD
             //return HP;
         }
 
-        private static uint[][,,] HPCreation()
+        private static short[][,,] OctreeCreation()
         {
-            nLayers = (short)(Math.Ceiling(Math.Log(HPBaseLayer.GetLength(0), 2)) + 1);
+            nLayers = (short)(Math.Ceiling(Math.Log(OctreeBaseLayer.GetLength(0), 2)) + 1);
             uint[][,,] HP = new uint[11][,,];
-            HP[0] = new uint[HPBaseLayer.GetLength(0), HPBaseLayer.GetLength(0), HPBaseLayer.GetLength(0)];
-            Array.Copy(HPBaseLayer, HP[0], HPBaseLayer.Length);
+            HP[0] = new uint[OctreeBaseLayer.GetLength(0), OctreeBaseLayer.GetLength(0), OctreeBaseLayer.GetLength(0)];
+            Array.Copy(OctreeBaseLayer, HP[0], OctreeBaseLayer.Length);
             //for (int i = 0; i < HPBaseLayer.GetLength(0); i++)
             //{
             //    for (int j = 0; j < HPBaseLayer.GetLength(0); j++)
@@ -384,26 +420,26 @@ namespace DispDICOMCMD
             stopWatch.Start();
             for (int i = 1; i < 11; i++)
             {
-                //int l = Math.Max(HP[i - 1].GetLength(0) / 2, 1);
-                //HP[i] = new int[l, l];
+                //int l = Math.Max(Oct[i - 1].GetLength(0) / 2, 1);
+                //Oct[i] = new int[l, l];
                 if (i < nLayers)
                 {
-                    int l = Math.Max(HP[i - 1].GetLength(0) / 2, 1);
-                    HP[i] = new uint[l, l, l];
-                    for (int iHP = 0; iHP < l; iHP++)
+                    int l = Math.Max(Octree[i - 1].GetLength(0) / 2, 1);
+                    Octree[i] = new short[l, l, l];
+                    for (int iOct = 0; iOct < l; iOct++)
                     {
-                        for (int jHP = 0; jHP < l; jHP++)
+                        for (int jOct = 0; jOct < l; jOct++)
                         {
-                            for(int kHP = 0; kHP < l; kHP++)
-                            HP[i][iHP, jHP, kHP] = HP[i - 1][iHP * 2, jHP * 2, kHP * 2] + HP[i - 1][iHP * 2 + 1, jHP * 2, kHP * 2] + HP[i - 1][iHP * 2 + 1, jHP * 2 + 1, kHP * 2] + HP[i - 1][iHP * 2, jHP * 2 + 1, kHP * 2] + 
-                                HP[i - 1][iHP * 2, jHP * 2, kHP * 2 + 1] + HP[i - 1][iHP * 2 + 1, jHP * 2, kHP * 2 + 1] + HP[i - 1][iHP * 2 + 1, jHP * 2 + 1, kHP * 2 + 1] + HP[i - 1][iHP * 2, jHP * 2 + 1, kHP * 2 + 1];
+                            for(int kOct = 0; kOct < l; kOct++)
+                                Octree[i][iOct, jOct, kOct] = (short)(Octree[i - 1][iOct * 2, jOct * 2, kOct * 2] + Octree[i - 1][iOct * 2 + 1, jOct * 2, kOct * 2] + Octree[i - 1][iOct * 2 + 1, jOct * 2 + 1, kOct * 2] + Octree[i - 1][iOct * 2, jOct * 2 + 1, kOct * 2] +
+                                Octree[i - 1][iOct * 2, jOct * 2, kOct * 2 + 1] + Octree[i - 1][iOct * 2 + 1, jOct * 2, kOct * 2 + 1] + Octree[i - 1][iOct * 2 + 1, jOct * 2 + 1, kOct * 2 + 1] + Octree[i - 1][iOct * 2, jOct * 2 + 1, kOct * 2 + 1]);
                         }
                     }
                 }
                 else
-                    HP[i] = new uint[,,] { { { 0 } } };
+                    Octree[i] = new short[,,] { { { 0 } } };
             }
-            nTri = (int)HP[nLayers - 1][0, 0, 0];
+            nTri = (int)Octree[nLayers - 1][0, 0, 0];
 
 
             stopWatch.Stop();
@@ -427,19 +463,19 @@ namespace DispDICOMCMD
             //    Console.WriteLine(n);
             //}
 
-            return HP;
+            return Octree;
         }
 
-        public static void HPTraverseKernel(Index1D index, ArrayView1D<FlatPoint, Stride1D.Dense> p, ArrayView1D<uint, Stride1D.Dense> k, ArrayView3D<uint, Stride3D.DenseXY> HPLayer)
+        public static void OctreeTraverseKernel(Index1D index, ArrayView1D<FlatPoint, Stride1D.Dense> p, ArrayView1D<short, Stride1D.Dense> k, ArrayView3D<short, Stride3D.DenseXY> OctreeLayer)
         {
-            uint a = HPLayer[p[index].X, p[index].Y, p[index].Z];
-            uint b = HPLayer[p[index].X + 1, p[index].Y, p[index].Z] + a;
-            uint c = HPLayer[p[index].X, p[index].Y + 1, p[index].Z] + b;
-            uint d = HPLayer[p[index].X + 1, p[index].Y + 1, p[index].Z] + c;
-            uint e = HPLayer[p[index].X, p[index].Y, p[index].Z + 1] + d;
-            uint f = HPLayer[p[index].X + 1, p[index].Y, p[index].Z + 1] + e;
-            uint g = HPLayer[p[index].X, p[index].Y + 1, p[index].Z + 1] + f;
-            uint h = HPLayer[p[index].X + 1, p[index].Y + 1, p[index].Z + 1] + g;
+            short a = OctreeLayer[p[index].X, p[index].Y, p[index].Z];
+            short b = (short)(OctreeLayer[p[index].X + 1, p[index].Y, p[index].Z] + a);
+            short c = (short)(OctreeLayer[p[index].X, p[index].Y + 1, p[index].Z] + b);
+            short d = (short)(OctreeLayer[p[index].X + 1, p[index].Y + 1, p[index].Z] + c);
+            short e = (short)(OctreeLayer[p[index].X, p[index].Y, p[index].Z + 1] + d);
+            short f = (short)(OctreeLayer[p[index].X + 1, p[index].Y, p[index].Z + 1] + e);
+            short g = (short)(OctreeLayer[p[index].X, p[index].Y + 1, p[index].Z + 1] + f);
+            short h = (short)(OctreeLayer[p[index].X + 1, p[index].Y + 1, p[index].Z + 1] + g);
             if (d == 0)
                 ;
             if (k[index] < a)
@@ -449,7 +485,7 @@ namespace DispDICOMCMD
                 if (k[index] == a)
                     k[index] = 0;
                 else
-                    k[index] = k[index] - a;
+                    k[index] = (short)(k[index] - a);
                 p[index].X++;
             }
             else if (k[index] < c)
@@ -457,7 +493,7 @@ namespace DispDICOMCMD
                 if (k[index] == b)
                     k[index] = 0;
                 else
-                    k[index] = k[index] - b;
+                    k[index] = (short)(k[index] - b);
                 p[index].Y++;
             }
             else if (k[index] < d)
@@ -465,7 +501,7 @@ namespace DispDICOMCMD
                 if (k[index] == c)
                     k[index] = 0;
                 else
-                    k[index] = k[index] - c;
+                    k[index] = (short)(k[index] - c);
                 p[index].X++;
                 p[index].Y++;
             }
@@ -474,7 +510,7 @@ namespace DispDICOMCMD
                 if (k[index] == d)
                     k[index] = 0;
                 else
-                    k[index] = k[index] - d;
+                    k[index] = (short)(k[index] - d);
                 p[index].Z++;
             }
             else if (k[index] < f)
@@ -482,7 +518,7 @@ namespace DispDICOMCMD
                 if (k[index] == e)
                     k[index] = 0;
                 else
-                    k[index] = k[index] - e;
+                    k[index] = (short)(k[index] - e);
                 p[index].X++;
                 p[index].Z++;
             }
@@ -491,7 +527,7 @@ namespace DispDICOMCMD
                 if (k[index] == f)
                     k[index] = 0;
                 else
-                    k[index] = k[index] - f;
+                    k[index] = (short)(k[index] - f);
                 p[index].Y++;
                 p[index].Z++;
             }
@@ -500,7 +536,7 @@ namespace DispDICOMCMD
                 if (k[index] == g)
                     k[index] = 0;
                 else
-                    k[index] = k[index] - g;
+                    k[index] = (short)(k[index] - g);
                 p[index].X++;
                 p[index].Y++;
                 p[index].Z++;
@@ -510,91 +546,91 @@ namespace DispDICOMCMD
             p[index].Z *= 2;
          }
 
-        public static void HPFinalLayer(Index1D index,
+        public static void OctreeFinalLayer(Index1D index,
             ArrayView1D<FlatPoint, Stride1D.Dense> p,
-            ArrayView1D<uint, Stride1D.Dense> k,
-            ArrayView3D<byte, Stride3D.DenseXY> HPLayer,
+            ArrayView1D<short, Stride1D.Dense> k,
+            ArrayView3D<short, Stride3D.DenseXY> OctreeLayer,
             ArrayView1D<Triangle, Stride1D.Dense> triangles, 
-            ArrayView3D<byte, Stride3D.DenseXY> edges, 
+            ArrayView3D<short, Stride3D.DenseXY> edges, 
             ArrayView1D<Edge, Stride1D.Dense> triTable, 
             ArrayView3D<short, Stride3D.DenseXY> input, 
-            int thresh, int HPSqrt)
+            int thresh, int OctreeSqrt)
         {
-            uint a = HPLayer[p[index].X, p[index].Y, p[index].Z];
-            uint b = HPLayer[p[index].X + 1, p[index].Y, p[index].Z] + a;
-            uint c = HPLayer[p[index].X, p[index].Y + 1, p[index].Z] + b;
-            uint d = HPLayer[p[index].X + 1, p[index].Y + 1, p[index].Z] + c;
-            uint e = HPLayer[p[index].X, p[index].Y, p[index].Z + 1] + d;
-            uint f = HPLayer[p[index].X + 1, p[index].Y, p[index].Z + 1] + e;
-            uint g = HPLayer[p[index].X, p[index].Y + 1, p[index].Z + 1] + f;
-            uint h = HPLayer[p[index].X + 1, p[index].Y + 1, p[index].Z + 1] + g;
-            if (d == 0)
-                ;
-            if (k[index] < a)
-                ;
-            else if (k[index] < b)
-            {
-                if (k[index] == a)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - a;
-                p[index].X++;
-            }
-            else if (k[index] < c)
-            {
-                if (k[index] == b)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - b;
-                p[index].Y++;
-            }
-            else if (k[index] < d)
-            {
-                if (k[index] == c)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - c;
-                p[index].X++;
-                p[index].Y++;
-            }
-            else if (k[index] < e)
-            {
-                if (k[index] == d)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - d;
-                p[index].Z++;
-            }
-            else if (k[index] < f)
-            {
-                if (k[index] == e)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - e;
-                p[index].X++;
-                p[index].Z++;
-            }
-            else if (k[index] < g)
-            {
-                if (k[index] == f)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - f;
-                p[index].Y++;
-                p[index].Z++;
-            }
-            else if (k[index] < h)
-            {
-                if (k[index] == g)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - g;
-                p[index].X++;
-                p[index].Y++;
-                p[index].Z++;
-            }
+            //uint a = OctreeLayer[p[index].X, p[index].Y, p[index].Z];
+            //uint b = OctreeLayer[p[index].X + 1, p[index].Y, p[index].Z] + a;
+            //uint c = OctreeLayer[p[index].X, p[index].Y + 1, p[index].Z] + b;
+            //uint d = OctreeLayer[p[index].X + 1, p[index].Y + 1, p[index].Z] + c;
+            //uint e = OctreeLayer[p[index].X, p[index].Y, p[index].Z + 1] + d;
+            //uint f = OctreeLayer[p[index].X + 1, p[index].Y, p[index].Z + 1] + e;
+            //uint g = OctreeLayer[p[index].X, p[index].Y + 1, p[index].Z + 1] + f;
+            //uint h = OctreeLayer[p[index].X + 1, p[index].Y + 1, p[index].Z + 1] + g;
+            //if (d == 0)
+            //    ;
+            //if (k[index] < a)
+            //    ;
+            //else if (k[index] < b)
+            //{
+            //    if (k[index] == a)
+            //        k[index] = 0;
+            //    else
+            //        k[index] = k[index] - a;
+            //    p[index].X++;
+            //}
+            //else if (k[index] < c)
+            //{
+            //    if (k[index] == b)
+            //        k[index] = 0;
+            //    else
+            //        k[index] = k[index] - b;
+            //    p[index].Y++;
+            //}
+            //else if (k[index] < d)
+            //{
+            //    if (k[index] == c)
+            //        k[index] = 0;
+            //    else
+            //        k[index] = k[index] - c;
+            //    p[index].X++;
+            //    p[index].Y++;
+            //}
+            //else if (k[index] < e)
+            //{
+            //    if (k[index] == d)
+            //        k[index] = 0;
+            //    else
+            //        k[index] = k[index] - d;
+            //    p[index].Z++;
+            //}
+            //else if (k[index] < f)
+            //{
+            //    if (k[index] == e)
+            //        k[index] = 0;
+            //    else
+            //        k[index] = k[index] - e;
+            //    p[index].X++;
+            //    p[index].Z++;
+            //}
+            //else if (k[index] < g)
+            //{
+            //    if (k[index] == f)
+            //        k[index] = 0;
+            //    else
+            //        k[index] = k[index] - f;
+            //    p[index].Y++;
+            //    p[index].Z++;
+            //}
+            //else if (k[index] < h)
+            //{
+            //    if (k[index] == g)
+            //        k[index] = 0;
+            //    else
+            //        k[index] = k[index] - g;
+            //    p[index].X++;
+            //    p[index].Y++;
+            //    p[index].Z++;
+            //}
 
-             //index3D = new Index3D(HPSqrt * (int)(p[index].X / (HPSqrt * HPSqrt)) + (int)(p[index].Y / (HPSqrt * HPSqrt)), p[index].X % (HPSqrt * HPSqrt), p[index].Y % (HPSqrt * HPSqrt));
+             //index3D = new Index3D(OctreeSqrt * (int)(p[index].X / (OctreeSqrt * OctreeSqrt)) + (int)(p[index].Y / (OctreeSqrt * OctreeSqrt)), p[index].X % (OctreeSqrt * OctreeSqrt), p[index].Y % (OctreeSqrt * OctreeSqrt));
             Index3D index3D = new Index3D(p[index].X, p[index].Y, p[index].Z);
             //short l;
             //if (index3D.Z + 1 > input.Extent.Z - 1)
@@ -661,6 +697,325 @@ namespace DispDICOMCMD
             //    ;
             triangles[index] = tempCube.MarchHP(threshold, triTable[edges[index3D.Z, index3D.Y, index3D.X]], (int)k[index]);
         }
+
+        private static byte[,,] MarchingCubesCPU()
+        {
+            //Edge[,,] edges = new Edge[(slices.GetLength(0) - 1), (width - 1), (length - 1)];
+            cubeBytes = new byte[(slices.GetLength(0) - 1), (width - 1), (length - 1)];
+            byte cubeByte;
+            OctreeBaseLayer = new short[OctreeSize, OctreeSize, OctreeSize];
+
+            //Normal[,,] grads = new Normal[(slices.GetLength(0)), (width), (length)];
+            //byte[,] configBytes = new byte[511, 511];
+            //int[,] edges = new int[length, width];
+
+            //bit order 
+            // i,j,k 
+            // i+1,j,k
+            // i+1,j+1,k
+            // i,j+1,k
+            // i,j,k+1
+            // i+1,j,k+1
+            // i+1,j+1,k+1
+            // i,j+1,k+1
+            int i, j, k;
+
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            for (k = 0; k < slices.GetLength(0); k++)
+            {
+                for (i = 0; i < slices.GetLength(2); i++)
+                {
+                    for (j = 0; j < slices.GetLength(1); j++)
+                    {
+                        //grads[k, j, i] =
+                        //new Normal(
+                        //     slices[k, j, Math.Min((width) - 1, i + 1)] - slices[k, j, Math.Max(i - 1, 0)],
+                        //     slices[k, Math.Min((width) - 1, j + 1), i] - slices[k, Math.Max(j - 1, 0), i],
+                        //     slices[Math.Min(slices.GetLength(0) - 1, k + 1), j, i] - slices[Math.Max(k - 1, 0), j, i]
+                        // );
+                        if (k != slices.GetLength(0) - 1 && j != slices.GetLength(1) - 1 && i != slices.GetLength(2) - 1)
+                        {
+                            cubeByte = 0;
+                            cubeByte += (slices[k, j, i] < threshold) ? (byte)0x01 : (byte)0;
+                            cubeByte += (slices[k, j, i + 1] < threshold) ? (byte)0x02 : (byte)0;
+                            cubeByte += (slices[k, j + 1, i + 1] < threshold) ? (byte)0x04 : (byte)0;
+                            cubeByte += (slices[k, j + 1, i] < threshold) ? (byte)0x08 : (byte)0;
+                            cubeByte += (slices[k + 1, j, i] < threshold) ? (byte)0x10 : (byte)0;
+                            cubeByte += (slices[k + 1, j, i + 1] < threshold) ? (byte)0x20 : (byte)0;
+                            cubeByte += (slices[k + 1, j + 1, i + 1] < threshold) ? (byte)0x40 : (byte)0;
+                            cubeByte += (slices[k + 1, j + 1, i] < threshold) ? (byte)0x80 : (byte)0;
+
+                            cubeBytes[k, j, i] = cubeByte;
+                            OctreeBaseLayer[i, j, k] = (byte)(triangleTable[cubeByte].getAsArray().Where(x => x >= 0).Count() / 3);
+                        }
+                    }
+                }
+            }
+            stopWatch.Stop();
+            // Get the elapsed time as a TimeSpan value.
+            ts += stopWatch.Elapsed;
+
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+            Console.WriteLine("RunTime " + elapsedTime);
+            return cubeBytes;
+        }
+
+        public static void Assign(Index3D index, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max, ArrayView3D<short, Stride3D.DenseXY> input)
+        {
+
+            var temp = new[] {input[(index.Z), (index.Y), (index.X)],
+            input[(index.Z), (index.Y), (index.X) + 1],
+            input[(index.Z), (index.Y) + 1, (index.X) + 1],
+            input[(index.Z), (index.Y) + 1, (index.X)],
+            input[(index.Z) + 1, (index.Y), (index.X)],
+            input[(index.Z) + 1, (index.Y), (index.X) + 1],
+            input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1],
+            input[(index.Z) + 1, (index.Y) + 1, (index.X)]};
+
+            short[] sort = findMinMax(temp, 0, 7);
+
+            min[index] = sort[1];
+            max[index] = sort[0];
+        }
+
+        public static void MarchingCubesGPU()
+        {
+            //Edge[,,] cubeBytes = new Edge[slices.GetLength(0) - 1, width - 1, length - 1];
+            //Normal[,,] grads = new Normal[slices.GetLength(0) - 1, width - 1, length - 1];
+            Index3D index = new Index3D(slices.GetLength(2) - 1, slices.GetLength(1) - 1, slices.GetLength(0) - 1);
+            List<byte> edgeList = new List<byte>();
+            //List<Normal> normalList = new List<Normal>();
+            //MemoryBuffer3D<Edge, Stride3D.DenseXY> cubeConfig = accelerator.Allocate3DDenseXY<Edge>(index);
+            //MemoryBuffer3D<Normal, Stride3D.DenseXY> gradConfig = accelerator.Allocate3DDenseXY<Normal>(index);
+            ////byte[,] configBytes = new byte[511, 511];
+
+            //Normal[] grad = new Normal[grads.Length];
+
+            //int[,,] edges = new int[slices.Length - 1, width - 1, length - 1];
+
+            //bit order 
+            // i,j,k 
+            // i+1,j,k
+            // i+1,j+1,k
+            // i,j+1,k
+            // i,j,k+1
+            // i+1,j,k+1
+            // i+1,j+1,k+1
+            // i,j+1,k+1
+            //var scanUsingScanProvider = accelerator.CreateScan<byte, Stride1D.Dense, Stride1D.Dense, ILGPU.Algorithms.ScanReduceOperations.>(ScanKind.Inclusive)
+            //HPBaseLayer = new byte[HPsize, HPsize, HPsize];
+
+            //Normal[,,] grads = new Normal[index.X, index.Y, index.Z];
+            octreeMin = new short[OctreeSize, OctreeSize, OctreeSize];
+            octreeMax = new short[OctreeSize, OctreeSize, OctreeSize];
+            //var gradPinned = GCHandle.Alloc(grads, GCHandleType.Pinned);
+            var minPinned = GCHandle.Alloc(octreeMin, GCHandleType.Pinned);
+            var maxPinned = GCHandle.Alloc(octreeMax, GCHandleType.Pinned);
+            PageLockedArray3D<short> minLocked = accelerator.AllocatePageLocked3D<short>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
+            PageLockedArray3D<short> maxLocked = accelerator.AllocatePageLocked3D<short>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
+            //PageLockedArray3D<Normal> gradLocked = accelerator.AllocatePageLocked3D<Normal>(index);
+            minConfig = accelerator.Allocate3DDenseXY<short>(minLocked.Extent);
+            maxConfig = accelerator.Allocate3DDenseXY<short>(maxLocked.Extent);
+            //gradConfig = accelerator.Allocate3DDenseXY<Normal>(index);
+            //var gradScope = accelerator.CreatePageLockFromPinned<Normal>(gradPinned.AddrOfPinnedObject(), grads.Length);
+            var minScope = accelerator.CreatePageLockFromPinned<short>(minPinned.AddrOfPinnedObject(), octreeMin.Length);
+            var maxScope = accelerator.CreatePageLockFromPinned<short>(maxPinned.AddrOfPinnedObject(), octreeMax.Length);
+            //gradConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
+            minConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, minScope);
+            maxConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, maxScope);
+
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            assign(index, minConfig.View, maxConfig.View, sliced.View);
+
+            accelerator.Synchronize();
+            stopWatch.Stop();
+            ts = stopWatch.Elapsed;
+            minConfig.CopyToCPU(octreeMin);
+            maxConfig.CopyToCPU(octreeMax);
+            //cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
+            //accelerator.Synchronize();
+            //cubeBytes = cubeLocked.GetArray();
+            //HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
+            //HPBaseLayer = HPLocked.GetArray();
+            //stopWatch.Stop();
+            //HPBaseConfig.Dispose();
+            //cubeConfig.Dispose();
+            minPinned.Free();
+            maxPinned.Free();
+            //sliced.Dispose();
+            //GCHandle.FromIntPtr(gradIntPtr).Free();
+            //GCHandle.FromIntPtr(cubeIntPtr).Free();
+
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+            Console.WriteLine("RunTime " + elapsedTime);
+            //ToBuffer3D(grads, slices.GetLength(0) - 1, width - 1, length - 1)
+            //return (cubeBytes);
+        }
+
+
+        public static ref MemoryBuffer3D<short, Stride3D.DenseXY> getMinOctreeLayer(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    return ref minLayer1;
+                case 2:
+                    return ref minLayer2;
+                case 3:
+                    return ref minLayer3;
+                case 4:
+                    return ref minLayer4;
+                case 5:
+                    return ref minLayer5;
+                case 6:
+                    return ref minLayer6;
+                case 7:
+                    return ref minLayer7;
+                case 8:
+                    return ref minLayer8;
+                case 9:
+                    return ref minLayer9;
+                case 10:
+                    return ref minLayer10;
+                case 11:
+                    return ref minLayer11;
+                case 12:
+                    return ref minLayer12;
+                case 13:
+                    return ref minLayer13;
+                case 14:
+                    return ref minLayer14;
+                case 15:
+                    return ref minLayer15;
+                default:
+                    return ref minConfig;
+            }
+        }
+
+        public static ref MemoryBuffer3D<short, Stride3D.DenseXY> getMaxOctreeLayer(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    return ref maxLayer1;
+                case 2:
+                    return ref maxLayer2;
+                case 3:
+                    return ref maxLayer3;
+                case 4:
+                    return ref maxLayer4;
+                case 5:
+                    return ref maxLayer5;
+                case 6:
+                    return ref maxLayer6;
+                case 7:
+                    return ref maxLayer7;
+                case 8:
+                    return ref maxLayer8;
+                case 9:
+                    return ref maxLayer9;
+                case 10:
+                    return ref maxLayer10;
+                case 11:
+                    return ref maxLayer11;
+                case 12:
+                    return ref maxLayer12;
+                case 13:
+                    return ref maxLayer13;
+                case 14:
+                    return ref maxLayer14;
+                case 15:
+                    return ref maxLayer15;
+                default:
+                    return ref maxConfig;
+            }
+        }
+
+        static short binarySearch(short[] a, short item, short low, short high)
+        {
+            while (low <= high)
+            {
+                short mid = (short)(low + (high - low) / 2);
+                if (item == a[mid])
+                    return (short)(mid + 1);
+                else if (item > a[mid])
+                    low = (short)(mid + 1);
+                else
+                    high = (short)(mid - 1);
+            }
+
+            return low;
+        }
+
+        // Function to sort an array a[] of size 'n'
+        static void insertionSort(short[] a, short n)
+        {
+            short i, loc, j, selected;
+            for (i = 1; i < n; ++i)
+            {
+                j = (short)(i - 1);
+                selected = a[i];
+
+                // find location where selected should be inseretd
+                loc = binarySearch(a, selected, 0, j);
+
+                // Move all elements after location to create space
+                while (j >= loc)
+                {
+                    a[j + 1] = a[j];
+                    j--;
+                }
+                a[j + 1] = selected;
+            }
+        }
+
+        static short[] findMinMax(short[] A, short start, short end)
+        {
+            short max;
+            short min;
+            if (start == end)
+            {
+                max = A[start];
+                min = A[start];
+            }
+            else if (start + 1 == end)
+            {
+                if (A[start] < A[end])
+                {
+                    max = A[end];
+                    min = A[start];
+                }
+                else
+                {
+                    max = A[start];
+                    min = A[end];
+                }
+            }
+            else
+            {
+                short mid = (short)(start + (end - start) / 2);
+                short[] left = findMinMax(A, start, mid);
+                short[] right = findMinMax(A, (short)(mid + 1), end);
+                if (left[0] > right[0])
+                    max = left[0];
+                else
+                    max = right[0];
+                if (left[1] < right[1])
+                    min = left[1];
+                else
+                    min = right[1];
+            }
+            // By convention, we assume ans[0] as max and ans[1] as min
+            short[] ans = { max, min };
+            return ans;
+}
 
         //private static void HPTraversalGPU(StreamWriter fs)
         //{
@@ -957,168 +1312,7 @@ namespace DispDICOMCMD
         //    }
         //}
 
-        private static byte[,,] MarchingCubesCPU()
-        {
-            //Edge[,,] edges = new Edge[(slices.GetLength(0) - 1), (width - 1), (length - 1)];
-            cubeBytes = new byte[(slices.GetLength(0) - 1), (width - 1), (length - 1)];
-            byte cubeByte;
-            HPBaseLayer = new byte[HPsize, HPsize, HPsize];
 
-            //Normal[,,] grads = new Normal[(slices.GetLength(0)), (width), (length)];
-            //byte[,] configBytes = new byte[511, 511];
-            //int[,] edges = new int[length, width];
-
-            //bit order 
-            // i,j,k 
-            // i+1,j,k
-            // i+1,j+1,k
-            // i,j+1,k
-            // i,j,k+1
-            // i+1,j,k+1
-            // i+1,j+1,k+1
-            // i,j+1,k+1
-            int i, j, k;
-
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            for (k = 0; k < slices.GetLength(0); k++)
-            {
-                for (i = 0; i < slices.GetLength(2); i++)
-                {
-                    for (j = 0; j < slices.GetLength(1); j++)
-                    {
-                        //grads[k, j, i] =
-                        //new Normal(
-                        //     slices[k, j, Math.Min((width) - 1, i + 1)] - slices[k, j, Math.Max(i - 1, 0)],
-                        //     slices[k, Math.Min((width) - 1, j + 1), i] - slices[k, Math.Max(j - 1, 0), i],
-                        //     slices[Math.Min(slices.GetLength(0) - 1, k + 1), j, i] - slices[Math.Max(k - 1, 0), j, i]
-                        // );
-                        if (k != slices.GetLength(0) - 1 && j != slices.GetLength(1) - 1 && i != slices.GetLength(2) - 1)
-                        {
-                            cubeByte = 0;
-                            cubeByte += (slices[k, j, i] < threshold) ? (byte)0x01 : (byte)0;
-                            cubeByte += (slices[k, j, i + 1] < threshold) ? (byte)0x02 : (byte)0;
-                            cubeByte += (slices[k, j + 1, i + 1] < threshold) ? (byte)0x04 : (byte)0;
-                            cubeByte += (slices[k, j + 1, i] < threshold) ? (byte)0x08 : (byte)0;
-                            cubeByte += (slices[k + 1, j, i] < threshold) ? (byte)0x10 : (byte)0;
-                            cubeByte += (slices[k + 1, j, i + 1] < threshold) ? (byte)0x20 : (byte)0;
-                            cubeByte += (slices[k + 1, j + 1, i + 1] < threshold) ? (byte)0x40 : (byte)0;
-                            cubeByte += (slices[k + 1, j + 1, i] < threshold) ? (byte)0x80 : (byte)0;
-
-                            cubeBytes[k, j, i] = cubeByte;
-                            HPBaseLayer[i, j, k] = (byte)(triangleTable[cubeByte].getAsArray().Where(x => x >= 0).Count() / 3);
-                        }
-                    }
-                }
-            }
-            stopWatch.Stop();
-            // Get the elapsed time as a TimeSpan value.
-            ts += stopWatch.Elapsed;
-
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-            Console.WriteLine("RunTime " + elapsedTime);
-            return cubeBytes;
-        }
-
-        public static void Assign(Index3D index, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max, ArrayView3D<short, Stride3D.DenseXY> input)
-        {
-            short[] temp = new[] {input[(index.Z), (index.Y), (index.X)],
-            input[(index.Z), (index.Y), (index.X) + 1],
-            input[(index.Z), (index.Y) + 1, (index.X) + 1],
-            input[(index.Z), (index.Y) + 1, (index.X)],
-            input[(index.Z) + 1, (index.Y), (index.X)],
-            input[(index.Z) + 1, (index.Y), (index.X) + 1],
-            input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1],
-            input[(index.Z) + 1, (index.Y) + 1, (index.X)]};
-
-
-            
-
-            insertionSort(temp, 8);
-
-            min[index] = temp[0];
-            max[index] = temp[7];
-        }
-
-        public static void MarchingCubesGPU()
-        {
-            //Edge[,,] cubeBytes = new Edge[slices.GetLength(0) - 1, width - 1, length - 1];
-            //Normal[,,] grads = new Normal[slices.GetLength(0) - 1, width - 1, length - 1];
-            Index3D index = new Index3D(slices.GetLength(2) - 1, slices.GetLength(1) - 1, slices.GetLength(0) - 1);
-            List<byte> edgeList = new List<byte>();
-            //List<Normal> normalList = new List<Normal>();
-            //MemoryBuffer3D<Edge, Stride3D.DenseXY> cubeConfig = accelerator.Allocate3DDenseXY<Edge>(index);
-            //MemoryBuffer3D<Normal, Stride3D.DenseXY> gradConfig = accelerator.Allocate3DDenseXY<Normal>(index);
-            ////byte[,] configBytes = new byte[511, 511];
-
-            //Normal[] grad = new Normal[grads.Length];
-
-            //int[,,] edges = new int[slices.Length - 1, width - 1, length - 1];
-
-            //bit order 
-            // i,j,k 
-            // i+1,j,k
-            // i+1,j+1,k
-            // i,j+1,k
-            // i,j,k+1
-            // i+1,j,k+1
-            // i+1,j+1,k+1
-            // i,j+1,k+1
-            //var scanUsingScanProvider = accelerator.CreateScan<byte, Stride1D.Dense, Stride1D.Dense, ILGPU.Algorithms.ScanReduceOperations.>(ScanKind.Inclusive)
-            //HPBaseLayer = new byte[HPsize, HPsize, HPsize];
-
-            //Normal[,,] grads = new Normal[index.X, index.Y, index.Z];
-            octreeMin = new short[(index.Z), (index.Y), (index.X)];
-            octreeMax = new short[(index.Z), (index.Y), (index.X)];
-            //var gradPinned = GCHandle.Alloc(grads, GCHandleType.Pinned);
-            var minPinned = GCHandle.Alloc(octreeMin, GCHandleType.Pinned);
-            var maxPinned = GCHandle.Alloc(octreeMax, GCHandleType.Pinned);
-            PageLockedArray3D<short> minLocked = accelerator.AllocatePageLocked3D<short>(new Index3D(index.Z, index.Y, index.X));
-            PageLockedArray3D<short> maxLocked = accelerator.AllocatePageLocked3D<short>(new Index3D(index.Z, index.Y, index.X));
-            //PageLockedArray3D<Normal> gradLocked = accelerator.AllocatePageLocked3D<Normal>(index);
-            minConfig = accelerator.Allocate3DDenseXY<short>(minLocked.Extent);
-            maxConfig = accelerator.Allocate3DDenseXY<short>(maxLocked.Extent);
-            //gradConfig = accelerator.Allocate3DDenseXY<Normal>(index);
-            //var gradScope = accelerator.CreatePageLockFromPinned<Normal>(gradPinned.AddrOfPinnedObject(), grads.Length);
-            var minScope = accelerator.CreatePageLockFromPinned<short>(minPinned.AddrOfPinnedObject(), octreeMin.Length);
-            var maxScope = accelerator.CreatePageLockFromPinned<short>(maxPinned.AddrOfPinnedObject(), octreeMax.Length);
-            //gradConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
-            minConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, minScope);
-            maxConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, maxScope);
-
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-
-            assign(index, minConfig.View, maxConfig.View, sliced.View);
-
-            accelerator.Synchronize();
-            stopWatch.Stop();
-            ts = stopWatch.Elapsed;
-            minConfig.CopyToCPU(octreeMin);
-            maxConfig.CopyToCPU(octreeMax);
-            //cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
-            //accelerator.Synchronize();
-            //cubeBytes = cubeLocked.GetArray();
-            //HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
-            //HPBaseLayer = HPLocked.GetArray();
-            //stopWatch.Stop();
-            //HPBaseConfig.Dispose();
-            //cubeConfig.Dispose();
-            minPinned.Free();
-            maxPinned.Free();
-            //sliced.Dispose();
-            //GCHandle.FromIntPtr(gradIntPtr).Free();
-            //GCHandle.FromIntPtr(cubeIntPtr).Free();
-
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-            Console.WriteLine("RunTime " + elapsedTime);
-            //ToBuffer3D(grads, slices.GetLength(0) - 1, width - 1, length - 1)
-            //return (cubeBytes);
-        }
 
         //public static void MarchCPU(StreamWriter fs)
         //{
@@ -1216,104 +1410,104 @@ namespace DispDICOMCMD
 
         //}
 
-        public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<Edge, Stride1D.Dense> triTable, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView1D<byte, Stride1D.Dense> flag, Point offset, int thresh, int batchSize, int width)
-        {
-            if (edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != 0 && edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != byte.MaxValue)
-            {
-                //Point p = new Point(
-                //                    (index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
-                //                    input[((index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1],
-                //Normal n = normals[((index.Z + (int)offset.Z) + 1), ((index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X) + 1];
-                Cube tempCube = new Cube(
-                            new Point(
-                                (index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
-                                input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)],
-                                new Normal(
-                                    input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1)] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X) - 1, 0)],
-                                    input[(index.Z + (int)offset.Z), Math.Min((width) - 1, (index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X)] - input[(index.Z + (int)offset.Z), Math.Max((index.Y + (int)offset.Y) - 1, 0), (index.X + (int)offset.X)],
-                                    input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]
-                                )),
-                            new Point(
-                                (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
-                                input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X) + 1],
-                                new Normal(
-                                    input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
-                                    input[(index.Z + (int)offset.Z), Math.Min((width) - 1, (index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X + 1)] - input[(index.Z + (int)offset.Z), Math.Max((index.Y + (int)offset.Y) - 1, 0), (index.X + (int)offset.X + 1)],
-                                    input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)]
-                                )),
-                            new Point(
-                                (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
-                                input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1],
-                                new Normal(
-                                    input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
-                                    input[(index.Z + (int)offset.Z), Math.Min((width) - 1, (index.Y + (int)offset.Y + 1) + 1), (index.X + (int)offset.X + 1)] - input[(index.Z + (int)offset.Z), Math.Max((index.Y + (int)offset.Y + 1) - 1, 0), (index.X + (int)offset.X + 1)],
-                                    input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)]
-                                )),
-                            new Point(
-                                (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
-                                input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X)],
-                                new Normal(
-                                    input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X + 1))] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X - 1), 0)],
-                                    input[(index.Z + (int)offset.Z), Math.Min((width) - 1, (index.Y + (int)offset.Y + 1) + 1), (index.X + (int)offset.X)] - input[(index.Z + (int)offset.Z), Math.Max((index.Y + (int)offset.Y + 1) - 1, 0), (index.X + (int)offset.X)],
-                                    input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)]
-                                )),
-                            new Point(
-                                (index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + 1 + (int)offset.Z),
-                                input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)],
-                                new Normal(
-                                    input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1)] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X) - 1, 0)],
-                                    input[(index.Z + (int)offset.Z + 1), Math.Min((width) - 1, (index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X)] - input[(index.Z + (int)offset.Z + 1), Math.Max((index.Y + (int)offset.Y) - 1, 0), (index.X + (int)offset.X)],
-                                    input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]
-                                )),
-                            new Point(
-                                (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + 1 + (int)offset.Z),
-                                input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X) + 1],
-                                new Normal(
-                                    input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
-                                    input[(index.Z + (int)offset.Z + 1), Math.Min((width) - 1, (index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X + 1)] - input[(index.Z + (int)offset.Z + 1), Math.Max((index.Y + (int)offset.Y) - 1, 0), (index.X + (int)offset.X + 1)],
-                                    input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)]
-                                )),
-                            new Point(
-                                (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), (index.Z + 1 + (int)offset.Z),
-                                input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1],
-                                new Normal(
-                                    input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
-                                    input[(index.Z + (int)offset.Z + 1), Math.Min((width) - 1, (index.Y + (int)offset.Y + 1) + 1), (index.X + (int)offset.X + 1)] - input[(index.Z + (int)offset.Z + 1), Math.Max((index.Y + (int)offset.Y + 1) - 1, 0), (index.X + (int)offset.X + 1)],
-                                    input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)]
-                                )),
-                            new Point(
-                                (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), (index.Z + 1 + (int)offset.Z),
-                                input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X)],
-                                new Normal(
-                                    input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X + 1))] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X - 1), 0)],
-                                    input[(index.Z + (int)offset.Z + 1), Math.Min((width) - 1, (index.Y + (int)offset.Y + 1) + 1), (index.X + (int)offset.X)] - input[(index.Z + (int)offset.Z + 1), Math.Max((index.Y + (int)offset.Y + 1) - 1, 0), (index.X + (int)offset.X)],
-                                    input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)]
-                                ))
-                            );
-                Point[] vertice = tempCube.MarchGPU(threshold, triTable[edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]]);
-                int i;
-                //count[0]++;
-                for (i = 0; i < 12; i += 3)
-                {
-                    if ((vertice[i].X > 0 || vertice[i].Y > 0 || vertice[i].Z > 0) ||
-                        (vertice[i + 1].X > 0 || vertice[i + 1].Y > 0 || vertice[i + 1].Z > 0) ||
-                        (vertice[i + 2].X > 0 || vertice[i + 2].Y > 0 || vertice[i + 2].Z > 0))
-                    {
+        //public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<Edge, Stride1D.Dense> triTable, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView1D<byte, Stride1D.Dense> flag, Point offset, int thresh, int batchSize, int width)
+        //{
+        //    if (edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != 0 && edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != byte.MaxValue)
+        //    {
+        //        //Point p = new Point(
+        //        //                    (index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
+        //        //                    input[((index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1],
+        //        //Normal n = normals[((index.Z + (int)offset.Z) + 1), ((index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X) + 1];
+        //        Cube tempCube = new Cube(
+        //                    new Point(
+        //                        (index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
+        //                        input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)],
+        //                        new Normal(
+        //                            input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1)] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X) - 1, 0)],
+        //                            input[(index.Z + (int)offset.Z), Math.Min((width) - 1, (index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X)] - input[(index.Z + (int)offset.Z), Math.Max((index.Y + (int)offset.Y) - 1, 0), (index.X + (int)offset.X)],
+        //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]
+        //                        )),
+        //                    new Point(
+        //                        (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
+        //                        input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X) + 1],
+        //                        new Normal(
+        //                            input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
+        //                            input[(index.Z + (int)offset.Z), Math.Min((width) - 1, (index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X + 1)] - input[(index.Z + (int)offset.Z), Math.Max((index.Y + (int)offset.Y) - 1, 0), (index.X + (int)offset.X + 1)],
+        //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)]
+        //                        )),
+        //                    new Point(
+        //                        (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
+        //                        input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1],
+        //                        new Normal(
+        //                            input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
+        //                            input[(index.Z + (int)offset.Z), Math.Min((width) - 1, (index.Y + (int)offset.Y + 1) + 1), (index.X + (int)offset.X + 1)] - input[(index.Z + (int)offset.Z), Math.Max((index.Y + (int)offset.Y + 1) - 1, 0), (index.X + (int)offset.X + 1)],
+        //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)]
+        //                        )),
+        //                    new Point(
+        //                        (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
+        //                        input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X)],
+        //                        new Normal(
+        //                            input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X + 1))] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X - 1), 0)],
+        //                            input[(index.Z + (int)offset.Z), Math.Min((width) - 1, (index.Y + (int)offset.Y + 1) + 1), (index.X + (int)offset.X)] - input[(index.Z + (int)offset.Z), Math.Max((index.Y + (int)offset.Y + 1) - 1, 0), (index.X + (int)offset.X)],
+        //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)]
+        //                        )),
+        //                    new Point(
+        //                        (index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + 1 + (int)offset.Z),
+        //                        input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)],
+        //                        new Normal(
+        //                            input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1)] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X) - 1, 0)],
+        //                            input[(index.Z + (int)offset.Z + 1), Math.Min((width) - 1, (index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X)] - input[(index.Z + (int)offset.Z + 1), Math.Max((index.Y + (int)offset.Y) - 1, 0), (index.X + (int)offset.X)],
+        //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]
+        //                        )),
+        //                    new Point(
+        //                        (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + 1 + (int)offset.Z),
+        //                        input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X) + 1],
+        //                        new Normal(
+        //                            input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
+        //                            input[(index.Z + (int)offset.Z + 1), Math.Min((width) - 1, (index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X + 1)] - input[(index.Z + (int)offset.Z + 1), Math.Max((index.Y + (int)offset.Y) - 1, 0), (index.X + (int)offset.X + 1)],
+        //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)]
+        //                        )),
+        //                    new Point(
+        //                        (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), (index.Z + 1 + (int)offset.Z),
+        //                        input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1],
+        //                        new Normal(
+        //                            input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
+        //                            input[(index.Z + (int)offset.Z + 1), Math.Min((width) - 1, (index.Y + (int)offset.Y + 1) + 1), (index.X + (int)offset.X + 1)] - input[(index.Z + (int)offset.Z + 1), Math.Max((index.Y + (int)offset.Y + 1) - 1, 0), (index.X + (int)offset.X + 1)],
+        //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)]
+        //                        )),
+        //                    new Point(
+        //                        (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), (index.Z + 1 + (int)offset.Z),
+        //                        input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X)],
+        //                        new Normal(
+        //                            input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X + 1))] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X - 1), 0)],
+        //                            input[(index.Z + (int)offset.Z + 1), Math.Min((width) - 1, (index.Y + (int)offset.Y + 1) + 1), (index.X + (int)offset.X)] - input[(index.Z + (int)offset.Z + 1), Math.Max((index.Y + (int)offset.Y + 1) - 1, 0), (index.X + (int)offset.X)],
+        //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)]
+        //                        ))
+        //                    );
+        //        Point[] vertice = tempCube.MarchGPU(threshold, triTable[edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]]);
+        //        int i;
+        //        //count[0]++;
+        //        for (i = 0; i < 12; i += 3)
+        //        {
+        //            if ((vertice[i].X > 0 || vertice[i].Y > 0 || vertice[i].Z > 0) ||
+        //                (vertice[i + 1].X > 0 || vertice[i + 1].Y > 0 || vertice[i + 1].Z > 0) ||
+        //                (vertice[i + 2].X > 0 || vertice[i + 2].Y > 0 || vertice[i + 2].Z > 0))
+        //            {
 
-                        //triangles[triangles.Length - 1].vertex1.value = 1;
-                        if (flag[0] == 0)
-                            flag[0] = 1;
-                        //if (triangles[(batchSize * batchSize * batchSize * 0) + (index.Z * batchSize * batchSize) + (index.Y * batchSize) + index.X].vertex1.X > 0)
-                        ////if (triangles.Length < 32 * 32 * 32 * 4 + 32 * 32 * 31 + 32 * 31 + 31 + 3)
-                        //{
-                        //    Triangle t = triangles[-1];
-                        //}
-                        triangles[(batchSize * batchSize * batchSize * (i / 3)) + (index.Z * batchSize * batchSize) + (index.Y * batchSize) + index.X] = new Triangle(vertice[i], vertice[i + 1], vertice[i + 2]);
-                        //count[0]++;
-                    }
-                }
-            }
-        }
+        //                //triangles[triangles.Length - 1].vertex1.value = 1;
+        //                if (flag[0] == 0)
+        //                    flag[0] = 1;
+        //                //if (triangles[(batchSize * batchSize * batchSize * 0) + (index.Z * batchSize * batchSize) + (index.Y * batchSize) + index.X].vertex1.X > 0)
+        //                ////if (triangles.Length < 32 * 32 * 32 * 4 + 32 * 32 * 31 + 32 * 31 + 31 + 3)
+        //                //{
+        //                //    Triangle t = triangles[-1];
+        //                //}
+        //                triangles[(batchSize * batchSize * batchSize * (i / 3)) + (index.Z * batchSize * batchSize) + (index.Y * batchSize) + index.X] = new Triangle(vertice[i], vertice[i + 1], vertice[i + 2]);
+        //                //count[0]++;
+        //            }
+        //        }
+        //    }
+        //}
 
 
 
@@ -1457,83 +1651,6 @@ namespace DispDICOMCMD
 
         //}
 
-        public static ref MemoryBuffer3D<uint, Stride3D.DenseXY> getHPLayer(int index)
-        {
-            switch (index)
-            {
-                case 1:
-                    return ref uintLayer1;
-                case 2:
-                    return ref uintLayer2;
-                case 3:
-                    return ref uintLayer3;
-                case 4:
-                    return ref uintLayer4;
-                case 5:
-                    return ref uintLayer5;
-                case 6:
-                    return ref uintLayer6;
-                case 7:
-                    return ref uintLayer7;
-                case 8:
-                    return ref uintLayer8;
-                case 9:
-                    return ref uintLayer9;
-                case 10:
-                    return ref uintLayer10;
-                case 11:
-                    return ref uintLayer11;
-                case 12:
-                    return ref uintLayer12;
-                case 13:
-                    return ref uintLayer13;
-                case 14:
-                    return ref uintLayer14;
-                case 15:
-                    return ref uintLayer15;
-                default:
-                    return ref uintLayer15;
-            }
-        }
-
-        static short binarySearch(short[] a, short item, short low, short high)
-        {
-            while (low <= high)
-            {
-                short mid = (short)(low + (high - low) / 2);
-                if (item == a[mid])
-                    return (short)(mid + 1);
-                else if (item > a[mid])
-                    low = (short)(mid + 1);
-                else
-                    high = (short)(mid - 1);
-            }
-
-            return low;
-        }
-
-        // Function to sort an array a[] of size 'n'
-        static void insertionSort(short[] a, short n)
-        {
-            short i, loc, j, selected;
-
-            for (i = 1; i < n; ++i)
-            {
-                j = (short)(i - 1);
-                selected = a[i];
-
-                // find location where selected should be inseretd
-                loc = binarySearch(a, selected, 0, j);
-
-                // Move all elements after location to create space
-                while (j >= loc)
-                {
-                    a[j + 1] = a[j];
-                    j--;
-                }
-                a[j + 1] = selected;
-            }
-        }
 
         //public static void getVerticesX(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<Normal, Stride3D.DenseXY> normals, ArrayView3D<Edge, Stride3D.DenseXY> edges, ArrayView1D<short, Stride1D.Dense> input, Point offset, int thresh, int batchSize, int width)
         //{
