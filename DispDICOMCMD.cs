@@ -33,23 +33,15 @@ namespace DispDICOMCMD
     class DispDICOMCMD
     {
         public static Context context;
-        //public static CudaAccelerator accelerator;
-        public static CPUAccelerator accelerator;
+        public static CudaAccelerator accelerator;
+        //public static CPUAccelerator accelerator;
         //public static Action<Index1D, HistoPyramid> testHP;
         public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<uint, Stride3D.DenseXY>> assign;
         public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<short, Stride1D.Dense>, Point, int, int, int> get_verts;
         public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY> , ArrayView3D<short, Stride3D.DenseXY> > octreeFirstLayer;
         public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY> , ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>> octreeCreation;
         public static Action<Index1D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernel;
-        public static Action<Index1D,
-            ArrayView1D<FlatPoint, Stride1D.Dense>,
-            ArrayView1D<short, Stride1D.Dense>,
-            ArrayView3D<short, Stride3D.DenseXY>,
-            ArrayView1D<Triangle, Stride1D.Dense>,
-            ArrayView3D<short, Stride3D.DenseXY>,
-            ArrayView1D<Edge, Stride1D.Dense>,
-            ArrayView3D<short, Stride3D.DenseXY>,
-            int, int> octreeFinalLayer;
+        public static Action<Index1D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, short, int> octreeFinalLayer;
 
 
         public static MemoryBuffer3D<short, Stride3D.DenseXY> minConfig;
@@ -150,23 +142,15 @@ namespace DispDICOMCMD
             //width = size;
             //length = size;
             context = Context.Create(builder => builder.Default().EnableAlgorithms());
-            //accelerator = context.CreateCudaAccelerator(0);
-            accelerator = context.CreateCPUAccelerator(0);
+            accelerator = context.CreateCudaAccelerator(0);
+            //accelerator = context.CreateCPUAccelerator(0);
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
             assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<uint, Stride3D.DenseXY>>(Assign);
             //get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<short, Stride1D.Dense>, Point, int, int, int>(getVertices);
             //octreeFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(BuildOctreeFirst); 
             octreeCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(BuildOctree);
             traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernel);
-            octreeFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D,
-            ArrayView1D<FlatPoint, Stride1D.Dense>,
-            ArrayView1D<short, Stride1D.Dense>,
-            ArrayView3D<short, Stride3D.DenseXY>,
-            ArrayView1D<Triangle, Stride1D.Dense>,
-            ArrayView3D<short, Stride3D.DenseXY>,
-            ArrayView1D<Edge, Stride1D.Dense>,
-            ArrayView3D<short, Stride3D.DenseXY>,
-            int, int>(OctreeFinalLayer);
+            octreeFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, short, int>(OctreeFinalLayer);
             //testHP = accelerator.LoadAutoGroupedStreamKernel<Index1D, HistoPyramid>(TestHP);
 
             //get_vertsX = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, Point, int, int, int>(getVerticesX);
@@ -507,7 +491,7 @@ namespace DispDICOMCMD
                 newKeys[index * 8 + 5] = (uint)(keys[index] + (5 << (3 * n)));
                 newKeys[index * 8 + 6] = (uint)(keys[index] + (6 << (3 * n)));
                 newKeys[index * 8 + 7] = (uint)(keys[index] + (7 << (3 * n)));
-                count[0] += 8;
+                count[index] = 8;
             }
             else
             {
@@ -522,19 +506,11 @@ namespace DispDICOMCMD
             }
         }
 
-        public static void OctreeFinalLayer(Index1D index,
-            ArrayView1D<FlatPoint, Stride1D.Dense> p,
-            ArrayView1D<short, Stride1D.Dense> k,
-            ArrayView3D<short, Stride3D.DenseXY> OctreeLayer,
-            ArrayView1D<Triangle, Stride1D.Dense> triangles, 
-            ArrayView3D<short, Stride3D.DenseXY> edges, 
-            ArrayView1D<Edge, Stride1D.Dense> triTable, 
-            ArrayView3D<short, Stride3D.DenseXY> input, 
-            int thresh, int OctreeSqrt)
+        public static void OctreeFinalLayer(Index1D index, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView1D<Triangle, Stride1D.Dense> triangles, ArrayView1D<Edge, Stride1D.Dense> triTable, short threshold, int n)
         {
 
              //index3D = new Index3D(OctreeSqrt * (int)(p[index].X / (OctreeSqrt * OctreeSqrt)) + (int)(p[index].Y / (OctreeSqrt * OctreeSqrt)), p[index].X % (OctreeSqrt * OctreeSqrt), p[index].Y % (OctreeSqrt * OctreeSqrt));
-            Index3D index3D = new Index3D(p[index].X, p[index].Y, p[index].Z);
+            Index3D index3D = getFromShuffleXYZ(keys[index], n);
             //short l;
             //if (index3D.Z + 1 > input.Extent.Z - 1)
             //    l = input[-1,0,0];
@@ -598,13 +574,37 @@ namespace DispDICOMCMD
                            );
             //if (triTable[edges[index3D.Z, index3D.Y, index3D.X]].getn() / 3 != HPLayer[p[index].X, p[index].Y])
             //    ;
-            triangles[index] = tempCube.MarchHP(threshold, triTable[edges[index3D.Z, index3D.Y, index3D.X]], (int)k[index]);
+
+            if (max[index3D] > threshold && min[index3D] < threshold)
+            {
+                tempCube.Config(threshold);
+                Point[] vertice = tempCube.MarchGPU(threshold, triTable[tempCube.config]);
+                for (int i = 0; i < 12; i += 3)
+                {
+                    if ((vertice[i].X > 0 || vertice[i].Y > 0 || vertice[i].Z > 0) ||
+                        (vertice[i + 1].X > 0 || vertice[i + 1].Y > 0 || vertice[i + 1].Z > 0) ||
+                        (vertice[i + 2].X > 0 || vertice[i + 2].Y > 0 || vertice[i + 2].Z > 0))
+                    {
+
+                        //triangles[triangles.Length - 1].vertex1.value = 1;
+                        //if (triangles[(batchSize * batchSize * batchSize * 0) + (index.Z * batchSize * batchSize) + (index.Y * batchSize) + index.X].vertex1.X > 0)
+                        ////if (triangles.Length < 32 * 32 * 32 * 4 + 32 * 32 * 31 + 32 * 31 + 31 + 3)
+                        //{
+                        //    Triangle t = triangles[-1];
+                        //}
+                        triangles[index * 5 + (i/3)] = new Triangle(vertice[i], vertice[i + 1], vertice[i + 2]);
+                        //count[0]++;
+                    }
+                }
+            }
         }
 
         private static void OctreeTraversalGPU(StreamWriter fs)
         {
             int n;
-            var cnt = accelerator.Allocate1D<uint>(new uint[] { 0 });
+            var cnt = accelerator.Allocate1D<uint>(8);
+            cnt.MemSetToZero();
+            var newKeys = accelerator.Allocate1D<uint>(new uint[] { 0 });
             uint[] k = { 0, 1, 2, 3, 4, 5, 6, 7 };
             for(int i = 0; i < 8; i++)
                 k[i] <<= ((nLayers - 1) * 3);
@@ -612,19 +612,20 @@ namespace DispDICOMCMD
             var keys = accelerator.Allocate1D<uint>(k);
             Index1D index = new Index1D(8);
             uint[] karray = Enumerable.Range(0, nTri).Select(x => (uint)x).ToArray();
-            int sum = 0;
+            MemoryBuffer<ArrayView1D<uint,Stride1D.Dense>> sum = accelerator.Allocate1D<uint>(1);
             //cubeConfig = accelerator.Allocate3DDenseXY(cubes);
             //byteLayer = accelerator.Allocate2DDenseX(HPBaseLayer);
             //k.MemSetToZero();
             accelerator.Synchronize();
             var radixSort = accelerator.CreateRadixSort<uint, Stride1D.Dense, DescendingUInt32>();
+            var prefixSum = accelerator.CreateReduction<uint, Stride1D.Dense, AddUInt32>();
 
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            for (n = nLayers - 2; n > 0; n--)
+            for (n = nLayers - 1; n >= 0; n--)
             {
-                var newKeys = accelerator.Allocate1D<uint>(index.Size * 8);;
+                newKeys = accelerator.Allocate1D<uint>(index.Size * 8);
                 traversalKernel(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
                 accelerator.Synchronize();
 
@@ -638,9 +639,13 @@ namespace DispDICOMCMD
                         newKeys.View,
                         tempBuffer.View);
                 }
+                prefixSum(accelerator.DefaultStream, cnt, sum.View);
+
+                accelerator.Synchronize();
 
                 keys = newKeys;
-                index = new Index1D((int)cnt.GetAsArray1D()[0]);
+                index = new Index1D((int)sum.GetAsArray1D()[0]);
+                cnt = accelerator.Allocate1D<uint>(index.Size);
                 cnt.MemSetToZero();
             }
 
@@ -652,9 +657,9 @@ namespace DispDICOMCMD
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
             stopWatch.Reset();
 
-            Triangle[] tri = new Triangle[nTri];
-            PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(nTri);
-            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(nTri);
+            Triangle[] tri = new Triangle[index * 5];
+            PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(index * 5);
+            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(index * 5);
 
             stopWatch.Start();
 
@@ -675,29 +680,47 @@ namespace DispDICOMCMD
             //    Console.WriteLine(n);
             //}
 
-            //octreeFinalLayer(index, p.View, k.View, OctreeBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, threshold, (int)Math.Sqrt(OctreeSize));
+            octreeFinalLayer(index, getMinOctreeLayer(0).View, getMaxOctreeLayer(0).View, keys.View, sliced.View, triConfig, triTable.View, threshold, nLayers - 1);
 
-            //accelerator.Synchronize();
-            //stopWatch.Stop();
-            //ts = stopWatch.Elapsed;
-            //count = 0;
-            //elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-            //    ts.Hours, ts.Minutes, ts.Seconds,
-            //    ts.Milliseconds / 10);
-            //Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
+            accelerator.Synchronize();
+            stopWatch.Stop();
+            ts = stopWatch.Elapsed;
+            count = 0;
+            elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+            Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
 
 
-            //triConfig.View.CopyToPageLockedAsync(triLocked);
-            //accelerator.Synchronize();
-            //tri = triLocked.GetArray();
-            //triConfig.Dispose();
-            //cubeConfig.Dispose();
-            //sliced.Dispose();
-            //k.Dispose();
-            //p.Dispose();
-            //triTable.Dispose();
-            //HPBaseConfig.Dispose();
+            triConfig.View.CopyToPageLockedAsync(triLocked);
+            accelerator.Synchronize();
+            tri = triLocked.GetArray();
+            triConfig.Dispose();
+            sliced.Dispose();
+            triTable.Dispose();
+            //OctreeBaseConfig.Dispose();
 
+            var triC = tri.Where(x => (x.vertex1.X != 0 && x.vertex1.Y != 0 && x.vertex1.Z != 0) &&
+            (x.vertex2.X != 0 && x.vertex2.Y != 0 && x.vertex2.Z != 0) &&
+            (x.vertex3.X != 0 && x.vertex3.Y != 0 && x.vertex3.Z != 0)).ToList();
+            //        foreach (var triangle in triC)
+            //        {
+            //            //vertices.Add(vertex);
+            //            fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
+            //            fs.WriteLine("vn " + triangle.vertex1.normal.X + " " + triangle.vertex1.normal.Y + " " + triangle.vertex1.normal.Z);
+            //            fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
+            //            fs.WriteLine("vn " + triangle.vertex2.normal.X + " " + triangle.vertex2.normal.Y + " " + triangle.vertex2.normal.Z);
+            //            fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
+            //            fs.WriteLine("vn " + triangle.vertex3.normal.X + " " + triangle.vertex3.normal.Y + " " + triangle.vertex3.normal.Z);
+            //            //    //fs.WriteLine("vt " + vertex.X + " " + vertex.Y + " " + vertex.Z);
+            //            //    //Point normal = Normal(slices[0], slices[1], slices[2], slices[3], vertex, k);
+            //            //    //fs.WriteLine("vn " + normal.X + " " + normal.Y + " " + normal.Z);
+            //            //    //Point n = new Point(vertex.normal.X * 2 + normal.X, vertex.normal.Y * 2 + normal.Y, vertex.normal.Z * 2 + normal.Z, 0);
+            //            //    //normals.Add(normal);
+            //            count += 3;
+            //        }
+            //    }
+            count = 0;
             foreach (var triangle in tri)
             {
                 //vertices.Add(vertex);
