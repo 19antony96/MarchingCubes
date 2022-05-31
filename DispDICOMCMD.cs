@@ -252,6 +252,8 @@ namespace DispDICOMCMD
             {
                 if (getMinOctreeLayer(i) != null && !getMinOctreeLayer(i).IsDisposed)
                     getMinOctreeLayer(i).Dispose();
+                if (getMaxOctreeLayer(i) != null && !getMaxOctreeLayer(i).IsDisposed)
+                    getMaxOctreeLayer(i).Dispose();
             }
             //stopWatch.Stop();
             //ts = stopWatch.Elapsed;
@@ -721,7 +723,7 @@ namespace DispDICOMCMD
             //        }
             //    }
             count = 0;
-            foreach (var triangle in tri)
+            foreach (var triangle in triC)
             {
                 //vertices.Add(vertex);
                 fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
