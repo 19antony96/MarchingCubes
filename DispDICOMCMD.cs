@@ -107,7 +107,7 @@ namespace DispDICOMCMD
             //slices = sphere;
 
             HPsize = width;
-            if (Math.Log(width - 1, 2) % 1 > 0)
+            if (Math.Log(width, 2) % 1 > 0)
             {
                 HPsize = (int)Math.Pow(2, (int)Math.Log(width, 2) + 1);
             }
