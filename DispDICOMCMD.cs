@@ -99,9 +99,9 @@ namespace DispDICOMCMD
         public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer1;
         //public HistoPyramid HPGPU;
 
-        public static readonly short threshold = 300;
-        public static int length = 256;
-        public static int width = 256;
+        public static readonly short threshold = 1280;
+        public static int length = 512;
+        public static int width = 512;
         public static short[,,] slices;
         public static short[] slices1D;
         public static byte[,,] cubeBytes;
@@ -132,7 +132,7 @@ namespace DispDICOMCMD
             //slices = sphere;
 
             OctreeSize = width;
-            if (Math.Log(width - 1, 2) % 1 > 0)
+            if (Math.Log(width, 2) % 1 > 0)
             {
                 OctreeSize = (int)Math.Pow(2, (int)Math.Log(width, 2) + 1);
             }
@@ -156,9 +156,9 @@ namespace DispDICOMCMD
             //get_vertsX = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, Point, int, int, int>(getVerticesX);
 
             DicomFile dicoms;
-            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
+            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
-            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\DICOM\\DICOM\\ST000000\\SE000001\\");
+            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\DICOM\\DICOM\\ST000000\\SE000001\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Resources\\");
 
             //DicomFile p = DicomFile.Open("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\view0296.dcm");
@@ -266,8 +266,8 @@ namespace DispDICOMCMD
         public short[,,] CreateSphere(int size)
         {
             double factor = Math.Sqrt((size / 2) * (size / 2) * 5);
-            short[,,] slice = new short[size / 2, size, size];
-            for (int k = 0; k < size / 2; k++)
+            short[,,] slice = new short[size, size, size];
+            for (int k = 0; k < size; k++)
             {
                 for (int i = 0; i < size; i++)
                 {
@@ -480,7 +480,7 @@ namespace DispDICOMCMD
 
         public static void OctreeTraverseKernel(Index1D index, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
         {
-            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X) + 1);
+            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
             short t = max[index3D];
             short s = min[index3D];
             if(max[index3D] > threshold && min[index3D] < threshold)
@@ -628,10 +628,10 @@ namespace DispDICOMCMD
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            for (n = nLayers - 1; n > 0; n--)
+            for (n = nLayers - 2; n > 0; n--)
             {
                 newKeys = accelerator.Allocate1D<uint>(index.Size * 8);
-                traversalKernel(index, getMinOctreeLayer(n - 1).View, getMaxOctreeLayer(n - 1).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n - 1);
+                traversalKernel(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
                 accelerator.Synchronize();
 
                 // Compute the required amount of temporary memory
@@ -672,24 +672,12 @@ namespace DispDICOMCMD
             PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(index * 5);
             MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(index * 5);
 
+
+            List<Index3D> templ = keys.GetAsArray1D().Select(x => getFromShuffleXYZ(x, nLayers - 1)).ToList();
+
+            templ.FindAll(x => x.X == templ[0].X && x.Y == templ[0].Y && x.Z == templ[0].Z);
+
             stopWatch.Start();
-
-
-
-            //for (int o = 0; o < 1; o++)
-            //{
-            //    for (int i = 0; i < byteLayer.GetAsArray2D().GetLength(0); i++)
-            //    {
-            //        for (int j = 0; j < byteLayer.GetAsArray2D().GetLength(0); j++)
-            //        {
-            //            if ((byteLayer.GetAsArray2D()[j, i] != HP[0][j, i]))
-            //                ;
-            //            Console.Write(byteLayer.GetAsArray2D()[j, i]);
-            //        }
-            //        Console.WriteLine();
-            //    }
-            //    Console.WriteLine(n);
-            //}
 
             octreeFinalLayer(index, getMinOctreeLayer(0).View, getMaxOctreeLayer(0).View, keys.View, sliced.View, triConfig, triTable.View, threshold, nLayers - 1);
 
@@ -1203,7 +1191,7 @@ namespace DispDICOMCMD
         static Index3D getFromShuffleXYZ(uint xyz, int n)
         {
             uint X = 0, Y = 0, Z = 0;
-            for (int i = 0; i < n - 1; i++)
+            for (int i = 0; i < n; i++)
             {
                 xyz >>= 3;
                 X += (1 & xyz) << i;
