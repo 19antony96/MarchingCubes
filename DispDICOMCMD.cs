@@ -187,11 +187,11 @@ namespace DispDICOMCMD
                 CreateBmp(dicoms, k);
                 //slices[k] = file;
                 k++;
-                //if (k * length * width > Math.Pow(2, 32))
+                //if (k * length * width > math.pow(2, 32))
                 //    break;
                 //if (k > 13)
                 //    break;
-                //Console.WriteLine(k);
+                //console.writeline(k);
             }
 
             slices1D = new short[slices.Length];
