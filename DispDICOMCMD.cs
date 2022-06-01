@@ -76,7 +76,7 @@ namespace DispDICOMCMD
         public static MemoryBuffer3D<ulong, Stride3D.DenseXY> ulongLayer;
         //public HistoPyramid HPGPU;
 
-        public static readonly short threshold = 600;
+        public static readonly short threshold = 300;
         public static int length = 512;
         public static int width = 512;
         public static short[,,] slices;
@@ -101,10 +101,10 @@ namespace DispDICOMCMD
 
         public DispDICOMCMD(int size)
         {
-            length = size;
-            width = size;
-            var sphere = CreateSphere(size);
-            slices = sphere;
+            //length = size;
+            //width = size;
+            //var sphere = CreateSphere(size);
+            //slices = sphere;
 
             HPsize = width;
             if (Math.Log(width - 1, 2) % 1 > 0)
@@ -162,21 +162,21 @@ namespace DispDICOMCMD
             short i, j, k = 0;
 
 
-            //slices = new short[files.Length, length, width];
+            slices = new short[files.Length, length, width];
 
-            //foreach (var file in files)
-            ////foreach (var file in sphere)
-            //{
-            //    dicoms = DicomFile.Open(file.FullName);
-            //    CreateBmp(dicoms, k);
-            //    //slices[k] = file;
-            //    k++;
-            //    //if (k * length * width > Math.Pow(2, 32))
-            //    //    break;
-            //    //if (k > 13)
-            //    //    break;
-            //    //Console.WriteLine(k);
-            //}
+            foreach (var file in files)
+            //foreach (var file in sphere)
+            {
+                dicoms = DicomFile.Open(file.FullName);
+                CreateBmp(dicoms, k);
+                //slices[k] = file;
+                k++;
+                //if (k * length * width > Math.Pow(2, 32))
+                //    break;
+                //if (k > 13)
+                //    break;
+                //Console.WriteLine(k);
+            }
 
             slices1D = new short[slices.Length];
 
