@@ -23,6 +23,7 @@ using ILGPU.Algorithms.HistogramOperations;
 using ILGPU.Algorithms.RadixSortOperations;
 using ILGPU;
 using System.Diagnostics;
+using ImageMagick;
 using System.Linq;
 using System.Threading;
 using System.Runtime.InteropServices;
@@ -36,52 +37,36 @@ namespace DispDICOMCMD
         public static CudaAccelerator accelerator;
         //public static CPUAccelerator accelerator;
         //public static Action<Index1D, HistoPyramid> testHP;
-        public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>> assign;
-        public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<short, Stride1D.Dense>, Point, int, int, int> get_verts;
-        public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY> , ArrayView3D<short, Stride3D.DenseXY> > octreeFirstLayer;
-        public static Action<Index3D, ArrayView3D<short, Stride3D.DenseXY> , ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>> octreeCreation;
-        public static Action<Index1D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernel;
-        public static Action<Index1D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, short, int> octreeFinalLayer;
+        public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> assign;
+        public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<ushort, Stride1D.Dense>, Point, int, int, int> get_verts;
+        public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY> , ArrayView3D<ushort, Stride3D.DenseXY> > octreeFirstLayer;
+        public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>> octreeCreation;
+        public static Action<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernel;
+        public static Action<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ushort, int> octreeFinalLayer;
 
 
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minConfig;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxConfig;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> layerConfig;
         public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysConfig;
-        private static MemoryBuffer3D<short, Stride3D.DenseXY> OctreeBaseConfig;
+        private static MemoryBuffer3D<ushort, Stride3D.DenseXY> OctreeBaseConfig;
         public static MemoryBuffer3D<Normal, Stride3D.DenseXY> gradConfig;
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> sliced;
+        public static MemoryBuffer3D<ushort, Stride3D.DenseXY> sliced;
         public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer15;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer14;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer13;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer12;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer11;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer10;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer9;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer8;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer7;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer6;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer5;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer4;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer3;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer2;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> maxLayer1;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer15;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer14;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer13;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer12;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer11;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer10;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer9;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer8;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer7;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer6;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer5;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer4;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer3;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer2;
-        public static MemoryBuffer3D<short, Stride3D.DenseXY> minLayer1;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer15;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer14;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer13;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer12;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer11;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer10;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer9;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer8;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer7;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer6;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer5;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer4;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer3;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer2;
+        public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer1;
         public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer15;
         public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer14;
         public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer13;
@@ -99,18 +84,18 @@ namespace DispDICOMCMD
         public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer1;
         //public HistoPyramid HPGPU;
 
-        public static readonly short threshold = 1280;
-        public static int length = 512;
-        public static int width = 512;
-        public static short[,,] slices;
-        public static short[] slices1D;
+        public static readonly ushort threshold = 1539;
+        public static int length = 256;
+        public static int width = 256;
+        public static ushort[,,] slices;
+        public static ushort[] slices1D;
         public static byte[,,] cubeBytes;
         public static int batchSize;
         public static int sliceSize = 127;
-        public static short[,,] OctreeBaseLayer;
-        public static short[][,,] Octree;
+        public static ushort[,,] OctreeBaseLayer;
+        public static ushort[][,,] Octree;
         public static int OctreeSize;
-        public static short nLayers;
+        public static ushort nLayers;
         public static int nTri;
 
         public static TimeSpan ts = new TimeSpan();
@@ -118,8 +103,7 @@ namespace DispDICOMCMD
 
         public static Normal[,,] normals;
         public static List<Point> vertices = new List<Point>();
-        public static short[,,] octreeMin;
-        public static short[,,] octreeMax;
+        public static byte[,,] octreeLayer;
         public static uint[,,] octreeKeys;
         public static Edge[] edges;
         public static int count = 0;
@@ -145,27 +129,36 @@ namespace DispDICOMCMD
             accelerator = context.CreateCudaAccelerator(0);
             //accelerator = context.CreateCPUAccelerator(0);
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
-            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(Assign);
-            //get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<short, Stride1D.Dense>, Point, int, int, int>(getVertices);
-            //octreeFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(BuildOctreeFirst); 
-            octreeCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(BuildOctree);
-            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernel);
-            octreeFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<short, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, short, int>(OctreeFinalLayer);
+            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(Assign);
+            //get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<ushort, Stride1D.Dense>, Point, int, int, int>(getVertices);
+            //octreeFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BuildOctreeFirst); 
+            octreeCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>>(BuildOctree);
+            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernel);
+            octreeFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ushort, int>(OctreeFinalLayer);
             //testHP = accelerator.LoadAutoGroupedStreamKernel<Index1D, HistoPyramid>(TestHP);
 
-            //get_vertsX = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, Point, int, int, int>(getVerticesX);
+            //get_vertsX = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, Point, int, int, int>(getVerticesX);
 
             DicomFile dicoms;
-            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
+            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\DICOM\\DICOM\\ST000000\\SE000001\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Resources\\");
+
+
+            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\PVSJ_882\\";
+            string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
+            OctreeSize = 512;
+            DirectoryInfo d = new DirectoryInfo(path);
 
             //DicomFile p = DicomFile.Open("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\view0296.dcm");
             //DicomPixelData pixelData = DicomPixelData.Create(p.Dataset);
 
 
-            FileInfo[] files = d.GetFiles("*.dcm");
+            //FileInfo[] files = d.GetFiles("*.dcm");
+            //FileInfo[] files = d.GetFiles("*.tif");
+            FileInfo[] files = d.GetFiles();
+            files = files.OrderBy(x => int.Parse(x.Name.Replace("MRbrain.", ""))).ToArray();
 
 
 
@@ -175,16 +168,17 @@ namespace DispDICOMCMD
             string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
             FileInfo fi = new FileInfo(fileName);
 
-            short i, j, k = 0;
+            ushort i, j, k = 0;
 
 
-            slices = new short[files.Length, length, width];
+            slices = new ushort[files.Length, length, width];
 
             foreach (var file in files)
             //foreach (var file in sphere)
             {
-                dicoms = DicomFile.Open(file.FullName);
-                CreateBmp(dicoms, k);
+                //dicoms = DicomFile.Open(file.FullName);
+                //CreateBmp(dicoms, k);
+                Decode(file.FullName, k);
                 //slices[k] = file;
                 k++;
                 //if (k * length * width > math.pow(2, 32))
@@ -192,20 +186,24 @@ namespace DispDICOMCMD
                 //if (k > 13)
                 //    break;
                 //console.writeline(k);
+                if (k > 1023)
+                    break;
             }
 
-            slices1D = new short[slices.Length];
+            slices1D = new ushort[slices.Length];
+            slices1D.Max();
 
             //Stopwatch stopWatch = new Stopwatch();
             //stopWatch.Start();
-            sliced = accelerator.Allocate3DDenseXY<short>(slices);
+            sliced = accelerator.Allocate3DDenseXY<ushort>(slices);
+            //sliced.AsContiguous().GetAsArray().Max();
             //sliced.View.To1DView().CopyToCPU(slices1D);
             //var temp = MarchingCubesCPU();
             MarchingCubesGPU();
             //int sum = 0;
             //foreach(Edge cube in cubes)
             //{
-            //    foreach(short n in cube.getAsArray())
+            //    foreach(ushort n in cube.getAsArray())
             //    {
             //        if (n > 0)
             //        {
@@ -250,10 +248,8 @@ namespace DispDICOMCMD
 
             for (i = 1; i < nLayers; i++)
             {
-                if (getMinOctreeLayer(i) != null && !getMinOctreeLayer(i).IsDisposed)
-                    getMinOctreeLayer(i).Dispose();
-                if (getMaxOctreeLayer(i) != null && !getMaxOctreeLayer(i).IsDisposed)
-                    getMaxOctreeLayer(i).Dispose();
+                if (getByteOctreeLayer(i) != null && !getByteOctreeLayer(i).IsDisposed)
+                    getByteOctreeLayer(i).Dispose();
             }
             //stopWatch.Stop();
             //ts = stopWatch.Elapsed;
@@ -263,30 +259,30 @@ namespace DispDICOMCMD
             //Console.WriteLine("RunTime " + elapsedTime);
         }
 
-        public short[,,] CreateSphere(int size)
+        public ushort[,,] CreateSphere(int size)
         {
             double factor = Math.Sqrt((size / 2) * (size / 2) * 5);
-            short[,,] slice = new short[size, size, size];
+            ushort[,,] slice = new ushort[size, size, size];
             for (int k = 0; k < size; k++)
             {
                 for (int i = 0; i < size; i++)
                 {
                     for (int j = 0; j < size; j++)
                     {
-                        slice[k, j, i] = (short)Math.Round(Math.Sqrt((i - size / 2) * (i - size / 2) + (j - size / 2) * (j - size / 2) + (k - size / 2) * (k - size / 2)) * (2000 / factor));
+                        slice[k, j, i] = (ushort)Math.Round(Math.Sqrt((i - size / 2) * (i - size / 2) + (j - size / 2) * (j - size / 2) + (k - size / 2) * (k - size / 2)) * (2000 / factor));
                         //double h = (k + i) * 60;
                         //bool p = h > (double)threshold;
-                        //slice[k, j, i] = (short)(p ? threshold - 50 : threshold + 50);
-                        //slice[k, j, i] = (short)(((j - size / 2) + (i - size / 2) + (k - size / 2)) * 20);
+                        //slice[k, j, i] = (ushort)(p ? threshold - 50 : threshold + 50);
+                        //slice[k, j, i] = (ushort)(((j - size / 2) + (i - size / 2) + (k - size / 2)) * 20);
                     }
                 }
             }
             return slice;
         }
-        public short[,,] CreateCayley(int size)
+        public ushort[,,] CreateCayley(int size)
         {
             double factor = Math.Sqrt((size / 2) * (size / 2) * 5);
-            short[,,] slice = new short[size, size, size];
+            ushort[,,] slice = new ushort[size, size, size];
             for (int k = 0; k < size; k++)
             {
                 for (int i = 0; i < size; i++)
@@ -296,58 +292,40 @@ namespace DispDICOMCMD
                         float x = (float)i / size;
                         float y = (float)j / size;
                         float z = (float)k / size;
-                        slice[k, j, i] = (short)(16 * x * y * z + 4 * (x + y + z) - 14) ;
+                        slice[k, j, i] = (ushort)(16 * x * y * z + 4 * (x + y + z) - 14) ;
                     }
                 }
             }
             return slice;
         }
 
-        public static void BuildOctree(Index3D index, ArrayView3D<short, Stride3D.DenseXY> minPrev, ArrayView3D<short, Stride3D.DenseXY> maxPrev, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max)
+        public static void BuildOctree(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> bytePrev, ArrayView3D<byte, Stride3D.DenseXY> layer)
         {
-
-            short[] tempMax = new[] {maxPrev[(index.Z)*2, (index.Y)*2, (index.X)*2],
-                maxPrev[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
-                maxPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
-                maxPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
-                maxPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
-                maxPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
-                maxPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
-                maxPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2] };
-
-            short[] tempMin = new[] {minPrev[(index.Z)*2, (index.Y)*2, (index.X)*2],
-                minPrev[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
-                minPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
-                minPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
-                minPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
-                minPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
-                minPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
-                minPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2]};
-
-            short tMax = tempMax[0];
-            short tMin = tempMin[0];
-            for (int i = 1; i < 8; i++)
-            {
-                if (tempMax[i] > tMax) tMax = tempMax[i];
-                if (tempMin[i] < tMin) tMin = tempMin[i];
-            }
-            min[(index.Z), (index.Y), (index.X)] = tMin;
-            max[(index.Z), (index.Y), (index.X)] = tMax;
-
+            if (bytePrev[(index.Z) * 2, (index.Y) * 2, (index.X) * 2] > 0 ||
+                bytePrev[(index.Z) * 2, (index.Y) * 2, (index.X) * 2 + 1] > 0 ||
+                bytePrev[(index.Z) * 2, (index.Y) * 2 + 1, (index.X) * 2 + 1] > 0 ||
+                bytePrev[(index.Z) * 2, (index.Y) * 2 + 1, (index.X) * 2] > 0 ||
+                bytePrev[(index.Z) * 2 + 1, (index.Y) * 2, (index.X) * 2] > 0 ||
+                bytePrev[(index.Z) * 2 + 1, (index.Y) * 2, (index.X) * 2 + 1] > 0 ||
+                bytePrev[(index.Z) * 2 + 1, (index.Y) * 2 + 1, (index.X) * 2 + 1] > 0 ||
+                bytePrev[(index.Z) * 2 + 1, (index.Y) * 2 + 1, (index.X) * 2] > 0)
+                layer[(index.Z), (index.Y), (index.X)] = 1;
+            else
+                layer[(index.Z), (index.Y), (index.X)] = 0;
         }
 
 
-        //public static void BuildOctreeFirst(Index3D index, ArrayView3D<short, Stride3D.DenseXY> OctreeLayer, ArrayView3D<short, Stride3D.DenseXY> OctreeLayerBase)
+        //public static void BuildOctreeFirst(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> OctreeLayer, ArrayView3D<ushort, Stride3D.DenseXY> OctreeLayerBase)
         //{
-        //    OctreeLayer[index] = (short)(OctreeLayerBase[index.X * 2, index.Y * 2, index.Z * 2] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2, index.Z * 2] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2 + 1, index.Z * 2] + OctreeLayerBase[index.X * 2, index.Y * 2 + 1, index.Z * 2] +
+        //    OctreeLayer[index] = (ushort)(OctreeLayerBase[index.X * 2, index.Y * 2, index.Z * 2] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2, index.Z * 2] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2 + 1, index.Z * 2] + OctreeLayerBase[index.X * 2, index.Y * 2 + 1, index.Z * 2] +
         //        OctreeLayerBase[index.X * 2, index.Y * 2, index.Z * 2 + 1] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2, index.Z * 2 + 1] + OctreeLayerBase[index.X * 2 + 1, index.Y * 2 + 1, index.Z * 2 + 1] + OctreeLayerBase[index.X * 2, index.Y * 2 + 1, index.Z * 2 + 1]);
         //}
 
         private static void OctreeCreationGPU()
         {
-            nLayers = (short)(Math.Ceiling(Math.Log(OctreeSize, 2)) + 1);
-            Octree = new short[10][,,];
-            Octree[0] = new short[OctreeSize, OctreeSize, OctreeSize];
+            nLayers = (ushort)(Math.Ceiling(Math.Log(OctreeSize, 2)) + 1);
+            Octree = new ushort[10][,,];
+            Octree[0] = new ushort[OctreeSize, OctreeSize, OctreeSize];
             //Array.Copy(OctreeBaseLayer, Octree[0], OctreeBaseLayer.Length);
             //for (int i = 0; i < HPBaseLayer.GetLength(0); i++)
             //{
@@ -360,8 +338,8 @@ namespace DispDICOMCMD
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            //getMinOctreeLayer(0) = accelerator.Allocate3DDenseXY<short>(new Index3D((int)OctreeBaseConfig.Extent.X / 2));
-            //getMaxOctreeLayer(1) = accelerator.Allocate3DDenseXY<short>(new Index3D((int)OctreeBaseConfig.Extent.X / 2));
+            //getMinOctreeLayer(0) = accelerator.Allocate3DDenseXY<ushort>(new Index3D((int)OctreeBaseConfig.Extent.X / 2));
+            //getMaxOctreeLayer(1) = accelerator.Allocate3DDenseXY<ushort>(new Index3D((int)OctreeBaseConfig.Extent.X / 2));
             //octreeFirstLayer(getMinOctreeLayer(1).IntExtent, getMinOctreeLayer(1).View, OctreeBaseConfig.View);
             accelerator.Synchronize();
             for (int i = 1; i < 16; i++)
@@ -371,11 +349,10 @@ namespace DispDICOMCMD
                 if (i < nLayers)
                 {
                     Index3D index = new Index3D(l); 
-                    getMinOctreeLayer(i) = accelerator.Allocate3DDenseXY<short>(index);
-                    getMaxOctreeLayer(i) = accelerator.Allocate3DDenseXY<short>(index);
+                    getByteOctreeLayer(i) = accelerator.Allocate3DDenseXY<byte>(index);
 
 
-                    octreeCreation(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View);
+                    octreeCreation(index, getByteOctreeLayer(i - 1).View, getByteOctreeLayer(i).View);
                     accelerator.Synchronize();
                 }
                 //else
@@ -391,7 +368,7 @@ namespace DispDICOMCMD
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
             Console.WriteLine("RunTime " + elapsedTime);
-            short[,,] data = data = getMinOctreeLayer(nLayers - 1).GetAsArray3D();
+            byte[,,] data = data = getByteOctreeLayer(nLayers - 1).GetAsArray3D();
             if (data.Length == 1)
                 nTri = (int)data[0, 0, 0];
             //for (int n = 0; n < 1; n++)
@@ -414,9 +391,9 @@ namespace DispDICOMCMD
             //return HP;
         }
 
-        private static short[][,,] OctreeCreation()
+        private static ushort[][,,] OctreeCreation()
         {
-            nLayers = (short)(Math.Ceiling(Math.Log(OctreeBaseLayer.GetLength(0), 2)) + 1);
+            nLayers = (ushort)(Math.Ceiling(Math.Log(OctreeBaseLayer.GetLength(0), 2)) + 1);
             uint[][,,] HP = new uint[11][,,];
             HP[0] = new uint[OctreeBaseLayer.GetLength(0), OctreeBaseLayer.GetLength(0), OctreeBaseLayer.GetLength(0)];
             Array.Copy(OctreeBaseLayer, HP[0], OctreeBaseLayer.Length);
@@ -437,19 +414,19 @@ namespace DispDICOMCMD
                 if (i < nLayers)
                 {
                     int l = Math.Max(Octree[i - 1].GetLength(0) / 2, 1);
-                    Octree[i] = new short[l, l, l];
+                    Octree[i] = new ushort[l, l, l];
                     for (int iOct = 0; iOct < l; iOct++)
                     {
                         for (int jOct = 0; jOct < l; jOct++)
                         {
                             for(int kOct = 0; kOct < l; kOct++)
-                                Octree[i][iOct, jOct, kOct] = (short)(Octree[i - 1][iOct * 2, jOct * 2, kOct * 2] + Octree[i - 1][iOct * 2 + 1, jOct * 2, kOct * 2] + Octree[i - 1][iOct * 2 + 1, jOct * 2 + 1, kOct * 2] + Octree[i - 1][iOct * 2, jOct * 2 + 1, kOct * 2] +
+                                Octree[i][iOct, jOct, kOct] = (ushort)(Octree[i - 1][iOct * 2, jOct * 2, kOct * 2] + Octree[i - 1][iOct * 2 + 1, jOct * 2, kOct * 2] + Octree[i - 1][iOct * 2 + 1, jOct * 2 + 1, kOct * 2] + Octree[i - 1][iOct * 2, jOct * 2 + 1, kOct * 2] +
                                 Octree[i - 1][iOct * 2, jOct * 2, kOct * 2 + 1] + Octree[i - 1][iOct * 2 + 1, jOct * 2, kOct * 2 + 1] + Octree[i - 1][iOct * 2 + 1, jOct * 2 + 1, kOct * 2 + 1] + Octree[i - 1][iOct * 2, jOct * 2 + 1, kOct * 2 + 1]);
                         }
                     }
                 }
                 else
-                    Octree[i] = new short[,,] { { { 0 } } };
+                    Octree[i] = new ushort[,,] { { { 0 } } };
             }
             nTri = (int)Octree[nLayers - 1][0, 0, 0];
 
@@ -478,12 +455,10 @@ namespace DispDICOMCMD
             return Octree;
         }
 
-        public static void OctreeTraverseKernel(Index1D index, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
+        public static void OctreeTraverseKernel(Index1D index, ArrayView3D<byte, Stride3D.DenseXY> layer, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
         {
-            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
-            short t = max[index3D];
-            short s = min[index3D];
-            if(max[index3D] > threshold && min[index3D] < threshold)
+            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(layer.Extent.X));
+            if(layer[index3D] > 0)
             {
                 newKeys[index * 8] = keys[index];
                 newKeys[index * 8 + 1] = (uint)(keys[index] + (1 << (3 * n)));
@@ -508,26 +483,26 @@ namespace DispDICOMCMD
             }
         }
 
-        public static void OctreeFinalLayer(Index1D index, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView1D<Triangle, Stride1D.Dense> triangles, ArrayView1D<Edge, Stride1D.Dense> triTable, short threshold, int n)
+        public static void OctreeFinalLayer(Index1D index, ArrayView3D<byte, Stride3D.DenseXY> layer, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView1D<Triangle, Stride1D.Dense> triangles, ArrayView1D<Edge, Stride1D.Dense> triTable, ushort threshold, int n)
         {
 
              //index3D = new Index3D(OctreeSqrt * (int)(p[index].X / (OctreeSqrt * OctreeSqrt)) + (int)(p[index].Y / (OctreeSqrt * OctreeSqrt)), p[index].X % (OctreeSqrt * OctreeSqrt), p[index].Y % (OctreeSqrt * OctreeSqrt));
             Index3D index3D = getFromShuffleXYZ(keys[index], n);
 
             index3D = new Index3D(index3D.Z, index3D.Y, index3D.X);
-            //short l;
+            //ushort l;
             //if (index3D.Z + 1 > input.Extent.Z - 1)
             //    l = input[-1,0,0];
 
-            if (max[index3D.Z, index3D.Y, index3D.X] > threshold && min[index3D.Z, index3D.Y, index3D.X] < threshold)
+            if (layer[index3D.Z, index3D.Y, index3D.X] > 0)
             {
-                //short t = input[(index3D.X), index3D.Y, index3D.Z];
-                new Point((short)(index3D.X), (short)(index3D.Y), (index3D.Z), input[(index3D.Z), index3D.Y, index3D.X],
-                    new Normal(
-                         input[(index3D.Z), (index3D.Y), Math.Min((input.Extent.Z) - 1, (index3D.X))] - input[(index3D.Z), (index3D.Y), Math.Max((index3D.X) - 1, 0)],
-                         input[(index3D.Z), Math.Min((input.Extent.Y) - 1, (index3D.Y)), (index3D.X)] - input[(index3D.Z), Math.Max((index3D.Y) - 1, 0), (index3D.X)],
-                         input[Math.Min((int)input.Extent.X - 1, (index3D.Z)), (index3D.Y), (index3D.X)] - input[Math.Max((index3D.Z) - 1, 0), (index3D.Y), (index3D.X)]
-                 ));
+                //ushort t = input[(index3D.X), index3D.Y, index3D.Z];
+                //new Point((ushort)(index3D.X), (ushort)(index3D.Y), (index3D.Z), input[(index3D.Z), index3D.Y, index3D.X],
+                //    new Normal(
+                //         input[(index3D.Z), (index3D.Y), Math.Min((input.Extent.Z) - 1, (index3D.X))] - input[(index3D.Z), (index3D.Y), Math.Max((index3D.X) - 1, 0)],
+                //         input[(index3D.Z), Math.Min((input.Extent.Y) - 1, (index3D.Y)), (index3D.X)] - input[(index3D.Z), Math.Max((index3D.Y) - 1, 0), (index3D.X)],
+                //         input[Math.Min((int)input.Extent.X - 1, (index3D.Z)), (index3D.Y), (index3D.X)] - input[Math.Max((index3D.Z) - 1, 0), (index3D.Y), (index3D.X)]
+                // ));
 
                 Cube tempCube = new Cube(
                                new Point(index3D.X, index3D.Y, index3D.Z, input[index3D.Z, index3D.Y, index3D.X],
@@ -536,19 +511,19 @@ namespace DispDICOMCMD
                                     input[index3D.Z, Math.Min((input.Extent.Y) - 1, index3D.Y + 1), index3D.X] - input[index3D.Z, Math.Max(index3D.Y - 1, 0), index3D.X],
                                     input[Math.Min((int)input.Extent.X - 1, index3D.Z + 1), index3D.Y, index3D.X] - input[Math.Max(index3D.Z - 1, 0), index3D.Y, index3D.X]
                                 )),
-                               new Point((short)(index3D.X + 1), index3D.Y, index3D.Z, input[index3D.Z, index3D.Y, index3D.X + 1],
+                               new Point((ushort)(index3D.X + 1), index3D.Y, index3D.Z, input[index3D.Z, index3D.Y, index3D.X + 1],
                                new Normal(
                                     input[index3D.Z, index3D.Y, Math.Min((input.Extent.Z) - 1, (index3D.X + 1) + 1)] - input[index3D.Z, index3D.Y, Math.Max((index3D.X + 1) - 1, 0)],
                                     input[index3D.Z, Math.Min((input.Extent.Y) - 1, index3D.Y + 1), (index3D.X + 1)] - input[index3D.Z, Math.Max(index3D.Y - 1, 0), (index3D.X + 1)],
                                     input[Math.Min((int)input.Extent.X - 1, index3D.Z + 1), index3D.Y, (index3D.X + 1)] - input[Math.Max(index3D.Z - 1, 0), index3D.Y, (index3D.X + 1)]
                                 )),
-                               new Point((short)(index3D.X + 1), (short)(index3D.Y + 1), index3D.Z, input[index3D.Z, index3D.Y + 1, index3D.X + 1],
+                               new Point((ushort)(index3D.X + 1), (ushort)(index3D.Y + 1), index3D.Z, input[index3D.Z, index3D.Y + 1, index3D.X + 1],
                                new Normal(
                                     input[index3D.Z, (index3D.Y + 1), Math.Min((input.Extent.Z) - 1, (index3D.X + 1) + 1)] - input[index3D.Z, (index3D.Y + 1), Math.Max((index3D.X + 1) - 1, 0)],
                                     input[index3D.Z, Math.Min((input.Extent.Y) - 1, (index3D.Y + 1) + 1), (index3D.X + 1)] - input[index3D.Z, Math.Max((index3D.Y + 1) - 1, 0), (index3D.X + 1)],
                                     input[Math.Min((int)input.Extent.X - 1, index3D.Z + 1), (index3D.Y + 1), (index3D.X + 1)] - input[Math.Max(index3D.Z - 1, 0), (index3D.Y + 1), (index3D.X + 1)]
                                 )),
-                               new Point(index3D.X, (short)(index3D.Y + 1), index3D.Z, input[index3D.Z, index3D.Y + 1, index3D.X],
+                               new Point(index3D.X, (ushort)(index3D.Y + 1), index3D.Z, input[index3D.Z, index3D.Y + 1, index3D.X],
                                new Normal(
                                     input[index3D.Z, (index3D.Y + 1), Math.Min((input.Extent.Z) - 1, index3D.X + 1)] - input[index3D.Z, (index3D.Y + 1), Math.Max(index3D.X - 1, 0)],
                                     input[index3D.Z, Math.Min((input.Extent.Y) - 1, (index3D.Y + 1) + 1), index3D.X] - input[index3D.Z, Math.Max((index3D.Y + 1) - 1, 0), index3D.X],
@@ -560,19 +535,19 @@ namespace DispDICOMCMD
                                     input[(index3D.Z + 1), Math.Min((input.Extent.Y) - 1, index3D.Y + 1), index3D.X] - input[(index3D.Z + 1), Math.Max(index3D.Y - 1, 0), index3D.X],
                                     input[Math.Min((int)input.Extent.X - 1, (index3D.Z + 1) + 1), index3D.Y, index3D.X] - input[Math.Max((index3D.Z + 1) - 1, 0), index3D.Y, index3D.X]
                                 )),
-                               new Point((short)(index3D.X + 1), index3D.Y, (index3D.Z + 1), input[(index3D.Z + 1), index3D.Y, index3D.X + 1],
+                               new Point((ushort)(index3D.X + 1), index3D.Y, (index3D.Z + 1), input[(index3D.Z + 1), index3D.Y, index3D.X + 1],
                                new Normal(
                                     input[(index3D.Z + 1), index3D.Y, Math.Min((input.Extent.Z) - 1, (index3D.X + 1) + 1)] - input[(index3D.Z + 1), index3D.Y, Math.Max((index3D.X + 1) - 1, 0)],
                                     input[(index3D.Z + 1), Math.Min((input.Extent.Y) - 1, index3D.Y + 1), (index3D.X + 1)] - input[(index3D.Z + 1), Math.Max(index3D.Y - 1, 0), (index3D.X + 1)],
                                     input[Math.Min((int)input.Extent.X - 1, (index3D.Z + 1) + 1), index3D.Y, (index3D.X + 1)] - input[Math.Max((index3D.Z + 1) - 1, 0), index3D.Y, (index3D.X + 1)]
                                 )),
-                               new Point((short)(index3D.X + 1), (short)(index3D.Y + 1), (index3D.Z + 1), input[(index3D.Z + 1), index3D.Y + 1, index3D.X + 1],
+                               new Point((ushort)(index3D.X + 1), (ushort)(index3D.Y + 1), (index3D.Z + 1), input[(index3D.Z + 1), index3D.Y + 1, index3D.X + 1],
                                new Normal(
                                     input[(index3D.Z + 1), (index3D.Y + 1), Math.Min((input.Extent.Z) - 1, (index3D.X + 1) + 1)] - input[(index3D.Z + 1), (index3D.Y + 1), Math.Max((index3D.X + 1) - 1, 0)],
                                     input[(index3D.Z + 1), Math.Min((input.Extent.Y) - 1, (index3D.Y + 1) + 1), (index3D.X + 1)] - input[(index3D.Z + 1), Math.Max((index3D.Y + 1) - 1, 0), (index3D.X + 1)],
                                     input[Math.Min((int)input.Extent.X - 1, (index3D.Z + 1) + 1), (index3D.Y + 1), (index3D.X + 1)] - input[Math.Max((index3D.Z + 1) - 1, 0), (index3D.Y + 1), (index3D.X + 1)]
                                 )),
-                               new Point(index3D.X, (short)(index3D.Y + 1), (index3D.Z + 1), input[(index3D.Z + 1), index3D.Y + 1, index3D.X],
+                               new Point(index3D.X, (ushort)(index3D.Y + 1), (index3D.Z + 1), input[(index3D.Z + 1), index3D.Y + 1, index3D.X],
                                new Normal(
                                     input[(index3D.Z + 1), (index3D.Y + 1), Math.Min((input.Extent.Z) - 1, index3D.X + 1)] - input[(index3D.Z + 1), (index3D.Y + 1), Math.Max(index3D.X - 1, 0)],
                                     input[(index3D.Z + 1), Math.Min((input.Extent.Y) - 1, (index3D.Y + 1) + 1), index3D.X] - input[(index3D.Z + 1), Math.Max((index3D.Y + 1) - 1, 0), index3D.X],
@@ -631,7 +606,7 @@ namespace DispDICOMCMD
             for (n = nLayers - 2; n > 0; n--)
             {
                 newKeys = accelerator.Allocate1D<uint>(index.Size * 8);
-                traversalKernel(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                traversalKernel(index, getByteOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
                 accelerator.Synchronize();
 
                 // Compute the required amount of temporary memory
@@ -650,8 +625,7 @@ namespace DispDICOMCMD
                 accelerator.Synchronize();
                 if(n > 0)
                 {
-                    getMinOctreeLayer(n).Dispose();
-                    getMaxOctreeLayer(n).Dispose();
+                    getByteOctreeLayer(n).Dispose();
                 }
 
                 keys = newKeys;
@@ -679,7 +653,7 @@ namespace DispDICOMCMD
 
             stopWatch.Start();
 
-            octreeFinalLayer(index, getMinOctreeLayer(0).View, getMaxOctreeLayer(0).View, keys.View, sliced.View, triConfig, triTable.View, threshold, nLayers - 1);
+            octreeFinalLayer(index, getByteOctreeLayer(0).View, keys.View, sliced.View, triConfig, triTable.View, threshold, nLayers - 1);
 
             accelerator.Synchronize();
             stopWatch.Stop();
@@ -749,7 +723,7 @@ namespace DispDICOMCMD
             //Edge[,,] edges = new Edge[(slices.GetLength(0) - 1), (width - 1), (length - 1)];
             cubeBytes = new byte[(slices.GetLength(0) - 1), (width - 1), (length - 1)];
             byte cubeByte;
-            OctreeBaseLayer = new short[OctreeSize, OctreeSize, OctreeSize];
+            OctreeBaseLayer = new ushort[OctreeSize, OctreeSize, OctreeSize];
 
             //Normal[,,] grads = new Normal[(slices.GetLength(0)), (width), (length)];
             //byte[,] configBytes = new byte[511, 511];
@@ -809,29 +783,22 @@ namespace DispDICOMCMD
             return cubeBytes;
         }
 
-        public static void Assign(Index3D index, ArrayView3D<short, Stride3D.DenseXY> min, ArrayView3D<short, Stride3D.DenseXY> max, ArrayView3D<short, Stride3D.DenseXY> input)
+        public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> layer, ArrayView3D<ushort, Stride3D.DenseXY> input)
         {
-            var temp = new[] {input[(index.Z), (index.Y), (index.X)],
-            input[(index.Z), (index.Y), (index.X) + 1],
-            input[(index.Z), (index.Y) + 1, (index.X) + 1],
-            input[(index.Z), (index.Y) + 1, (index.X)],
-            input[(index.Z) + 1, (index.Y), (index.X)],
-            input[(index.Z) + 1, (index.Y), (index.X) + 1],
-            input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1],
-            input[(index.Z) + 1, (index.Y) + 1, (index.X)]};
+            byte cubeByte = 0; 
+            cubeByte += (input[(index.Z), (index.Y), (index.X)] < threshold) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y), (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X)] < threshold) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X)] < threshold) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X)] < threshold) ? (byte)0x01 : (byte)0;
 
-            short tMax = temp[0];
-            short tMin = temp[0];
-            for(int i = 1; i< 8; i++)
-            {
-                if (temp[i] > tMax) tMax = temp[i];
-                if (temp[i] < tMin) tMin = temp[i];
-            }
-            min[(index.Z), (index.Y), (index.X)] = tMin;
-            max[(index.Z), (index.Y), (index.X)] = tMax;
-
-
-            //short[] sort = findMinMax(temp, 0, 7);
+            if(cubeByte == 0 || cubeByte == 8)
+                layer[(index.Z), (index.Y), (index.X)] = 0;
+            else
+                layer[(index.Z), (index.Y), (index.X)] = 1;
         }
 
         public static void MarchingCubesGPU()
@@ -862,34 +829,27 @@ namespace DispDICOMCMD
             //HPBaseLayer = new byte[HPsize, HPsize, HPsize];
 
             //Normal[,,] grads = new Normal[index.X, index.Y, index.Z];
-            octreeMin = new short[OctreeSize, OctreeSize, OctreeSize];
-            octreeMax = new short[OctreeSize, OctreeSize, OctreeSize];
+            octreeLayer = new byte[OctreeSize, OctreeSize, OctreeSize];
             //var gradPinned = GCHandle.Alloc(grads, GCHandleType.Pinned);
-            var minPinned = GCHandle.Alloc(octreeMin, GCHandleType.Pinned);
-            var maxPinned = GCHandle.Alloc(octreeMax, GCHandleType.Pinned);
-            PageLockedArray3D<short> minLocked = accelerator.AllocatePageLocked3D<short>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
-            PageLockedArray3D<short> maxLocked = accelerator.AllocatePageLocked3D<short>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
+            var layerPinned = GCHandle.Alloc(octreeLayer, GCHandleType.Pinned);
+            PageLockedArray3D<byte> layerLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
             //PageLockedArray3D<Normal> gradLocked = accelerator.AllocatePageLocked3D<Normal>(index);
-            minConfig = accelerator.Allocate3DDenseXY<short>(minLocked.Extent);
-            maxConfig = accelerator.Allocate3DDenseXY<short>(maxLocked.Extent);
+            layerConfig = accelerator.Allocate3DDenseXY<byte>(layerLocked.Extent);
             //gradConfig = accelerator.Allocate3DDenseXY<Normal>(index);
             //var gradScope = accelerator.CreatePageLockFromPinned<Normal>(gradPinned.AddrOfPinnedObject(), grads.Length);
-            var minScope = accelerator.CreatePageLockFromPinned<short>(minPinned.AddrOfPinnedObject(), octreeMin.Length);
-            var maxScope = accelerator.CreatePageLockFromPinned<short>(maxPinned.AddrOfPinnedObject(), octreeMax.Length);
+            var layerScope = accelerator.CreatePageLockFromPinned<byte>(layerPinned.AddrOfPinnedObject(), octreeLayer.Length);
             //gradConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
-            minConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, minScope);
-            maxConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, maxScope);
+            layerConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, layerScope);
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            assign(index, minConfig.View, maxConfig.View, sliced.View);
+            assign(index, layerConfig.View, sliced.View);
 
             accelerator.Synchronize();
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
-            minConfig.CopyToCPU(octreeMin);
-            maxConfig.CopyToCPU(octreeMax);
+            layerConfig.CopyToCPU(octreeLayer);
             //cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
             //accelerator.Synchronize();
             //cubeBytes = cubeLocked.GetArray();
@@ -898,8 +858,7 @@ namespace DispDICOMCMD
             //stopWatch.Stop();
             //HPBaseConfig.Dispose();
             //cubeConfig.Dispose();
-            minPinned.Free();
-            maxPinned.Free();
+            layerPinned.Free();
             //sliced.Dispose();
             //GCHandle.FromIntPtr(gradIntPtr).Free();
             //GCHandle.FromIntPtr(cubeIntPtr).Free();
@@ -913,83 +872,44 @@ namespace DispDICOMCMD
         }
 
 
-        public static ref MemoryBuffer3D<short, Stride3D.DenseXY> getMinOctreeLayer(int index)
+        public static ref MemoryBuffer3D<byte, Stride3D.DenseXY> getByteOctreeLayer(int index)
         {
             switch (index)
             {
                 case 1:
-                    return ref minLayer1;
+                    return ref byteLayer1;
                 case 2:
-                    return ref minLayer2;
+                    return ref byteLayer2;
                 case 3:
-                    return ref minLayer3;
+                    return ref byteLayer3;
                 case 4:
-                    return ref minLayer4;
+                    return ref byteLayer4;
                 case 5:
-                    return ref minLayer5;
+                    return ref byteLayer5;
                 case 6:
-                    return ref minLayer6;
+                    return ref byteLayer6;
                 case 7:
-                    return ref minLayer7;
+                    return ref byteLayer7;
                 case 8:
-                    return ref minLayer8;
+                    return ref byteLayer8;
                 case 9:
-                    return ref minLayer9;
+                    return ref byteLayer9;
                 case 10:
-                    return ref minLayer10;
+                    return ref byteLayer10;
                 case 11:
-                    return ref minLayer11;
+                    return ref byteLayer11;
                 case 12:
-                    return ref minLayer12;
+                    return ref byteLayer12;
                 case 13:
-                    return ref minLayer13;
+                    return ref byteLayer13;
                 case 14:
-                    return ref minLayer14;
+                    return ref byteLayer14;
                 case 15:
-                    return ref minLayer15;
+                    return ref byteLayer15;
                 default:
-                    return ref minConfig;
+                    return ref layerConfig;
             }
         }
-
-        public static ref MemoryBuffer3D<short, Stride3D.DenseXY> getMaxOctreeLayer(int index)
-        {
-            switch (index)
-            {
-                case 1:
-                    return ref maxLayer1;
-                case 2:
-                    return ref maxLayer2;
-                case 3:
-                    return ref maxLayer3;
-                case 4:
-                    return ref maxLayer4;
-                case 5:
-                    return ref maxLayer5;
-                case 6:
-                    return ref maxLayer6;
-                case 7:
-                    return ref maxLayer7;
-                case 8:
-                    return ref maxLayer8;
-                case 9:
-                    return ref maxLayer9;
-                case 10:
-                    return ref maxLayer10;
-                case 11:
-                    return ref maxLayer11;
-                case 12:
-                    return ref maxLayer12;
-                case 13:
-                    return ref maxLayer13;
-                case 14:
-                    return ref maxLayer14;
-                case 15:
-                    return ref maxLayer15;
-                default:
-                    return ref maxConfig;
-            }
-        }       
         
         public static ref MemoryBuffer3D<uint, Stride3D.DenseXY> getKeysOctreeLayer(int index)
         {
@@ -1030,29 +950,29 @@ namespace DispDICOMCMD
             }
         }
 
-        static short binarySearch(short[] a, short item, short low, short high)
+        static ushort binarySearch(ushort[] a, ushort item, ushort low, ushort high)
         {
             while (low <= high)
             {
-                short mid = (short)(low + (high - low) / 2);
+                ushort mid = (ushort)(low + (high - low) / 2);
                 if (item == a[mid])
-                    return (short)(mid + 1);
+                    return (ushort)(mid + 1);
                 else if (item > a[mid])
-                    low = (short)(mid + 1);
+                    low = (ushort)(mid + 1);
                 else
-                    high = (short)(mid - 1);
+                    high = (ushort)(mid - 1);
             }
 
             return low;
         }
 
         // Function to sort an array a[] of size 'n'
-        static void insertionSort(short[] a, short n)
+        static void insertionSort(ushort[] a, ushort n)
         {
-            short i, loc, j, selected;
+            ushort i, loc, j, selected;
             for (i = 1; i < n; ++i)
             {
-                j = (short)(i - 1);
+                j = (ushort)(i - 1);
                 selected = a[i];
 
                 // find location where selected should be inseretd
@@ -1068,10 +988,10 @@ namespace DispDICOMCMD
             }
         }
 
-        static short[] findMinMax(short[] A, short start, short end)
+        static ushort[] findMinMax(ushort[] A, ushort start, ushort end)
         {
-            short max;
-            short min; 
+            ushort max;
+            ushort min; 
             //if (start == end)
             //{
             //    max = A[start];
@@ -1092,9 +1012,9 @@ namespace DispDICOMCMD
             }
             else
             {
-                short mid = (short)(start + (end - start) / 2);
-                short[] left = findMinMax(A, start, mid);
-                short[] right = findMinMax(A, (short)(mid + 1), end);
+                ushort mid = (ushort)(start + (end - start) / 2);
+                ushort[] left = findMinMax(A, start, mid);
+                ushort[] right = findMinMax(A, (ushort)(mid + 1), end);
                 if (left[0] > right[0])
                     max = left[0];
                 else
@@ -1105,13 +1025,13 @@ namespace DispDICOMCMD
                     min = right[1];
             }
             // By convention, we assume ans[0] as max and ans[1] as min
-            short[] ans = { max, min };
+            ushort[] ans = { max, min };
             return ans;
         }
         
-        static short findMin(short[] A, short start, short end)
+        static ushort findMin(ushort[] A, ushort start, ushort end)
         {
-            short min;
+            ushort min;
             //if (start == end)
             //{
             //    min = A[start];
@@ -1129,9 +1049,9 @@ namespace DispDICOMCMD
             }
             else
             {
-                short mid = (short)(start + (end - start) / 2);
-                short[] left = findMinMax(A, start, mid);
-                short[] right = findMinMax(A, (short)(mid + 1), end);
+                ushort mid = (ushort)(start + (end - start) / 2);
+                ushort[] left = findMinMax(A, start, mid);
+                ushort[] right = findMinMax(A, (ushort)(mid + 1), end);
                 if (left[1] < right[1])
                     min = left[1];
                 else
@@ -1141,9 +1061,9 @@ namespace DispDICOMCMD
             return min;
         }
 
-        static short findMax(short[] A, short start, short end)
+        static ushort findMax(ushort[] A, ushort start, ushort end)
         {
-            short max;
+            ushort max;
             //if (start == end)
             //{
             //    max = A[start];
@@ -1161,9 +1081,9 @@ namespace DispDICOMCMD
             }
             else
             {
-                short mid = (short)(start + (end - start) / 2);
-                short[] left = findMinMax(A, start, mid);
-                short[] right = findMinMax(A, (short)(mid + 1), end);
+                ushort mid = (ushort)(start + (end - start) / 2);
+                ushort[] left = findMinMax(A, start, mid);
+                ushort[] right = findMinMax(A, (ushort)(mid + 1), end);
                 if (left[0] > right[0])
                     max = left[0];
                 else
@@ -1295,13 +1215,13 @@ namespace DispDICOMCMD
 
         //        //Cube tempCube = new Cube(
         //        //    new Point(index3D.X, index3D.Y, index3D.Z, slices[index3D.Z, index3D.Y, index3D.X], normals[index3D.Z, index3D.Y, index3D.X]),
-        //        //    new Point((short)(index3D.X + 1), index3D.Y, index3D.Z, slices[index3D.Z, index3D.Y, index3D.X + 1], normals[index3D.Z, index3D.Y, index3D.X + 1]),
-        //        //    new Point((short)(index3D.X + 1), (short)(index3D.Y + 1), index3D.Z, slices[index3D.Z, index3D.Y + 1, index3D.X + 1], normals[index3D.Z, (index3D.Y + 1), index3D.X + 1]),
-        //        //    new Point(index3D.X, (short)(index3D.Y + 1), index3D.Z, slices[index3D.Z, index3D.Y + 1, index3D.X], normals[index3D.Z, (index3D.Y + 1), index3D.X]),
+        //        //    new Point((ushort)(index3D.X + 1), index3D.Y, index3D.Z, slices[index3D.Z, index3D.Y, index3D.X + 1], normals[index3D.Z, index3D.Y, index3D.X + 1]),
+        //        //    new Point((ushort)(index3D.X + 1), (ushort)(index3D.Y + 1), index3D.Z, slices[index3D.Z, index3D.Y + 1, index3D.X + 1], normals[index3D.Z, (index3D.Y + 1), index3D.X + 1]),
+        //        //    new Point(index3D.X, (ushort)(index3D.Y + 1), index3D.Z, slices[index3D.Z, index3D.Y + 1, index3D.X], normals[index3D.Z, (index3D.Y + 1), index3D.X]),
         //        //    new Point(index3D.X, index3D.Y, (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y, index3D.X], normals[(index3D.Z + 1), index3D.Y, index3D.X]),
-        //        //    new Point((short)(index3D.X + 1), index3D.Y, (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y, index3D.X + 1], normals[(index3D.Z + 1), index3D.Y, index3D.X + 1]),
-        //        //    new Point((short)(index3D.X + 1), (short)(index3D.Y + 1), (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y + 1, index3D.X + 1], normals[(index3D.Z + 1), (index3D.Y + 1), index3D.X + 1]),
-        //        //    new Point(index3D.X, (short)(index3D.Y + 1), (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y + 1, index3D.X], normals[(index3D.Z + 1), (index3D.Y + 1), index3D.X])
+        //        //    new Point((ushort)(index3D.X + 1), index3D.Y, (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y, index3D.X + 1], normals[(index3D.Z + 1), index3D.Y, index3D.X + 1]),
+        //        //    new Point((ushort)(index3D.X + 1), (ushort)(index3D.Y + 1), (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y + 1, index3D.X + 1], normals[(index3D.Z + 1), (index3D.Y + 1), index3D.X + 1]),
+        //        //    new Point(index3D.X, (ushort)(index3D.Y + 1), (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y + 1, index3D.X], normals[(index3D.Z + 1), (index3D.Y + 1), index3D.X])
         //        //    );
         //        Cube tempCube = new Cube(
         //                       new Point(index3D.X, index3D.Y, index3D.Z, slices[index3D.Z, index3D.Y, index3D.X],
@@ -1310,19 +1230,19 @@ namespace DispDICOMCMD
         //                            slices[index3D.Z, Math.Min((width) - 1, index3D.Y + 1), index3D.X] - slices[index3D.Z, Math.Max(index3D.Y - 1, 0), index3D.X],
         //                            slices[Math.Min(slices.GetLength(0) - 1, index3D.Z + 1), index3D.Y, index3D.X] - slices[Math.Max(index3D.Z - 1, 0), index3D.Y, index3D.X]
         //                        )),
-        //                       new Point((short)(index3D.X + 1), index3D.Y, index3D.Z, slices[index3D.Z, index3D.Y, index3D.X + 1],
+        //                       new Point((ushort)(index3D.X + 1), index3D.Y, index3D.Z, slices[index3D.Z, index3D.Y, index3D.X + 1],
         //                       new Normal(
         //                            slices[index3D.Z, index3D.Y, Math.Min((width) - 1, (index3D.X + 1) + 1)] - slices[index3D.Z, index3D.Y, Math.Max((index3D.X + 1) - 1, 0)],
         //                            slices[index3D.Z, Math.Min((width) - 1, index3D.Y + 1), (index3D.X + 1)] - slices[index3D.Z, Math.Max(index3D.Y - 1, 0), (index3D.X + 1)],
         //                            slices[Math.Min(slices.GetLength(0) - 1, index3D.Z + 1), index3D.Y, (index3D.X + 1)] - slices[Math.Max(index3D.Z - 1, 0), index3D.Y, (index3D.X + 1)]
         //                        )),
-        //                       new Point((short)(index3D.X + 1), (short)(index3D.Y + 1), index3D.Z, slices[index3D.Z, index3D.Y + 1, index3D.X + 1],
+        //                       new Point((ushort)(index3D.X + 1), (ushort)(index3D.Y + 1), index3D.Z, slices[index3D.Z, index3D.Y + 1, index3D.X + 1],
         //                       new Normal(
         //                            slices[index3D.Z, (index3D.Y + 1), Math.Min((width) - 1, (index3D.X + 1) + 1)] - slices[index3D.Z, (index3D.Y + 1), Math.Max((index3D.X + 1) - 1, 0)],
         //                            slices[index3D.Z, Math.Min((width) - 1, (index3D.Y + 1) + 1), (index3D.X + 1)] - slices[index3D.Z, Math.Max((index3D.Y + 1) - 1, 0), (index3D.X + 1)],
         //                            slices[Math.Min(slices.GetLength(0) - 1, index3D.Z + 1), (index3D.Y + 1), (index3D.X + 1)] - slices[Math.Max(index3D.Z - 1, 0), (index3D.Y + 1), (index3D.X + 1)]
         //                        )),
-        //                       new Point(index3D.X, (short)(index3D.Y + 1), index3D.Z, slices[index3D.Z, index3D.Y + 1, index3D.X],
+        //                       new Point(index3D.X, (ushort)(index3D.Y + 1), index3D.Z, slices[index3D.Z, index3D.Y + 1, index3D.X],
         //                       new Normal(
         //                            slices[index3D.Z, (index3D.Y + 1), Math.Min((width) - 1, index3D.X + 1)] - slices[index3D.Z, (index3D.Y + 1), Math.Max(index3D.X - 1, 0)],
         //                            slices[index3D.Z, Math.Min((width) - 1, (index3D.Y + 1) + 1), index3D.X] - slices[index3D.Z, Math.Max((index3D.Y + 1) - 1, 0), index3D.X],
@@ -1334,19 +1254,19 @@ namespace DispDICOMCMD
         //                            slices[(index3D.Z + 1), Math.Min((width) - 1, index3D.Y + 1), index3D.X] - slices[(index3D.Z + 1), Math.Max(index3D.Y - 1, 0), index3D.X],
         //                            slices[Math.Min(slices.GetLength(0) - 1, (index3D.Z + 1) + 1), index3D.Y, index3D.X] - slices[Math.Max((index3D.Z + 1) - 1, 0), index3D.Y, index3D.X]
         //                        )),
-        //                       new Point((short)(index3D.X + 1), index3D.Y, (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y, index3D.X + 1],
+        //                       new Point((ushort)(index3D.X + 1), index3D.Y, (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y, index3D.X + 1],
         //                       new Normal(
         //                            slices[(index3D.Z + 1), index3D.Y, Math.Min((width) - 1, (index3D.X + 1) + 1)] - slices[(index3D.Z + 1), index3D.Y, Math.Max((index3D.X + 1) - 1, 0)],
         //                            slices[(index3D.Z + 1), Math.Min((width) - 1, index3D.Y + 1), (index3D.X + 1)] - slices[(index3D.Z + 1), Math.Max(index3D.Y - 1, 0), (index3D.X + 1)],
         //                            slices[Math.Min(slices.GetLength(0) - 1, (index3D.Z + 1) + 1), index3D.Y, (index3D.X + 1)] - slices[Math.Max((index3D.Z + 1) - 1, 0), index3D.Y, (index3D.X + 1)]
         //                        )),
-        //                       new Point((short)(index3D.X + 1), (short)(index3D.Y + 1), (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y + 1, index3D.X + 1],
+        //                       new Point((ushort)(index3D.X + 1), (ushort)(index3D.Y + 1), (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y + 1, index3D.X + 1],
         //                       new Normal(
         //                            slices[(index3D.Z + 1), (index3D.Y + 1), Math.Min((width) - 1, (index3D.X + 1) + 1)] - slices[(index3D.Z + 1), (index3D.Y + 1), Math.Max((index3D.X + 1) - 1, 0)],
         //                            slices[(index3D.Z + 1), Math.Min((width) - 1, (index3D.Y + 1) + 1), (index3D.X + 1)] - slices[(index3D.Z + 1), Math.Max((index3D.Y + 1) - 1, 0), (index3D.X + 1)],
         //                            slices[Math.Min(slices.GetLength(0) - 1, (index3D.Z + 1) + 1), (index3D.Y + 1), (index3D.X + 1)] - slices[Math.Max((index3D.Z + 1) - 1, 0), (index3D.Y + 1), (index3D.X + 1)]
         //                        )),
-        //                       new Point(index3D.X, (short)(index3D.Y + 1), (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y + 1, index3D.X],
+        //                       new Point(index3D.X, (ushort)(index3D.Y + 1), (index3D.Z + 1), slices[(index3D.Z + 1), index3D.Y + 1, index3D.X],
         //                       new Normal(
         //                            slices[(index3D.Z + 1), (index3D.Y + 1), Math.Min((width) - 1, index3D.X + 1)] - slices[(index3D.Z + 1), (index3D.Y + 1), Math.Max(index3D.X - 1, 0)],
         //                            slices[(index3D.Z + 1), Math.Min((width) - 1, (index3D.Y + 1) + 1), index3D.X] - slices[(index3D.Z + 1), Math.Max((index3D.Y + 1) - 1, 0), index3D.X],
@@ -1409,19 +1329,19 @@ namespace DispDICOMCMD
         //                             slices[k, Math.Min((width) - 1, j + 1), i] - slices[k, Math.Max(j - 1, 0), i],
         //                             slices[Math.Min(slices.GetLength(0) - 1, k + 1), j, i] - slices[Math.Max(k - 1, 0), j, i]
         //                         )),
-        //                        new Point((short)(i + 1), j, k, slices[k, j, i + 1],
+        //                        new Point((ushort)(i + 1), j, k, slices[k, j, i + 1],
         //                        new Normal(
         //                             slices[k, j, Math.Min((width) - 1, (i + 1) + 1)] - slices[k, j, Math.Max((i + 1) - 1, 0)],
         //                             slices[k, Math.Min((width) - 1, j + 1), (i + 1)] - slices[k, Math.Max(j - 1, 0), (i + 1)],
         //                             slices[Math.Min(slices.GetLength(0) - 1, k + 1), j, (i + 1)] - slices[Math.Max(k - 1, 0), j, (i + 1)]
         //                         )),
-        //                        new Point((short)(i + 1), (short)(j + 1), k, slices[k, j + 1, i + 1],
+        //                        new Point((ushort)(i + 1), (ushort)(j + 1), k, slices[k, j + 1, i + 1],
         //                        new Normal(
         //                             slices[k, (j + 1), Math.Min((width) - 1, (i + 1) + 1)] - slices[k, (j + 1), Math.Max((i + 1) - 1, 0)],
         //                             slices[k, Math.Min((width) - 1, (j + 1) + 1), (i + 1)] - slices[k, Math.Max((j + 1) - 1, 0), (i + 1)],
         //                             slices[Math.Min(slices.GetLength(0) - 1, k + 1), (j + 1), (i + 1)] - slices[Math.Max(k - 1, 0), (j + 1), (i + 1)]
         //                         )),
-        //                        new Point(i, (short)(j + 1), k, slices[k, j + 1, i],
+        //                        new Point(i, (ushort)(j + 1), k, slices[k, j + 1, i],
         //                        new Normal(
         //                             slices[k, (j + 1), Math.Min((width) - 1, i + 1)] - slices[k, (j + 1), Math.Max(i - 1, 0)],
         //                             slices[k, Math.Min((width) - 1, (j + 1) + 1), i] - slices[k, Math.Max((j + 1) - 1, 0), i],
@@ -1433,19 +1353,19 @@ namespace DispDICOMCMD
         //                             slices[(k + 1), Math.Min((width) - 1, j + 1), i] - slices[(k + 1), Math.Max(j - 1, 0), i],
         //                             slices[Math.Min(slices.GetLength(0) - 1, (k + 1) + 1), j, i] - slices[Math.Max((k + 1) - 1, 0), j, i]
         //                         )),
-        //                        new Point((short)(i + 1), j, (k + 1), slices[(k + 1), j, i + 1],
+        //                        new Point((ushort)(i + 1), j, (k + 1), slices[(k + 1), j, i + 1],
         //                        new Normal(
         //                             slices[(k + 1), j, Math.Min((width) - 1, (i + 1) + 1)] - slices[(k + 1), j, Math.Max((i + 1) - 1, 0)],
         //                             slices[(k + 1), Math.Min((width) - 1, j + 1), (i + 1)] - slices[(k + 1), Math.Max(j - 1, 0), (i + 1)],
         //                             slices[Math.Min(slices.GetLength(0) - 1, (k + 1) + 1), j, (i + 1)] - slices[Math.Max((k + 1) - 1, 0), j, (i + 1)]
         //                         )),
-        //                        new Point((short)(i + 1), (short)(j + 1), (k + 1), slices[(k + 1), j + 1, i + 1],
+        //                        new Point((ushort)(i + 1), (ushort)(j + 1), (k + 1), slices[(k + 1), j + 1, i + 1],
         //                        new Normal(
         //                             slices[(k + 1), (j + 1), Math.Min((width) - 1, (i + 1) + 1)] - slices[(k + 1), (j + 1), Math.Max((i + 1) - 1, 0)],
         //                             slices[(k + 1), Math.Min((width) - 1, (j + 1) + 1), (i + 1)] - slices[(k + 1), Math.Max((j + 1) - 1, 0), (i + 1)],
         //                             slices[Math.Min(slices.GetLength(0) - 1, (k + 1) + 1), (j + 1), (i + 1)] - slices[Math.Max((k + 1) - 1, 0), (j + 1), (i + 1)]
         //                         )),
-        //                        new Point(i, (short)(j + 1), (k + 1), slices[(k + 1), j + 1, i],
+        //                        new Point(i, (ushort)(j + 1), (k + 1), slices[(k + 1), j + 1, i],
         //                        new Normal(
         //                             slices[(k + 1), (j + 1), Math.Min((width) - 1, i + 1)] - slices[(k + 1), (j + 1), Math.Max(i - 1, 0)],
         //                             slices[(k + 1), Math.Min((width) - 1, (j + 1) + 1), i] - slices[(k + 1), Math.Max((j + 1) - 1, 0), i],
@@ -1484,7 +1404,7 @@ namespace DispDICOMCMD
 
         //}
 
-        //public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<Edge, Stride1D.Dense> triTable, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView1D<byte, Stride1D.Dense> flag, Point offset, int thresh, int batchSize, int width)
+        //public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<Edge, Stride1D.Dense> triTable, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView1D<byte, Stride1D.Dense> flag, Point offset, int thresh, int batchSize, int width)
         //{
         //    if (edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != 0 && edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != byte.MaxValue)
         //    {
@@ -1502,7 +1422,7 @@ namespace DispDICOMCMD
         //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]
         //                        )),
         //                    new Point(
-        //                        (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
+        //                        (ushort)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
         //                        input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X) + 1],
         //                        new Normal(
         //                            input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
@@ -1510,7 +1430,7 @@ namespace DispDICOMCMD
         //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)]
         //                        )),
         //                    new Point(
-        //                        (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
+        //                        (ushort)((index.X + (int)offset.X) + 1), (ushort)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
         //                        input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1],
         //                        new Normal(
         //                            input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
@@ -1518,7 +1438,7 @@ namespace DispDICOMCMD
         //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)]
         //                        )),
         //                    new Point(
-        //                        (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
+        //                        (index.X + (int)offset.X), (ushort)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
         //                        input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X)],
         //                        new Normal(
         //                            input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X + 1))] - input[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X - 1), 0)],
@@ -1534,7 +1454,7 @@ namespace DispDICOMCMD
         //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]
         //                        )),
         //                    new Point(
-        //                        (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + 1 + (int)offset.Z),
+        //                        (ushort)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + 1 + (int)offset.Z),
         //                        input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X) + 1],
         //                        new Normal(
         //                            input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
@@ -1542,7 +1462,7 @@ namespace DispDICOMCMD
         //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y), (index.X + (int)offset.X + 1)]
         //                        )),
         //                    new Point(
-        //                        (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), (index.Z + 1 + (int)offset.Z),
+        //                        (ushort)((index.X + (int)offset.X) + 1), (ushort)((index.Y + (int)offset.Y) + 1), (index.Z + 1 + (int)offset.Z),
         //                        input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X) + 1],
         //                        new Normal(
         //                            input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X) + 1 + 1)] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X + 1 - 1), 0)],
@@ -1550,7 +1470,7 @@ namespace DispDICOMCMD
         //                            input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X + 1)]
         //                        )),
         //                    new Point(
-        //                        (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), (index.Z + 1 + (int)offset.Z),
+        //                        (index.X + (int)offset.X), (ushort)((index.Y + (int)offset.Y) + 1), (index.Z + 1 + (int)offset.Z),
         //                        input[(index.Z + 1 + (int)offset.Z), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X)],
         //                        new Normal(
         //                            input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Min((width) - 1, (index.X + (int)offset.X + 1))] - input[(index.Z + (int)offset.Z + 1), (index.Y + (int)offset.Y + 1), Math.Max((index.X + (int)offset.X - 1), 0)],
@@ -1589,10 +1509,10 @@ namespace DispDICOMCMD
         //{
         //    //gradConfig.MemSetToZero();
         //    //cubeConfig.MemSetToZero();
-        //    short[] sizes = { 12,16,18,20,22,24,26,28,30,32,34 };
+        //    ushort[] sizes = { 12,16,18,20,22,24,26,28,30,32,34 };
         //    if (width < 200)
-        //        sizes = new short[] { (short)width };
-        //    foreach (short size in sizes)
+        //        sizes = new ushort[] { (ushort)width };
+        //    foreach (ushort size in sizes)
         //    {
         //        batchSize = size;
 
@@ -1643,8 +1563,8 @@ namespace DispDICOMCMD
         //                    {
         //                        Point offset = new Point() { X = i * batchSize, Y = j * batchSize, Z = k * batchSize };
 
-        //                        //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal);
-        //                        //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
+        //                        //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(AssignNormal);
+        //                        //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
 
         //                        get_verts(index, triConfig.View, cubeConfig.View, triTable, sliced.View, flag.View, offset, threshold, batchSize, width);
 
@@ -1726,9 +1646,9 @@ namespace DispDICOMCMD
         //}
 
 
-        //public static void getVerticesX(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<Normal, Stride3D.DenseXY> normals, ArrayView3D<Edge, Stride3D.DenseXY> edges, ArrayView1D<short, Stride1D.Dense> input, Point offset, int thresh, int batchSize, int width)
+        //public static void getVerticesX(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<Normal, Stride3D.DenseXY> normals, ArrayView3D<Edge, Stride3D.DenseXY> edges, ArrayView1D<ushort, Stride1D.Dense> input, Point offset, int thresh, int batchSize, int width)
         //{
-        //    short s = input[(index.Z) * batchSize * batchSize + (index.Y) * batchSize + index.X + 1];
+        //    ushort s = input[(index.Z) * batchSize * batchSize + (index.Y) * batchSize + index.X + 1];
         //    Normal n = normals[(index.Z + 1), (index.Y + 1), index.X + 1];
         //    Cube tempCube = new Cube(
         //                    new Point(
@@ -1736,15 +1656,15 @@ namespace DispDICOMCMD
         //                        input[index.Z * width * width + index.Y * width + index.X],
         //                        normals[index.Z, index.Y, index.X]),
         //                    new Point(
-        //                        (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
+        //                        (ushort)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
         //                        input[index.Z * width * width + index.Y * width + index.X + 1],
         //                        normals[index.Z, index.Y, index.X + 1]),
         //                    new Point(
-        //                        (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
+        //                        (ushort)((index.X + (int)offset.X) + 1), (ushort)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
         //                        input[index.Z * width * width + (index.Y + 1) * width + index.X + 1],
         //                        normals[index.Z, (index.Y + 1), index.X + 1]),
         //                    new Point(
-        //                        (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
+        //                        (index.X + (int)offset.X), (ushort)((index.Y + (int)offset.Y) + 1), (index.Z + (int)offset.Z),
         //                        input[index.Z * width * width + (index.Y + 1) * width + index.X],
         //                        normals[index.Z, (index.Y + 1), index.X]),
         //                    new Point(
@@ -1752,15 +1672,15 @@ namespace DispDICOMCMD
         //                        input[(index.Z + 1) * width * width + index.Y * width + index.X],
         //                        normals[(index.Z + 1), index.Y, index.X]),
         //                    new Point(
-        //                        (short)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), ((index.Z + (int)offset.Z) + 1),
+        //                        (ushort)((index.X + (int)offset.X) + 1), (index.Y + (int)offset.Y), ((index.Z + (int)offset.Z) + 1),
         //                        input[(index.Z + 1) * width * width + index.Y * width + index.X + 1],
         //                        normals[(index.Z + 1), index.Y, index.X + 1]),
         //                    new Point(
-        //                        (short)((index.X + (int)offset.X) + 1), (short)((index.Y + (int)offset.Y) + 1), ((index.Z + (int)offset.Z) + 1),
+        //                        (ushort)((index.X + (int)offset.X) + 1), (ushort)((index.Y + (int)offset.Y) + 1), ((index.Z + (int)offset.Z) + 1),
         //                        input[(index.Z + 1) * width * width + (index.Y + 1) * width + index.X + 1],
         //                        normals[(index.Z + 1), (index.Y + 1), index.X + 1]),
         //                    new Point(
-        //                        (index.X + (int)offset.X), (short)((index.Y + (int)offset.Y) + 1), ((index.Z + (int)offset.Z) + 1),
+        //                        (index.X + (int)offset.X), (ushort)((index.Y + (int)offset.Y) + 1), ((index.Z + (int)offset.Z) + 1),
         //                        input[(index.Z + 1) * width * width + (index.Y + 1) * width + index.X],
         //                        normals[(index.Z + 1), (index.Y + 1), index.X])
         //                    );
@@ -1790,8 +1710,8 @@ namespace DispDICOMCMD
         //}
         //public static void MarchGPUX(StreamWriter fs)
         //{
-        //    short[] sizes = { 32 };
-        //    foreach (short size in sizes)
+        //    ushort[] sizes = { 32 };
+        //    foreach (ushort size in sizes)
         //    {
 
         //        int i, j, k;
@@ -1810,7 +1730,7 @@ namespace DispDICOMCMD
 
         //        gradConfig = accelerator.Allocate1D<Normal>((width) * (width) * (Math.Min(sliceSize, Z) + 1));
         //        cubeConfig = accelerator.Allocate1D<Edge>(Math.Min(Nindex.Size, X * Y * sliceSize));
-        //        slicedConfig = accelerator.Allocate1D<short>((width) * (width) * (Math.Min(sliceSize, Z) + 1));
+        //        slicedConfig = accelerator.Allocate1D<ushort>((width) * (width) * (Math.Min(sliceSize, Z) + 1));
 
 
         //        //count = 0;
@@ -1832,7 +1752,7 @@ namespace DispDICOMCMD
         //            Gindex = new Index3D(X + 1, Y + 1, Math.Min(sliceSize, Nindex.Z - i * sliceSize + 1));
         //            Normal[] normslices = new Normal[gradConfig.Length];
         //            Edge[] cubeslices = new Edge[cubeConfig.Length];
-        //            short[] subslice = new short[slicedConfig.Length];
+        //            ushort[] subslice = new ushort[slicedConfig.Length];
         //            Point offset = new Point(i * sliceSize, 0, 0, 0, new Normal());
 
         //            Array.Copy(normals, i * Gindex.Size, normslices, 0, Gindex.Size);
@@ -1846,8 +1766,8 @@ namespace DispDICOMCMD
 
         //            for (int c = 1; c < cubes.Length; c++)
         //            {
-        //                short[] c1 = cubes[c].getAsArray();
-        //                short[] c2 = cubeslices[c].getAsArray();
+        //                ushort[] c1 = cubes[c].getAsArray();
+        //                ushort[] c2 = cubeslices[c].getAsArray();
         //                for (int e = 0; e < 12; e++)
         //                {
         //                    if (c1[e] != c2[e])
@@ -1862,13 +1782,13 @@ namespace DispDICOMCMD
         //                    ;
         //                }
         //            }
-        //            var sliceScope = accelerator.CreatePageLockFromPinned<short>(subslice);
+        //            var sliceScope = accelerator.CreatePageLockFromPinned<ushort>(subslice);
         //            gradConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
         //            cubeConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
         //            slicedConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, sliceScope);
         //            accelerator.Synchronize();
-        //            //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal);
-        //            //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
+        //            //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(AssignNormal);
+        //            //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
 
         //            get_vertsX(index, triConfig.View, gradConfig.View, cubeConfig.View, slicedConfig.View, offset, threshold, sliceSize, batchSize);
 
@@ -1959,8 +1879,8 @@ namespace DispDICOMCMD
 
         //public static void MarchGPUBatchRobust(StreamWriter fs)
         //{
-        //    short[] sizes = { 127 };
-        //    foreach (short size in sizes)
+        //    ushort[] sizes = { 127 };
+        //    foreach (ushort size in sizes)
         //    {
         //        batchSize = size;
 
@@ -1983,10 +1903,10 @@ namespace DispDICOMCMD
         //        List<Triangle> triangleList = new List<Triangle>();
         //        gradConfig = accelerator.Allocate1D<Normal>(Math.Min(Gindex.Size, (batchSize + 1) * (batchSize + 1) * (batchSize + 1) + 1));
         //        cubeConfig = accelerator.Allocate1D<Edge>(Math.Min(Nindex.Size, batchSize * batchSize * batchSize));
-        //        slicedConfig = accelerator.Allocate1D<short>(Math.Min(Gindex.Size, (batchSize + 1) * (batchSize + 1) * (batchSize + 1)));
+        //        slicedConfig = accelerator.Allocate1D<ushort>(Math.Min(Gindex.Size, (batchSize + 1) * (batchSize + 1) * (batchSize + 1)));
         //        //Normal[] normslices = new Normal[Gindex.Size];
         //        //Edge[] cubeslices = new Edge[batchSize * batchSize * batchSize];
-        //        //short[] subslice = new short[(Gindex.Size)];
+        //        //ushort[] subslice = new ushort[(Gindex.Size)];
 
 
         //        Triangle[] tri = new Triangle[Math.Min(Nindex.Size * 5 + 1, batchSize * batchSize * batchSize * 5 + 1)];
@@ -2012,7 +1932,7 @@ namespace DispDICOMCMD
         //                {
         //                    Normal[] normslices = new Normal[(batchSize + 1) * (batchSize + 1) * (batchSize + 1)];
         //                    Edge[] cubeslices = new Edge[batchSize * batchSize * batchSize];
-        //                    short[] subslice = new short[(batchSize + 1) * (batchSize + 1) * (batchSize + 1)];
+        //                    ushort[] subslice = new ushort[(batchSize + 1) * (batchSize + 1) * (batchSize + 1)];
         //                    //Console.WriteLine(i + "," + j + "," + k);
         //                    Index3D index = (Math.Min(Nindex.X - i * batchSize, batchSize), Math.Min(Nindex.Y - j * batchSize, batchSize), Math.Min(Nindex.Z - k * batchSize, batchSize));
         //                    if (index.Size < 1) break;
@@ -2041,7 +1961,7 @@ namespace DispDICOMCMD
         //                    //gradConfig.View.CopyFromCPU(accelerator.DefaultStream, normslices);
         //                    var gradScope = accelerator.CreatePageLockFromPinned(normslices);
         //                    var cubeScope = accelerator.CreatePageLockFromPinned(cubeslices);
-        //                    var sliceScope = accelerator.CreatePageLockFromPinned<short>(subslice);
+        //                    var sliceScope = accelerator.CreatePageLockFromPinned<ushort>(subslice);
         //                    gradConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, gradScope);
         //                    cubeConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
         //                    slicedConfig.View.CopyFromPageLockedAsync(accelerator.DefaultStream, sliceScope);
@@ -2049,8 +1969,8 @@ namespace DispDICOMCMD
 
         //                    for (int c = 1; c < cubes.Length; c++)
         //                    {
-        //                        short[] c1 = cubes[c].getAsArray();
-        //                        short[] c2 = cubeslices[c].getAsArray();
+        //                        ushort[] c1 = cubes[c].getAsArray();
+        //                        ushort[] c2 = cubeslices[c].getAsArray();
         //                        for (int e = 0; e<12;e++)
         //                        {
         //                            if(c1[e] != c2[e])
@@ -2065,8 +1985,8 @@ namespace DispDICOMCMD
         //                            ;
         //                        }
         //                    }
-        //                    //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>>(AssignNormal);
-        //                    //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<short, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
+        //                    //assign_normal = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Normal, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(AssignNormal);
+        //                    //assign_edges= accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<Edge, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int>(AssignEdges);
 
         //                    get_vertsX(index, triConfig.View, gradConfig.View, cubeConfig.View, slicedConfig.View, offset, threshold, batchSize, batchSize + 1);
 
@@ -2183,7 +2103,7 @@ namespace DispDICOMCMD
 
             GrayscalePixelDataU16 pixelData = new GrayscalePixelDataU16(header.Width, header.Width, header.BitDepth, h);
 
-            short[,] pixArray = new short[pixelData.Width, pixelData.Width];
+            ushort[,] pixArray = new ushort[pixelData.Width, pixelData.Width];
 
             List<byte> color = new List<byte>();
             //var pixelData = PixelDataFactory.Create(dicom.PixelData, 0); // returns IPixelData type
@@ -2196,12 +2116,12 @@ namespace DispDICOMCMD
                 ////Accelerator accelerator;
                 //Accelerator accelerator = context.CreateCPUAccelerator(0);
                 //var loadedKernel = accelerator.LoadAutoGroupedStreamKernel(
-                //(Index2D i, ArrayView<ushort> data, ArrayView2D<short, Stride2D.DenseX> output, int w) =>
+                //(Index2D i, ArrayView<uushort> data, ArrayView2D<ushort, Stride2D.DenseX> output, int w) =>
                 //{
-                //    output[i] = (short)data[i.X * w + i.Y];
+                //    output[i] = (ushort)data[i.X * w + i.Y];
                 //});
 
-                //var tempOut = accelerator.Allocate2DDenseX<short>(new LongIndex2D(pixelData.Width, pixelData.Height));
+                //var tempOut = accelerator.Allocate2DDenseX<ushort>(new LongIndex2D(pixelData.Width, pixelData.Height));
                 //var tempView = accelerator.Allocate1D(pixelData.Data);
                 //loadedKernel(new Index2D(pixelData.Width, pixelData.Height), tempView.View, tempOut, width);
 
@@ -2210,7 +2130,7 @@ namespace DispDICOMCMD
                     for (int j = 0; j < pixelData.Height; j++)
                     {
                         int index = j * header.Width + i;
-                        slices[k, j, i] = (short)pixelData.Data[index];
+                        slices[k, j, i] = (ushort)pixelData.Data[index];
                         //if (pixelData.GetPixel(j, i) > threshold) color.Add(255);
                         //else color.Add(0);
                         //color.Add(color.Last());
@@ -2226,6 +2146,106 @@ namespace DispDICOMCMD
                 //pixArray = l;
             }
         }
+        
+        private static void DecodeTIFF(string path, int k)
+        {
+            MagickImage image = new MagickImage(path);
+            var pixelValues = image.GetPixels().GetValues();
+
+
+            //ushort[,] pixArray = new ushort[image.Width, image.Height];
+
+            //var pixelData = PixelDataFactory.Create(dicom.PixelData, 0); // returns IPixelData type
+
+
+            if (true)
+            {
+
+                //Context context = Context.CreateDefault();
+                ////Accelerator accelerator;
+                //Accelerator accelerator = context.CreateCPUAccelerator(0);
+                //var loadedKernel = accelerator.LoadAutoGroupedStreamKernel(
+                //(Index2D i, ArrayView<uushort> data, ArrayView2D<ushort, Stride2D.DenseX> output, int w) =>
+                //{
+                //    output[i] = (ushort)data[i.X * w + i.Y];
+                //});
+
+                //var tempOut = accelerator.Allocate2DDenseX<ushort>(new LongIndex2D(pixelData.Width, pixelData.Height));
+                //var tempView = accelerator.Allocate1D(pixelData.Data);
+                //loadedKernel(new Index2D(pixelData.Width, pixelData.Height), tempView.View, tempOut, width);
+
+                for (int i = 0; i < image.Width; i++)
+                {
+                    for (int j = 0; j < image.Height; j++)
+                    {
+                        int index = j * image.Width + i;
+                        slices[k, j, i] = (ushort)pixelValues[index];
+                    }
+                }
+
+                //accelerator.DefaultStream.Synchronize();
+                //var l = tempOut.GetAsArray2D();
+
+                //accelerator.Dispose();
+                //context.Dispose();
+                //pixArray = l;
+            }
+        }
+
+        private static void Decode(string path, int k)
+        {
+            FileStream stream = File.OpenRead(path);
+            byte[] byteTemp = new byte[stream.Length];
+            ushort[] pixels = new ushort[stream.Length / 2];
+            stream.Read(byteTemp, 0, (int)stream.Length);
+            var reverse = byteTemp.Reverse().ToArray();
+
+            Buffer.BlockCopy(reverse, 0, pixels, 0, (int)stream.Length);
+            stream.Close();
+            stream.Dispose();
+
+
+
+            //var pixelData = PixelDataFactory.Create(dicom.PixelData, 0); // returns IPixelData type
+
+
+            if (true)
+            {
+
+                //Context context = Context.CreateDefault();
+                ////Accelerator accelerator;
+                //Accelerator accelerator = context.CreateCPUAccelerator(0);
+                //var loadedKernel = accelerator.LoadAutoGroupedStreamKernel(
+                //(Index2D i, ArrayView<uushort> data, ArrayView2D<ushort, Stride2D.DenseX> output, int w) =>
+                //{
+                //    output[i] = (ushort)data[i.X * w + i.Y];
+                //});
+
+                //var tempOut = accelerator.Allocate2DDenseX<ushort>(new LongIndex2D(pixelData.Width, pixelData.Height));
+                //var tempView = accelerator.Allocate1D(pixelData.Data);
+                //loadedKernel(new Index2D(pixelData.Width, pixelData.Height), tempView.View, tempOut, width);
+
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < width; j++)
+                    {
+                        int index = j * width + i;
+                        slices[k, j, i] = (ushort)pixels[index];
+                        if (slices[k, j, i] >= 4096)
+                            slices[k, j, i] = 0;
+                    }
+                }
+
+                //accelerator.DefaultStream.Synchronize();
+                //var l = tempOut.GetAsArray2D();
+
+                //accelerator.Dispose();
+                //context.Dispose();
+                //pixArray = l;
+            }
+        }
+
+
 
 
         //public static Vertex Interpolate(Vertex v1, Vertex v2, double interpolant)
@@ -2233,7 +2253,7 @@ namespace DispDICOMCMD
 
         //}
 
-        //public static Point[] March(short threshold, byte config)
+        //public static Point[] March(ushort threshold, byte config)
         //{
         //    int i, j, k;
         //    for (k = 0; k < cubes.GetLength(0) - 2; k++)
@@ -2243,7 +2263,7 @@ namespace DispDICOMCMD
         //            for (j = 0; j < cubes.GetLength(1) - 2; j++)
         //            {
 
-        //                short[] ed = edges[k, j, i].getAsArray().Where(x => x >= 0).ToArray();
+        //                ushort[] ed = edges[k, j, i].getAsArray().Where(x => x >= 0).ToArray();
         //                Vertex[] points = new Vertex[ed.Length];
         //                for (i = 0; i < ed.Length; i++)
         //                {
@@ -2305,14 +2325,14 @@ namespace DispDICOMCMD
         //    return points;
         //}
 
-        //public static short[] GetRow(short[,] matrix, int rowNumber)
+        //public static ushort[] GetRow(ushort[,] matrix, int rowNumber)
         //{
         //    return Enumerable.Range(0, matrix.GetLength(1))
         //            .Select(x => matrix[rowNumber, x])
         //            .ToArray();
         //}
 
-        //private static Point Normal(short[,] slice1, short[,] slice2, short[,] slice3, short[,] slice4, Point point, short index)
+        //private static Point Normal(ushort[,] slice1, ushort[,] slice2, ushort[,] slice3, ushort[,] slice4, Point point, ushort index)
         //{
         //    Point vertex = point;
         //    double factor, interpolant;
@@ -2434,7 +2454,7 @@ namespace DispDICOMCMD
         //}
 
 
-        //private static Bitmap array2Bitmap(short[,] pixArray)
+        //private static Bitmap array2Bitmap(ushort[,] pixArray)
         //{
 
         //    int res = 96;
@@ -2993,10 +3013,10 @@ namespace DispDICOMCMD
 //        public MemoryBuffer2D<byte, Stride2D.DenseX> layer0;
 //        public MemoryBuffer2D<byte, Stride2D.DenseX> layer1;
 //        public MemoryBuffer2D<byte, Stride2D.DenseX> layer2;
-//        public MemoryBuffer2D<ushort, Stride2D.DenseX> layer3;
-//        public MemoryBuffer2D<ushort, Stride2D.DenseX> layer4;
-//        public MemoryBuffer2D<ushort, Stride2D.DenseX> layer5;
-//        public MemoryBuffer2D<ushort, Stride2D.DenseX> layer6;
+//        public MemoryBuffer2D<uushort, Stride2D.DenseX> layer3;
+//        public MemoryBuffer2D<uushort, Stride2D.DenseX> layer4;
+//        public MemoryBuffer2D<uushort, Stride2D.DenseX> layer5;
+//        public MemoryBuffer2D<uushort, Stride2D.DenseX> layer6;
 //        public MemoryBuffer2D<uint, Stride2D.DenseX> layer7;
 //        public MemoryBuffer2D<uint, Stride2D.DenseX> layer8;
 //        public MemoryBuffer2D<uint, Stride2D.DenseX> layer9;
@@ -3028,25 +3048,25 @@ namespace DispDICOMCMD
 //            Buffer.BlockCopy(tempBytes, 0, temp2Dbytes, 0, tempBytes.Length);
 //            layer2 = acc.Allocate2DDenseX<byte>(temp2Dbytes);
 
-//            ushort[] tempUshorts = HP[3].Cast<int>().Select(x => (ushort)x).ToArray();
-//            ushort[,] temp2DUshorts = new ushort[HP[3].GetLength(0), HP[3].GetLength(0)];
-//            Buffer.BlockCopy(tempUshorts, 0, temp2DUshorts, 0, tempUshorts.Length);
-//            layer3 = acc.Allocate2DDenseX<ushort>(temp2DUshorts);
+//            uushort[] tempUushorts = HP[3].Cast<int>().Select(x => (uushort)x).ToArray();
+//            uushort[,] temp2DUushorts = new uushort[HP[3].GetLength(0), HP[3].GetLength(0)];
+//            Buffer.BlockCopy(tempUushorts, 0, temp2DUushorts, 0, tempUushorts.Length);
+//            layer3 = acc.Allocate2DDenseX<uushort>(temp2DUushorts);
 
-//            tempUshorts = HP[4].Cast<int>().Select(x => (ushort)x).ToArray();
-//            temp2DUshorts = new ushort[HP[4].GetLength(0), HP[4].GetLength(0)];
-//            Buffer.BlockCopy(tempUshorts, 0, temp2DUshorts, 0, tempUshorts.Length);
-//            layer4 = acc.Allocate2DDenseX<ushort>(temp2DUshorts);
+//            tempUushorts = HP[4].Cast<int>().Select(x => (uushort)x).ToArray();
+//            temp2DUushorts = new uushort[HP[4].GetLength(0), HP[4].GetLength(0)];
+//            Buffer.BlockCopy(tempUushorts, 0, temp2DUushorts, 0, tempUushorts.Length);
+//            layer4 = acc.Allocate2DDenseX<uushort>(temp2DUushorts);
 
-//            tempUshorts = HP[5].Cast<int>().Select(x => (ushort)x).ToArray();
-//            temp2DUshorts = new ushort[HP[5].GetLength(0), HP[5].GetLength(0)];
-//            Buffer.BlockCopy(tempUshorts, 0, temp2DUshorts, 0, tempUshorts.Length);
-//            layer5 = acc.Allocate2DDenseX<ushort>(temp2DUshorts);
+//            tempUushorts = HP[5].Cast<int>().Select(x => (uushort)x).ToArray();
+//            temp2DUushorts = new uushort[HP[5].GetLength(0), HP[5].GetLength(0)];
+//            Buffer.BlockCopy(tempUushorts, 0, temp2DUushorts, 0, tempUushorts.Length);
+//            layer5 = acc.Allocate2DDenseX<uushort>(temp2DUushorts);
 
-//            tempUshorts = HP[6].Cast<int>().Select(x => (ushort)x).ToArray();
-//            temp2DUshorts = new ushort[HP[6].GetLength(0), HP[6].GetLength(0)];
-//            Buffer.BlockCopy(tempUshorts, 0, temp2DUshorts, 0, tempUshorts.Length);
-//            layer6 = acc.Allocate2DDenseX<ushort>(temp2DUshorts);
+//            tempUushorts = HP[6].Cast<int>().Select(x => (uushort)x).ToArray();
+//            temp2DUushorts = new uushort[HP[6].GetLength(0), HP[6].GetLength(0)];
+//            Buffer.BlockCopy(tempUushorts, 0, temp2DUushorts, 0, tempUushorts.Length);
+//            layer6 = acc.Allocate2DDenseX<uushort>(temp2DUushorts);
 
 //            uint[] tempUints = HP[7].Cast<int>().Select(x => (uint)x).ToArray();
 //            uint[,] temp2DUints = new uint[HP[7].GetLength(0), HP[7].GetLength(0)];
@@ -3139,10 +3159,10 @@ namespace DispDICOMCMD
 //        public ArrayView2D<byte, Stride2D.DenseX> layer0;
 //        public ArrayView2D<byte, Stride2D.DenseX> layer1;
 //        public ArrayView2D<byte, Stride2D.DenseX> layer2;
-//        public ArrayView2D<ushort, Stride2D.DenseX> layer3;
-//        public ArrayView2D<ushort, Stride2D.DenseX> layer4;
-//        public ArrayView2D<ushort, Stride2D.DenseX> layer5;
-//        public ArrayView2D<ushort, Stride2D.DenseX> layer6;
+//        public ArrayView2D<uushort, Stride2D.DenseX> layer3;
+//        public ArrayView2D<uushort, Stride2D.DenseX> layer4;
+//        public ArrayView2D<uushort, Stride2D.DenseX> layer5;
+//        public ArrayView2D<uushort, Stride2D.DenseX> layer6;
 //        public ArrayView2D<uint, Stride2D.DenseX> layer7;
 //        public ArrayView2D<uint, Stride2D.DenseX> layer8;
 //        public ArrayView2D<uint, Stride2D.DenseX> layer9;
@@ -3157,10 +3177,10 @@ namespace DispDICOMCMD
 //        public HistoPyramid(ArrayView2D<byte, Stride2D.DenseX> l0,
 //            ArrayView2D<byte, Stride2D.DenseX> l1,
 //            ArrayView2D<byte, Stride2D.DenseX> l2,
-//            ArrayView2D<ushort, Stride2D.DenseX> l3,
-//            ArrayView2D<ushort, Stride2D.DenseX> l4,
-//            ArrayView2D<ushort, Stride2D.DenseX> l5,
-//            ArrayView2D<ushort, Stride2D.DenseX> l6,
+//            ArrayView2D<uushort, Stride2D.DenseX> l3,
+//            ArrayView2D<uushort, Stride2D.DenseX> l4,
+//            ArrayView2D<uushort, Stride2D.DenseX> l5,
+//            ArrayView2D<uushort, Stride2D.DenseX> l6,
 //            ArrayView2D<uint, Stride2D.DenseX> l7,
 //            ArrayView2D<uint, Stride2D.DenseX> l8,
 //            ArrayView2D<uint, Stride2D.DenseX> l9,
@@ -3243,7 +3263,7 @@ namespace DispDICOMCMD
 //    }
 
 //}
-/*        public static void AssignNormal(Index3D index, ArrayView3D<Normal, Stride3D.DenseXY> normals, ArrayView3D<short, Stride3D.DenseXY> input)
+/*        public static void AssignNormal(Index3D index, ArrayView3D<Normal, Stride3D.DenseXY> normals, ArrayView3D<ushort, Stride3D.DenseXY> input)
         {
             normals[index] =
                 new Normal(
@@ -3253,7 +3273,7 @@ namespace DispDICOMCMD
                 );
         }
 
-        public static void AssignEdges(Index3D index, ArrayView3D<Edge, Stride3D.DenseXY> edges, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh)
+        public static void AssignEdges(Index3D index, ArrayView3D<Edge, Stride3D.DenseXY> edges, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh)
         { 
             //return Enumerable.Range(0, matrix.GetLength(1))
             //    .Select(x => matrix[rowNumber, x])
@@ -3282,7 +3302,7 @@ namespace DispDICOMCMD
             edges[index] = triTable[(int)config];
         }        
         
-        public static void AssignNormal1D(Index3D index, ArrayView1D<Normal, Stride1D.Dense> normals, ArrayView3D<short, Stride3D.DenseXY> input)
+        public static void AssignNormal1D(Index3D index, ArrayView1D<Normal, Stride1D.Dense> normals, ArrayView3D<ushort, Stride3D.DenseXY> input)
         {
             normals[index.X * 127 * 127 + index.Y * 127 + index.Z] =
                 new Normal(
@@ -3292,7 +3312,7 @@ namespace DispDICOMCMD
                 );
         }
 
-        public static void AssignEdges1D(Index3D index, ArrayView1D<Edge, Stride1D.Dense> edges, ArrayView3D<short, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh)
+        public static void AssignEdges1D(Index3D index, ArrayView1D<Edge, Stride1D.Dense> edges, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh)
         { 
             //return Enumerable.Range(0, matrix.GetLength(1))
             //    .Select(x => matrix[rowNumber, x])
@@ -3322,7 +3342,7 @@ namespace DispDICOMCMD
         }
 */
 
-//private static Cube[,] MarchingCubes(short index)
+//private static Cube[,] MarchingCubes(ushort index)
 //{
 //    Cube[,] cubeBytes = new Cube[length, width];
 //    //byte[,] configBytes = new byte[511, 511];
@@ -3339,9 +3359,9 @@ namespace DispDICOMCMD
 //    // i,j+1,k+1
 
 
-//    for (short i = 0; i < slices.GetLength(2) - 1; i++)
+//    for (ushort i = 0; i < slices.GetLength(2) - 1; i++)
 //    {
-//        for (short j = 0; j < slices.GetLength(1) - 1; j++)
+//        for (ushort j = 0; j < slices.GetLength(1) - 1; j++)
 //        {
 //            Stopwatch stopWatch = new Stopwatch();
 //            stopWatch.Start();
@@ -3351,17 +3371,17 @@ namespace DispDICOMCMD
 //                    slices[index, Math.Min(length - 1, j + 1), i] - slices[index, Math.Max(j - 1, 0), i],
 //                    slices[Math.Min(slices.Length - 1, index + 1), j, i] - slices[Math.Max(index - 1, 0), j, i]
 //                    )),
-//                new Point((short)(i + 1), j, index, slices[index, j, i + 1], new Normal(
+//                new Point((ushort)(i + 1), j, index, slices[index, j, i + 1], new Normal(
 //                    slices[index, j, Math.Min(length - 1, (i + 1) + 1)] - slices[index, j, Math.Max((i + 1) - 1, 0)],
 //                    slices[index, Math.Min(length - 1, j + 1), (i + 1)] - slices[index, Math.Max(j - 1, 0), (i + 1)],
 //                    slices[Math.Min(slices.Length - 1, index + 1), j, (i + 1)] - slices[Math.Max(index - 1, 0), j, (i + 1)]
 //                    )),
-//                new Point((short)(i + 1), (short)(j + 1), index, slices[index, j + 1, i + 1], new Normal(
+//                new Point((ushort)(i + 1), (ushort)(j + 1), index, slices[index, j + 1, i + 1], new Normal(
 //                    slices[index, (j + 1), Math.Min(length - 1, (i + 1) + 1)] - slices[index, (j + 1), Math.Max((i + 1) - 1, 0)],
 //                    slices[index, Math.Min(length - 1, (j + 1) + 1), (i + 1)] - slices[index, Math.Max((j + 1) - 1, 0), (i + 1)],
 //                    slices[Math.Min(slices.Length - 1, index + 1), (j + 1), (i + 1)] - slices[Math.Max(index - 1, 0), (j + 1), (i + 1)]
 //                    )),
-//                new Point(i, (short)(j + 1), index, slices[index, j + 1, i], new Normal(
+//                new Point(i, (ushort)(j + 1), index, slices[index, j + 1, i], new Normal(
 //                    slices[index, (j + 1), Math.Min(length - 1, i + 1)] - slices[index, (j + 1), Math.Max(i - 1, 0)],
 //                    slices[index, Math.Min(length - 1, (j + 1) + 1), i] - slices[index, Math.Max((j + 1) - 1, 0), i],
 //                    slices[Math.Min(slices.Length - 1, index + 1), (j + 1), i] - slices[Math.Max(index - 1, 0), (j + 1), i]
@@ -3371,17 +3391,17 @@ namespace DispDICOMCMD
 //                    slices[(index + 1), Math.Min(length - 1, j + 1), i] - slices[(index + 1), Math.Max(j - 1, 0), i],
 //                    slices[Math.Min(slices.Length - 1, (index + 1) + 1), j, i] - slices[Math.Max((index + 1) - 1, 0), j, i]
 //                    )),
-//                new Point((short)(i + 1), j, (index + 1), slices[(index + 1), j, i + 1], new Normal(
+//                new Point((ushort)(i + 1), j, (index + 1), slices[(index + 1), j, i + 1], new Normal(
 //                    slices[(index + 1), j, Math.Min(length - 1, (i + 1) + 1)] - slices[(index + 1), j, Math.Max((i + 1) - 1, 0)],
 //                    slices[(index + 1), Math.Min(length - 1, j + 1), (i + 1)] - slices[(index + 1), Math.Max(j - 1, 0), (i + 1)],
 //                    slices[Math.Min(slices.Length - 1, (index + 1) + 1), j, (i + 1)] - slices[Math.Max((index + 1) - 1, 0), j, (i + 1)]
 //                    )),
-//                new Point((short)(i + 1), (short)(j + 1), (index + 1), slices[(index + 1), j + 1, i + 1], new Normal(
+//                new Point((ushort)(i + 1), (ushort)(j + 1), (index + 1), slices[(index + 1), j + 1, i + 1], new Normal(
 //                    slices[(index + 1), (j + 1), Math.Min(length - 1, (i + 1) + 1)] - slices[(index + 1), (j + 1), Math.Max((i + 1) - 1, 0)],
 //                    slices[(index + 1), Math.Min(length - 1, (j + 1) + 1), (i + 1)] - slices[(index + 1), Math.Max((j + 1) - 1, 0), (i + 1)],
 //                    slices[Math.Min(slices.Length - 1, (index + 1) + 1), (j + 1), (i + 1)] - slices[Math.Max((index + 1) - 1, 0), (j + 1), (i + 1)]
 //                    )),
-//                new Point(i, (short)(j + 1), (index + 1), slices[(index + 1), j + 1, i], new Normal(
+//                new Point(i, (ushort)(j + 1), (index + 1), slices[(index + 1), j + 1, i], new Normal(
 //                    slices[(index + 1), (j + 1), Math.Min(length - 1, i + 1)] - slices[(index + 1), (j + 1), Math.Max(i - 1, 0)],
 //                    slices[(index + 1), Math.Min(length - 1, (j + 1) + 1), i] - slices[(index + 1), Math.Max((j + 1) - 1, 0), i],
 //                    slices[Math.Min(slices.Length - 1, (index + 1) + 1), (j + 1), i] - slices[Math.Max((index + 1) - 1, 0), (j + 1), i]

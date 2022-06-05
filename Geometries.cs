@@ -46,14 +46,14 @@ namespace DispDICOMCMD
 
     public struct Point
     {
-        //const short epsilon = 0;
+        //const ushort epsilon = 0;
         public Normal normal;
         public float X;
         public float Y;
         public float Z;
-        public short value;
+        public ushort value;
 
-        public Point(float i, float j, float k, short val, Normal norm)
+        public Point(float i, float j, float k, ushort val, Normal norm)
         {
             X = i;
             Y = j;
@@ -62,7 +62,7 @@ namespace DispDICOMCMD
             normal = norm;
         }
 
-        //public Point(double i, double j, float k, short val, short threshold, Normal norm)
+        //public Point(double i, double j, float k, ushort val, ushort threshold, Normal norm)
         //{
         //    X = i;
         //    Y = j;
@@ -73,7 +73,7 @@ namespace DispDICOMCMD
         //    normal = norm;
         //}
 
-        public Point Interpolate(Point other, short threshold)
+        public Point Interpolate(Point other, ushort threshold)
         {
             float p1 = other.value;
             float p2 = value;
@@ -90,7 +90,7 @@ namespace DispDICOMCMD
             return vertex;
         }
 
-        //public Point FullInterpolate(Point other, short threshold)
+        //public Point FullInterpolate(Point other, ushort threshold)
         //{
         //    //float p1 = other.value;
         //    //float p2 = value;
@@ -275,7 +275,7 @@ namespace DispDICOMCMD
         //public Point getMax() { return getAsArray().Max(); }
         //public Point getmin() { return getAsArray().Min(); }
 
-        public Point[] March(short threshold, Edge config)
+        public Point[] March(ushort threshold, Edge config)
         {
             sbyte[] ed = config.getAsArray().Where(x => x >= 0).ToArray();
             if (ed.All(x => x == 0))
@@ -347,12 +347,12 @@ namespace DispDICOMCMD
             return points;
         }
 
-        public Point[] MarchGPU(short threshold, Edge config)
+        public Point[] MarchGPU(ushort threshold, Edge config)
         {
             sbyte[] ed = config.getAsArray();
 
             //if (ed.All(x => x == 0))
-            //    ed = new short[] { };
+            //    ed = new ushort[] { };
             //if (ed.Length > 0)
             //{
 
@@ -416,12 +416,12 @@ namespace DispDICOMCMD
             return points;
         }
 
-        public Triangle MarchHP(short threshold, Edge config, int index)
+        public Triangle MarchHP(ushort threshold, Edge config, int index)
         {
             sbyte[] ed = config.getAsArray();
 
             //if (ed.All(x => x == 0))
-            //    ed = new short[] { };
+            //    ed = new ushort[] { };
             //if (ed.Length > 0)
             //{
 
