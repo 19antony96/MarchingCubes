@@ -14,7 +14,7 @@ namespace MarchingCubes
             for (int i = 25; i < 26; i += 25)
             {
                 Console.WriteLine(i);
-                HistoPyramid3D run1 = new HistoPyramid3D(i);
+                NaiveGPU run1 = new NaiveGPU(i);
             }
             Console.Out.WriteLine("DONE");
         }

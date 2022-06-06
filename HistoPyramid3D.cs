@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using Dicom;
-using Dicom.Imaging;
-using Dicom.Imaging.Render;
-using System.Windows;
-using ILGPU.Runtime.Cuda;
 using ILGPU.Runtime;
 using ILGPU;
 using System.Diagnostics;
@@ -164,48 +158,6 @@ namespace MarchingCubes
                 nTri = (int)data[0, 0, 0];
         }
 
-        private static uint[][,,] HPCreation()
-        {
-            nLayers = (ushort)(Math.Ceiling(Math.Log(HPBaseLayer.GetLength(0), 2)) + 1);
-            uint[][,,] HP = new uint[11][,,];
-            HP[0] = new uint[HPBaseLayer.GetLength(0), HPBaseLayer.GetLength(0), HPBaseLayer.GetLength(0)];
-            Array.Copy(HPBaseLayer, HP[0], HPBaseLayer.Length);
-
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            for (int i = 1; i < 11; i++)
-            {
-                if (i < nLayers)
-                {
-                    int l = Math.Max(HP[i - 1].GetLength(0) / 2, 1);
-                    HP[i] = new uint[l, l, l];
-                    for (int iHP = 0; iHP < l; iHP++)
-                    {
-                        for (int jHP = 0; jHP < l; jHP++)
-                        {
-                            for (int kHP = 0; kHP < l; kHP++)
-                                HP[i][iHP, jHP, kHP] = HP[i - 1][iHP * 2, jHP * 2, kHP * 2] + HP[i - 1][iHP * 2 + 1, jHP * 2, kHP * 2] + HP[i - 1][iHP * 2 + 1, jHP * 2 + 1, kHP * 2] + HP[i - 1][iHP * 2, jHP * 2 + 1, kHP * 2] +
-                                    HP[i - 1][iHP * 2, jHP * 2, kHP * 2 + 1] + HP[i - 1][iHP * 2 + 1, jHP * 2, kHP * 2 + 1] + HP[i - 1][iHP * 2 + 1, jHP * 2 + 1, kHP * 2 + 1] + HP[i - 1][iHP * 2, jHP * 2 + 1, kHP * 2 + 1];
-                        }
-                    }
-                }
-                else
-                    HP[i] = new uint[,,] { { { 0 } } };
-            }
-            nTri = (int)HP[nLayers - 1][0, 0, 0];
-
-
-            stopWatch.Stop();
-            ts += stopWatch.Elapsed;
-
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
-            Console.WriteLine("RunTime " + elapsedTime);
-
-            return HP;
-        }
-
         public static void HPTraverseKernel(Index1D index, ArrayView1D<FlatPoint, Stride1D.Dense> p, ArrayView1D<uint, Stride1D.Dense> k, ArrayView3D<uint, Stride3D.DenseXY> HPLayer)
         {
             uint a = HPLayer[p[index].X, p[index].Y, p[index].Z];
@@ -216,8 +168,6 @@ namespace MarchingCubes
             uint f = HPLayer[p[index].X + 1, p[index].Y, p[index].Z + 1] + e;
             uint g = HPLayer[p[index].X, p[index].Y + 1, p[index].Z + 1] + f;
             uint h = HPLayer[p[index].X + 1, p[index].Y + 1, p[index].Z + 1] + g;
-            if (d == 0)
-                ;
             if (k[index] < a)
                 ;
             else if (k[index] < b)
@@ -304,7 +254,9 @@ namespace MarchingCubes
             uint f = HPLayer[p[index].X + 1, p[index].Y, p[index].Z + 1] + e;
             uint g = HPLayer[p[index].X, p[index].Y + 1, p[index].Z + 1] + f;
             uint h = HPLayer[p[index].X + 1, p[index].Y + 1, p[index].Z + 1] + g;
-            if (k[index] < b)
+            if (k[index] < a)
+                ;
+            else if (k[index] < b)
             {
                 if (k[index] == a)
                     k[index] = 0;
@@ -444,6 +396,7 @@ namespace MarchingCubes
             }
 
             stopWatch.Stop();
+
             ts = stopWatch.Elapsed;
             count = 0;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
@@ -452,7 +405,7 @@ namespace MarchingCubes
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
             stopWatch.Reset();
             stopWatch.Start();
-
+            HPBaseConfig.AsContiguous().GetAsArray().Max();
             hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, threshold, (int)Math.Sqrt(HPsize));
 
             accelerator.Synchronize();
@@ -501,7 +454,7 @@ namespace MarchingCubes
             config += (input[(index.Z) + 1, (index.Y) + 1, (index.X)] < thresh) ? (byte)0x80 : (byte)0;
             edges[index.Z, index.Y, (index.X)] = config;
             if (config > 0 && config < 255)
-                HPindices[index.X, index.Y, index.Z] = (byte)(triTable[(int)edges[index.Z, index.Y, (index.X)]].getn());
+                HPindices[index.X, index.Y, index.Z] = (byte)(triTable[(int)edges[index.Z, index.Y, (index.X)]].getn() / 3);
         }
 
         public static byte[,,] MarchingCubesGPU()
