@@ -138,16 +138,16 @@ namespace MarchingCubes
         public static uint getShuffleXYZ(Index3D index)
         {
             uint X, Y, Z, key = 0;
-            X = (uint)index.X;
+            X = (uint)index.Z;
             Y = (uint)index.Y;
-            Z = (uint)index.Z;
+            Z = (uint)index.X;
             for (int i = 0; i < 10; i++)
             {
-                key += (Z <<= 1) * (uint)XMath.Pow(2, i * 3);
-                key += (Y <<= 1) * (uint)XMath.Pow(2, (i + 1) * 3);
-                key += (X <<= 1) * (uint)XMath.Pow(2, (i + 2) * 3);
+                key += (((Z & (1 << i)) > 0) ? (uint)XMath.Pow(2, i * 3) : 0);
+                key += (((Y & (1 << i)) > 0) ? (uint)XMath.Pow(2, i * 3 + 1) : 0);
+                key += (((X & (1 << i)) > 0) ? (uint)XMath.Pow(2, i * 3 + 2) : 0);
             }
-            return 0;
+            return key;
         }
 
         public static Index3D getFromShuffleXYZ(uint xyz, int n)
@@ -162,6 +162,21 @@ namespace MarchingCubes
             }
             return new Index3D((int)X, (int)Y, (int)Z);
         }
+
+
+        public static Index3D getFromShuffleXYZ2(uint xyz, int n)
+        {
+            uint X = 0, Y = 0, Z = 0;
+            for (int i = 0; i < n; i++)
+            {
+                X += (1 & xyz) << i;
+                Y += (1 & xyz >> 1) << i;
+                Z += (1 & xyz >> 2) << i;
+                xyz >>= 3;
+            }
+            return new Index3D((int)X, (int)Y, (int)Z);
+        }
+
         public static void CreateBmp(DicomFile dicom, int k)
         {
             var decomp = dicom.Clone();

@@ -14,7 +14,7 @@ namespace MarchingCubes
             for (int i = 25; i < 26; i += 25)
             {
                 Console.WriteLine(i);
-                NaiveCPUMemMax run1 = new NaiveCPUMemMax(i);
+                OctreeWPrior run1 = new OctreeWPrior(i);
             }
             Console.Out.WriteLine("DONE");
         }
