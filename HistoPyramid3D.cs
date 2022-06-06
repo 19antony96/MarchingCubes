@@ -12,7 +12,7 @@ namespace MarchingCubes
 {
     class HistoPyramid3D : MarchingCubes
     {
-        public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int> assign1D;
+        public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int> assign;
         public static Action<Index3D, ArrayView3D<uint, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>> hpFirstLayer;
         public static Action<Index3D, ArrayView3D<uint, Stride3D.DenseXY>, ArrayView3D<uint, Stride3D.DenseXY>> hpCreation;
         public static Action<Index1D, ArrayView1D<FlatPoint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<uint, Stride3D.DenseXY>> traversalKernel;
@@ -69,7 +69,7 @@ namespace MarchingCubes
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
             //var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
 
-            assign1D = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int>(Assign1D);
+            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int>(Assign);
             hpFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<uint, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>>(BuildHPFirst);
             hpCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<uint, Stride3D.DenseXY>, ArrayView3D<uint, Stride3D.DenseXY>>(BuildHP);
             traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<FlatPoint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<uint, Stride3D.DenseXY>>(HPTraverseKernel);
@@ -441,7 +441,7 @@ namespace MarchingCubes
             }
         }
 
-        public static void Assign1D(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView3D<byte, Stride3D.DenseXY> HPindices, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int width, int HPsizeFator)
+        public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView3D<byte, Stride3D.DenseXY> HPindices, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int width, int HPsizeFator)
         {
             byte config = 0;
             config += (input[(index.Z), (index.Y), (index.X)] < thresh) ? (byte)0x01 : (byte)0;
@@ -490,7 +490,7 @@ namespace MarchingCubes
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            assign1D(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, threshold, width, (int)Math.Sqrt(HPsize));
+            assign(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, threshold, width, (int)Math.Sqrt(HPsize));
 
             accelerator.Synchronize();
             stopWatch.Stop();

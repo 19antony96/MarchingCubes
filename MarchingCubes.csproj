@@ -281,7 +281,10 @@
     <Compile Include="HistoPyramid3D.cs" />
     <Compile Include="MarchingCubes.cs" />
     <Compile Include="NaiveGPU.cs" />
+    <Compile Include="NaiveCPUMemMax .cs" />
+    <Compile Include="NaiveGPUMemMax.cs" />
     <Compile Include="Octree.cs" />
+    <Compile Include="OctreeWPrefixOnly.cs" />
     <Compile Include="OctreeWPrior.cs" />
     <Compile Include="Geometries.cs" />
     <Compile Include="Program.cs" />

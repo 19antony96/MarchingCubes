@@ -1,11 +1,11 @@
-﻿using System;
+﻿using ILGPU;
+using ILGPU.Runtime;
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using ILGPU.Runtime;
-using ILGPU;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace MarchingCubes
@@ -35,7 +35,7 @@ namespace MarchingCubes
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
             //var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
 
-            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int>(Assign1D);
+            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int>(Assign);
             get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, Point, int, int, int>(getVertices);
 
             cubes = MarchingCubesGPU();
@@ -54,7 +54,7 @@ namespace MarchingCubes
         }
 
 
-        public static void Assign1D(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int width)
+        public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int width)
         {
             byte config = 0;
             config += (input[(index.X), (index.Y), (index.Z)] < thresh) ? (byte)0x01 : (byte)0;
@@ -102,9 +102,6 @@ namespace MarchingCubes
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
             cubeConfig.CopyToCPU(cubeBytes);
-            //cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
-            //cubeBytes = cubeLocked.GetArray();
-            //cubePinned.Free();
 
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                 ts.Hours, ts.Minutes, ts.Seconds,

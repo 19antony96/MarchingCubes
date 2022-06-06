@@ -14,7 +14,7 @@ namespace MarchingCubes
             for (int i = 25; i < 26; i += 25)
             {
                 Console.WriteLine(i);
-                NaiveGPU run1 = new NaiveGPU(i);
+                NaiveCPUMemMax run1 = new NaiveCPUMemMax(i);
             }
             Console.Out.WriteLine("DONE");
         }
