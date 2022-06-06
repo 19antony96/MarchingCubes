@@ -14,7 +14,7 @@ namespace MarchingCubes
             for (int i = 25; i < 26; i += 25)
             {
                 Console.WriteLine(i);
-                OctreeWPrior run1 = new OctreeWPrior(i);
+                Octree run1 = new Octree(i);
             }
             Console.Out.WriteLine("DONE");
         }

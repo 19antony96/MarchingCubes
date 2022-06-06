@@ -16,9 +16,6 @@ namespace MarchingCubes
 {
     class OctreeWPrior : MarchingCubes
     {
-        public static Context context;
-        public static CudaAccelerator accelerator;
-        //public static CPUAccelerator accelerator;
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> assign;
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>> octreeCreation;
         public static Action<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernel;
@@ -46,10 +43,7 @@ namespace MarchingCubes
 
 
         public static TimeSpan ts = new TimeSpan();
-        public static int xCount = 0, yCount = 0, zCount = 0, lCount = 0;
 
-        public static List<Point> vertices = new List<Point>();
-        public static byte[,,] octreeLayer;
         public static int count = 0;
 
         public OctreeWPrior(int size)
@@ -68,8 +62,6 @@ namespace MarchingCubes
             octreeCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>>(BuildOctree);
             traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernel);
             octreeFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ushort, int>(OctreeFinalLayer);
-
-            sliced = accelerator.Allocate3DDenseXY<ushort>(slices);
 
             MarchingCubesGPU();
 
@@ -373,7 +365,7 @@ namespace MarchingCubes
             // i+1,j+1,k+1
             // i,j+1,k+1
 
-            octreeLayer = new byte[OctreeSize, OctreeSize, OctreeSize];
+            var octreeLayer = new byte[OctreeSize, OctreeSize, OctreeSize];
             var layerPinned = GCHandle.Alloc(octreeLayer, GCHandleType.Pinned);
             PageLockedArray3D<byte> layerLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
             layerConfig = accelerator.Allocate3DDenseXY<byte>(layerLocked.Extent);

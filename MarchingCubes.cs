@@ -3,6 +3,9 @@ using Dicom.Imaging;
 using Dicom.Imaging.Render;
 using ILGPU;
 using ILGPU.Algorithms;
+using ILGPU.Runtime;
+using ILGPU.Runtime.CPU;
+using ILGPU.Runtime.Cuda;
 using ImageMagick;
 using System;
 using System.Collections.Generic;
@@ -15,16 +18,17 @@ namespace MarchingCubes
 {
     class MarchingCubes
     {
-
+        public static Context context;
+        public static CudaAccelerator accelerator;
+        //public static CPUAccelerator accelerator;
+        public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
+        public static MemoryBuffer3D<ushort, Stride3D.DenseXY> sliced;
         public static readonly ushort threshold = 1539;
         public static int length = 256;
         public static int width = 256;
         public static ushort[,,] slices;
-        public static byte[,,] cubeBytes;
         public static int batchSize;
         public static int sliceSize = 127;
-        public static ushort[,,] OctreeBaseLayer;
-        public static ushort[][,,] Octree;
         public static int OctreeSize;
         public static ushort nLayers;
         public static int nTri;
@@ -32,6 +36,10 @@ namespace MarchingCubes
 
         public static FileInfo CreateVolume(int size)
         {
+            context = Context.Create(builder => builder.Default().EnableAlgorithms());
+            accelerator = context.CreateCudaAccelerator(0);
+            //accelerator = context.CreateCPUAccelerator(0);
+            triTable = accelerator.Allocate1D<Edge>(triangleTable);
 
             //length = size;
             //width = size;
@@ -81,6 +89,7 @@ namespace MarchingCubes
                     break;
             }
 
+            sliced = accelerator.Allocate3DDenseXY<ushort>(slices);
             return fi;
         }
 
@@ -124,7 +133,7 @@ namespace MarchingCubes
             }
             return slice;
         }
-        static uint getShuffleXYZ(Index3D index)
+        public static uint getShuffleXYZ(Index3D index)
         {
             uint X, Y, Z, key = 0;
             X = (uint)index.X;
