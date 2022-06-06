@@ -19,13 +19,13 @@ namespace MarchingCubes
     class MarchingCubes
     {
         public static Context context;
-        public static CudaAccelerator accelerator;
-        //public static CPUAccelerator accelerator;
+        //public static CudaAccelerator accelerator;
+        public static CPUAccelerator accelerator;
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
         public static MemoryBuffer3D<ushort, Stride3D.DenseXY> sliced;
         public static readonly ushort threshold = 1539;
-        public static int length = 256;
-        public static int width = 256;
+        public static int length = 440;
+        public static int width = 440;
         public static ushort[,,] slices;
         public static int batchSize;
         public static int sliceSize = 127;
@@ -37,8 +37,8 @@ namespace MarchingCubes
         public static FileInfo CreateVolume(int size)
         {
             context = Context.Create(builder => builder.Default().EnableAlgorithms());
-            accelerator = context.CreateCudaAccelerator(0);
-            //accelerator = context.CreateCPUAccelerator(0);
+            //accelerator = context.CreateCudaAccelerator(0);
+            accelerator = context.CreateCPUAccelerator(0);
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
 
             //length = size;
@@ -54,24 +54,24 @@ namespace MarchingCubes
 
             DicomFile dicoms;
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
-            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
+            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\DICOM\\DICOM\\ST000000\\SE000001\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Resources\\");
 
 
             //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\PVSJ_882\\";
-            string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
+            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
             //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\bunny\\";
             //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\CThead\\";
-            OctreeSize = 512;
-            DirectoryInfo d = new DirectoryInfo(path);
+            //OctreeSize = 512;
+            //DirectoryInfo d = new DirectoryInfo(path);
 
 
 
-            //FileInfo[] files = d.GetFiles("*.dcm");
+            FileInfo[] files = d.GetFiles("*.dcm");
             //FileInfo[] files = d.GetFiles("*.tif");
-            FileInfo[] files = d.GetFiles();
-            files = files.OrderBy(x => int.Parse(x.Name.Replace("MRbrain.", ""))).ToArray();
+            //FileInfo[] files = d.GetFiles();
+            //files = files.OrderBy(x => int.Parse(x.Name.Replace("CThead.", ""))).ToArray();
 
             string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
             FileInfo fi = new FileInfo(fileName);
@@ -83,7 +83,9 @@ namespace MarchingCubes
 
             foreach (var file in files)
             {
-                Decode(file.FullName, k);
+                dicoms = DicomFile.Open(file.FullName);
+                CreateBmp(dicoms, k);
+                //Decode(file.FullName, k);
                 k++;
                 if (k > 1023)
                     break;

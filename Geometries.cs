@@ -427,8 +427,7 @@ namespace MarchingCubes
 
             //}
             Point[] points = new Point[3];
-            int i;
-            for (i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 switch (ed[index * 3 + i])
                 {
@@ -484,8 +483,6 @@ namespace MarchingCubes
                         break;
                 }
             }
-            if ((points[0] - points[1]).X > 1)
-                ;
             return new Triangle(points[0], points[1], points[2]);
         }
 

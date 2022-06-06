@@ -113,12 +113,6 @@ namespace MarchingCubes
             var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
             var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
-            //width = size;
-            //length = size;
-            context = Context.CreateDefault();
-            accelerator = context.CreateCudaAccelerator(0);
-            //accelerator = context.CreateCPUAccelerator(0);
-            triTable = accelerator.Allocate1D<Edge>(triangleTable);
 
             assign1D = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView2D<byte, Stride2D.DenseX>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int>(Assign1D);
             get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, Point, int, int, int>(getVertices);
