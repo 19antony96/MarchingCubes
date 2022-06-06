@@ -11,7 +11,7 @@ using ILGPU.Runtime.CPU;
 using ILGPU.Runtime;
 using ILGPU;
 
-namespace DispDICOMCMD
+namespace MarchingCubes
 {
 
     public struct Triangle

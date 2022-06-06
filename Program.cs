@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DispDICOMCMD;
 
-namespace MarchingCubes		
+namespace MarchingCubes
 {
     class Program
     {
@@ -15,7 +14,7 @@ namespace MarchingCubes
             for (int i = 25; i < 26; i += 25)
             {
                 Console.WriteLine(i);
-                DispDICOMCMD.DispDICOMCMD run1 = new DispDICOMCMD.DispDICOMCMD(i);
+                OctreeWPrior run1 = new OctreeWPrior(i);
             }
             Console.Out.WriteLine("DONE");
         }
