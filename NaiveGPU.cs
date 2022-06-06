@@ -65,6 +65,8 @@ namespace MarchingCubes
             config += (input[(index.X) + 1, (index.Y), (index.Z) + 1] < thresh) ? (byte)0x20 : (byte)0;
             config += (input[(index.X) + 1, (index.Y) + 1, (index.Z) + 1] < thresh) ? (byte)0x40 : (byte)0;
             config += (input[(index.X) + 1, (index.Y) + 1, (index.Z)] < thresh) ? (byte)0x80 : (byte)0;
+            if (config != 0 && config != byte.MaxValue)
+                ;
             edges[index.X, index.Y, (index.Z)] = config;
         }
 
@@ -99,9 +101,10 @@ namespace MarchingCubes
             accelerator.Synchronize();
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
-            cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
-            cubeBytes = cubeLocked.GetArray();
-            cubePinned.Free();
+            cubeConfig.CopyToCPU(cubeBytes);
+            //cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
+            //cubeBytes = cubeLocked.GetArray();
+            //cubePinned.Free();
 
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                 ts.Hours, ts.Minutes, ts.Seconds,
@@ -216,11 +219,11 @@ namespace MarchingCubes
                 int nY = (int)Math.Ceiling((double)(Y / batchSize));
                 int nZ = (int)Math.Ceiling((double)(Z / batchSize));
 
-                Triangle[] triangleList = new Triangle[Math.Max(Nindex.Size, (nX + 1) * (nY + 1) * (nZ + 1) * batchSize * batchSize * batchSize) * 5];
+                Triangle[] triangleList = new Triangle[Math.Max(Nindex.Size * 5, (nX + 1) * (nY + 1) * (nZ + 1) * batchSize * batchSize * batchSize) * 5];
                 int sum = 0;
-                Triangle[] tri = new Triangle[Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5 + 1, (batchSize) * (batchSize) * (batchSize) * 5 + 1)];
-                PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5 + 1, (batchSize) * (batchSize) * (batchSize) * 5 + 1));
-                MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5 + 1, (batchSize) * (batchSize) * (batchSize) * 5 + 1));
+                Triangle[] tri = new Triangle[Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5, (batchSize) * (batchSize) * (batchSize) * 5)];
+                PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5, (batchSize) * (batchSize) * (batchSize) * 5));
+                MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5, (batchSize) * (batchSize) * (batchSize) * 5));
                 MemoryBuffer1D<byte, Stride1D.Dense> flag = accelerator.Allocate1D<byte>(1);
                 cubeConfig = accelerator.Allocate3DDenseXY(cubes);
                 int iX = 0;
