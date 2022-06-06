@@ -14,7 +14,7 @@ namespace MarchingCubes
             for (int i = 25; i < 26; i += 25)
             {
                 Console.WriteLine(i);
-                Octree run1 = new Octree(i);
+                HistoPyramid3D run1 = new HistoPyramid3D(i);
             }
             Console.Out.WriteLine("DONE");
         }

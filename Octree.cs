@@ -1,32 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Windows.Media.Imaging;
-using System.Collections;
-using Dicom;
-using Dicom.Imaging;
-using Dicom.Imaging.Render;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using Dicom.Imaging.Mathematics;
-using System.Windows;
-using ILGPU.Runtime.Cuda;
-using ILGPU.Runtime.CPU;
 using ILGPU.Runtime;
 using ILGPU.Algorithms.ScanReduceOperations;
 using ILGPU.Algorithms;
-using ILGPU.Algorithms.HistogramOperations;
 using ILGPU.Algorithms.RadixSortOperations;
 using ILGPU;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading;
 using System.Runtime.InteropServices;
-using ILGPU.Algorithms.ComparisonOperations;
 
 namespace MarchingCubes
 {

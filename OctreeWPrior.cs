@@ -23,8 +23,6 @@ namespace MarchingCubes
 
 
         public static MemoryBuffer3D<byte, Stride3D.DenseXY> layerConfig;
-        public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
-        public static MemoryBuffer3D<ushort, Stride3D.DenseXY> sliced;
         public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer15;
         public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer14;
         public static MemoryBuffer3D<byte, Stride3D.DenseXY> byteLayer13;
