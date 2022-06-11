@@ -20,8 +20,8 @@ namespace MarchingCubes
                 //HistoPyramid3D run6 = new HistoPyramid3D(i);
                 //Octree run7 = new Octree(i);
                 //OctreeEvenSubdiv run8 = new OctreeEvenSubdiv(i);
-                //OctreeWPrior run9 = new OctreeWPrior(i);
-                OctreeBONOwPrior run10 = new OctreeBONOwPrior(i);
+                OctreeWPrior run9 = new OctreeWPrior(i);
+                //OctreeBONOwPrior run10 = new OctreeBONOwPrior(i);
             }
             while (true) 
                 ;

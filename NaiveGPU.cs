@@ -45,7 +45,7 @@ namespace MarchingCubes
 
             using (StreamWriter fs = fi.CreateText())
             {
-                MarchGPU(fs);
+                MarchBatchGPU(fs);
 
                 int f = 0;
                 for (f = 1; f < count - 1; f += 3)
