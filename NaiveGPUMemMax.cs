@@ -28,6 +28,7 @@ namespace MarchingCubes
 
         public NaiveGPUMemMax(int size)
         {
+            Console.WriteLine("GPU Mem");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
 

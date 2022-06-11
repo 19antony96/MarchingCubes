@@ -14,8 +14,17 @@ namespace MarchingCubes
             for (int i = 25; i < 26; i += 25)
             {
                 Console.WriteLine(i);
-                OctreeWPrior run1 = new OctreeWPrior(i);
+                //NaiveCPU run1 = new NaiveCPU(i);
+                //NaiveGPU run2 = new NaiveGPU(i);
+                //HistoPyramid run5 = new HistoPyramid(i);
+                //HistoPyramid3D run6 = new HistoPyramid3D(i);
+                //Octree run7 = new Octree(i);
+                //OctreeEvenSubdiv run8 = new OctreeEvenSubdiv(i);
+                //OctreeWPrior run9 = new OctreeWPrior(i);
+                OctreeBONOwPrior run10 = new OctreeBONOwPrior(i);
             }
+            while (true) 
+                ;
             Console.Out.WriteLine("DONE");
         }
     }

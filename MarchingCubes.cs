@@ -11,8 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MarchingCubes
 {
@@ -23,7 +21,7 @@ namespace MarchingCubes
         //public static CPUAccelerator accelerator;
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
         public static MemoryBuffer3D<ushort, Stride3D.DenseXY> sliced;
-        public static readonly ushort threshold = 600;
+        public static readonly ushort threshold = 1538;
         public static int length = 256;
         public static int width = 256;
         public static ushort[,,] slices;
@@ -60,9 +58,9 @@ namespace MarchingCubes
 
 
             //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\PVSJ_882\\";
-            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
+            string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
             //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\bunny\\";
-            string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\CThead\\";
+            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\CThead\\";
             //OctreeSize = 512;
             DirectoryInfo d = new DirectoryInfo(path);
 
@@ -71,7 +69,7 @@ namespace MarchingCubes
             //FileInfo[] files = d.GetFiles("*.dcm");
             //FileInfo[] files = d.GetFiles("*.tif");
             FileInfo[] files = d.GetFiles();
-            files = files.OrderBy(x => int.Parse(x.Name.Replace("CThead.", ""))).ToArray();
+            files = files.OrderBy(x => int.Parse(x.Name.Replace("MRbrain.", ""))).ToArray();
 
             string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
             FileInfo fi = new FileInfo(fileName);
@@ -83,7 +81,7 @@ namespace MarchingCubes
 
             foreach (var file in files)
             {
-                dicoms = DicomFile.Open(file.FullName);
+                //dicoms = DicomFile.Open(file.FullName);
                 //CreateBmp(dicoms, k);
                 Decode(file.FullName, k);
                 k++;

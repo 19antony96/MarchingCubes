@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 
 namespace MarchingCubes
 {
-    class Octree : MarchingCubes
+    class OctreeTest : MarchingCubes
     {
         public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> assign;
         public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> octreeCreation;
@@ -73,7 +73,7 @@ namespace MarchingCubes
         public static TimeSpan ts = new TimeSpan();
         public static int count = 0;
 
-        public Octree(int size)
+        public OctreeTest(int size)
         {
             Console.WriteLine("Octree");
             ushort i = 0;
@@ -182,17 +182,17 @@ namespace MarchingCubes
 
         public static void OctreeTraverseKernel(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
         {
-            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
+            Index3D index3D = getFromShuffleXYZ(keys[index], (int)XMath.Log2(max.Extent.X));
             if (max[index3D] > threshold && min[index3D] < threshold)
             {
-                newKeys[index * 8] = keys[index];
-                newKeys[index * 8 + 1] = (uint)(keys[index] + (1 << (3 * n)));
-                newKeys[index * 8 + 2] = (uint)(keys[index] + (2 << (3 * n)));
-                newKeys[index * 8 + 3] = (uint)(keys[index] + (3 << (3 * n)));
-                newKeys[index * 8 + 4] = (uint)(keys[index] + (4 << (3 * n)));
-                newKeys[index * 8 + 5] = (uint)(keys[index] + (5 << (3 * n)));
-                newKeys[index * 8 + 6] = (uint)(keys[index] + (6 << (3 * n)));
-                newKeys[index * 8 + 7] = (uint)(keys[index] + (7 << (3 * n)));
+                newKeys[index * 8] = keys[index] << 3;
+                newKeys[index * 8 + 1] = (uint)((keys[index] << 3) + 1);
+                newKeys[index * 8 + 2] = (uint)((keys[index] << 3) + 2);
+                newKeys[index * 8 + 3] = (uint)((keys[index] << 3) + 3);
+                newKeys[index * 8 + 4] = (uint)((keys[index] << 3) + 4);
+                newKeys[index * 8 + 5] = (uint)((keys[index] << 3) + 5);
+                newKeys[index * 8 + 6] = (uint)((keys[index] << 3) + 6);
+                newKeys[index * 8 + 7] = (uint)((keys[index] << 3) + 7);
                 count[index] = 8;
             }
             else
@@ -289,7 +289,7 @@ namespace MarchingCubes
             var newKeys = accelerator.Allocate1D<uint>(new uint[] { 0 });
             uint[] k = { 0, 1, 2, 3, 4, 5, 6, 7 };
             for (int i = 0; i < 8; i++)
-                k[i] <<= ((nLayers - 1) * 3);
+                k[i] <<= 3;
 
             var keys = accelerator.Allocate1D<uint>(k);
             Index1D index = new Index1D(8);

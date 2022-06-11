@@ -58,6 +58,7 @@ namespace MarchingCubes
 
         public HistoPyramid(int size)
         {
+            Console.WriteLine("HistoPyramid Flat 3D");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
 

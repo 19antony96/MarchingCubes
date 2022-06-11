@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -13,11 +12,23 @@ using System.Runtime.InteropServices;
 
 namespace MarchingCubes
 {
-    class Octree : MarchingCubes
+    class OctreeEvenSubdiv : MarchingCubes
     {
         public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> assign;
-        public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> octreeCreation;
-        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernel;
+        public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> branchAll;
+        public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> branchX;
+        public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> branchY;
+        public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> branchZ;
+        public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> branchXY;
+        public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> branchXZ;
+        public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> branchYZ;
+        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernelAll;
+        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernelX;
+        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernelY;
+        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernelZ;
+        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernelXY;
+        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernelXZ;
+        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernelYZ;
         public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ushort, int> octreeFinalLayer;
 
 
@@ -70,27 +81,48 @@ namespace MarchingCubes
         public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer2;
         public static MemoryBuffer3D<uint, Stride3D.DenseXY> keysLayer1;
 
+        public static ushort xCode;
+        public static ushort yCode;
+        public static ushort zCode;
+
         public static TimeSpan ts = new TimeSpan();
         public static int count = 0;
 
-        public Octree(int size)
+        public OctreeEvenSubdiv(int size)
         {
-            Console.WriteLine("Octree");
+            Console.WriteLine("OctreeEvenSubdiv");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
+
+            xCode = (ushort)(slices.GetLength(2) - 1);
+            yCode = (ushort)(slices.GetLength(1) - 1);
+            zCode = (ushort)(slices.GetLength(0) - 1);
 
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
             //var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
 
             assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(Assign);
-            octreeCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BuildOctree);
-            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernel);
+            branchAll = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BranchAll);
+            branchX = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BranchX);
+            branchY = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BranchY);
+            branchZ = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BranchZ);
+            branchXY = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BranchXY);
+            branchXZ = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BranchXZ);
+            branchYZ = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BranchYZ);
+            traversalKernelAll = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernelAll);
+            traversalKernelX = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernelX);
+            traversalKernelY = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernelY);
+            traversalKernelZ = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernelZ);
+            traversalKernelXY = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernelXY);
+            traversalKernelXZ = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernelXZ);
+            traversalKernelYZ = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernelYZ);
             octreeFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ushort, int>(OctreeFinalLayer);
 
             MarchingCubesGPU();
 
             OctreeCreationGPU();
+
 
             using (StreamWriter fs = fi.CreateText())
             {
@@ -113,26 +145,111 @@ namespace MarchingCubes
             }
         }
 
-        public static void BuildOctree(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> minPrev, ArrayView3D<ushort, Stride3D.DenseXY> maxPrev, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max)
+        public static void BranchX(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> minPrev, ArrayView3D<ushort, Stride3D.DenseXY> maxPrev, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max)
+        {
+            min[index] = XMath.Min(minPrev[(index.X) * 2, (index.Y), (index.Z)], minPrev[(index.X) * 2 + 1, (index.Y), (index.Z)]);
+            max[index] = XMath.Max(maxPrev[(index.X) * 2, (index.Y), (index.Z)], maxPrev[(index.X) * 2 + 1, (index.Y), (index.Z)]);
+        }
+
+        public static void BranchY(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> minPrev, ArrayView3D<ushort, Stride3D.DenseXY> maxPrev, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max)
+        {
+            min[index] = XMath.Min(minPrev[(index.X), (index.Y) * 2, (index.Z)], minPrev[(index.X), (index.Y) * 2 + 1, (index.Z)]);
+            max[index] = XMath.Max(maxPrev[(index.X), (index.Y) * 2, (index.Z)], maxPrev[(index.X), (index.Y) * 2 + 1, (index.Z)]);
+        }
+        public static void BranchZ(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> minPrev, ArrayView3D<ushort, Stride3D.DenseXY> maxPrev, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max)
+        {
+            min[index] = XMath.Min(minPrev[(index.X), (index.Y), (index.Z) * 2], minPrev[(index.X), (index.Y), (index.Z) * 2 + 1]);
+            max[index] = XMath.Max(maxPrev[(index.X), (index.Y), (index.Z) * 2], maxPrev[(index.X), (index.Y), (index.Z) * 2 + 1]);
+        }
+        public static void BranchXY(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> minPrev, ArrayView3D<ushort, Stride3D.DenseXY> maxPrev, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max)
         {
 
-            ushort[] tempMax = new[] {maxPrev[(index.Z)*2, (index.Y)*2, (index.X)*2],
-                maxPrev[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
-                maxPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
-                maxPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
-                maxPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
-                maxPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
-                maxPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
-                maxPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2] };
+            ushort[] tempMax = new[] {maxPrev[(index.X)*2, (index.Y)*2, (index.Z)],
+                maxPrev[(index.X)*2, (index.Y)*2 + 1, (index.Z)],
+                maxPrev[(index.X)*2 + 1, (index.Y)*2, (index.Z)],
+                maxPrev[(index.X)*2 + 1, (index.Y)*2 + 1, (index.Z)] };
 
-            ushort[] tempMin = new[] {minPrev[(index.Z)*2, (index.Y)*2, (index.X)*2],
-                minPrev[(index.Z)*2, (index.Y)*2, (index.X)*2 + 1],
-                minPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2 + 1],
-                minPrev[(index.Z)*2, (index.Y)*2 + 1, (index.X)*2],
-                minPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2],
-                minPrev[(index.Z)*2 + 1, (index.Y)*2, (index.X)*2 + 1],
-                minPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2 + 1],
-                minPrev[(index.Z)*2 + 1, (index.Y)*2 + 1, (index.X)*2]};
+            ushort[] tempMin = new[] {minPrev[(index.X)*2, (index.Y)*2, (index.Z)],
+                minPrev[(index.X)*2, (index.Y)*2 + 1, (index.Z)],
+                minPrev[(index.X)*2 + 1, (index.Y)*2, (index.Z)],
+                minPrev[(index.X)*2 + 1, (index.Y)*2 + 1, (index.Z)]};
+
+            ushort tMax = tempMax[0];
+            ushort tMin = tempMin[0];
+            for (int i = 1; i < 4; i++)
+            {
+                if (tempMax[i] > tMax) tMax = tempMax[i];
+                if (tempMin[i] < tMin) tMin = tempMin[i];
+            }
+            min[index] = tMin;
+            max[index] = tMax;
+        }
+        public static void BranchXZ(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> minPrev, ArrayView3D<ushort, Stride3D.DenseXY> maxPrev, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max)
+        {
+
+            ushort[] tempMax = new[] {maxPrev[(index.X)*2, (index.Y), (index.Z)*2],
+                maxPrev[(index.X)*2, (index.Y), (index.Z)*2 + 1],
+                maxPrev[(index.X)*2 + 1, (index.Y), (index.Z)*2],
+                maxPrev[(index.X)*2 + 1, (index.Y), (index.Z)*2 + 1] };
+
+            ushort[] tempMin = new[] {minPrev[(index.X)*2, (index.Y), (index.Z)*2],
+                minPrev[(index.X)*2, (index.Y), (index.Z)*2 + 1],
+                minPrev[(index.X)*2 + 1, (index.Y), (index.Z)*2],
+                minPrev[(index.X)*2 + 1, (index.Y), (index.Z)*2 + 1] };
+
+            ushort tMax = tempMax[0];
+            ushort tMin = tempMin[0];
+            for (int i = 1; i < 4; i++)
+            {
+                if (tempMax[i] > tMax) tMax = tempMax[i];
+                if (tempMin[i] < tMin) tMin = tempMin[i];
+            }
+            min[index] = tMin;
+            max[index] = tMax;
+        }
+        public static void BranchYZ(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> minPrev, ArrayView3D<ushort, Stride3D.DenseXY> maxPrev, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max)
+        {
+
+            ushort[] tempMax = new[] {maxPrev[(index.X), (index.Y)*2, (index.Z)*2],
+                maxPrev[(index.X), (index.Y)*2, (index.Z)*2 + 1],
+                maxPrev[(index.X), (index.Y)*2 + 1, (index.Z)*2 + 1],
+                maxPrev[(index.X), (index.Y)*2 + 1, (index.Z)*2] };
+
+            ushort[] tempMin = new[] {minPrev[(index.X), (index.Y)*2, (index.Z)*2],
+                minPrev[(index.X), (index.Y)*2, (index.Z)*2 + 1],
+                minPrev[(index.X), (index.Y)*2 + 1, (index.Z)*2 + 1],
+                minPrev[(index.X), (index.Y)*2 + 1, (index.Z)*2] };
+
+            ushort tMax = tempMax[0];
+            ushort tMin = tempMin[0];
+            for (int i = 1; i < 4; i++)
+            {
+                if (tempMax[i] > tMax) tMax = tempMax[i];
+                if (tempMin[i] < tMin) tMin = tempMin[i];
+            }
+            min[index] = tMin;
+            max[index] = tMax;
+        }
+        public static void BranchAll(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> minPrev, ArrayView3D<ushort, Stride3D.DenseXY> maxPrev, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max)
+        {
+
+            ushort[] tempMax = new[] {maxPrev[(index.X)*2, (index.Y)*2, (index.Z)*2],
+                maxPrev[(index.X)*2, (index.Y)*2, (index.Z)*2 + 1],
+                maxPrev[(index.X)*2, (index.Y)*2 + 1, (index.Z)*2 + 1],
+                maxPrev[(index.X)*2, (index.Y)*2 + 1, (index.Z)*2],
+                maxPrev[(index.X)*2 + 1, (index.Y)*2, (index.Z)*2],
+                maxPrev[(index.X)*2 + 1, (index.Y)*2, (index.Z)*2 + 1],
+                maxPrev[(index.X)*2 + 1, (index.Y)*2 + 1, (index.Z)*2 + 1],
+                maxPrev[(index.X)*2 + 1, (index.Y)*2 + 1, (index.Z)*2] };
+
+            ushort[] tempMin = new[] {minPrev[(index.X)*2, (index.Y)*2, (index.Z)*2],
+                minPrev[(index.X)*2, (index.Y)*2, (index.Z)*2 + 1],
+                minPrev[(index.X)*2, (index.Y)*2 + 1, (index.Z)*2 + 1],
+                minPrev[(index.X)*2, (index.Y)*2 + 1, (index.Z)*2],
+                minPrev[(index.X)*2 + 1, (index.Y)*2, (index.Z)*2],
+                minPrev[(index.X)*2 + 1, (index.Y)*2, (index.Z)*2 + 1],
+                minPrev[(index.X)*2 + 1, (index.Y)*2 + 1, (index.Z)*2 + 1],
+                minPrev[(index.X)*2 + 1, (index.Y)*2 + 1, (index.Z)*2]};
 
             ushort tMax = tempMax[0];
             ushort tMin = tempMin[0];
@@ -141,29 +258,61 @@ namespace MarchingCubes
                 if (tempMax[i] > tMax) tMax = tempMax[i];
                 if (tempMin[i] < tMin) tMin = tempMin[i];
             }
-            min[(index.Z), (index.Y), (index.X)] = tMin;
-            max[(index.Z), (index.Y), (index.X)] = tMax;
-
+            min[index] = tMin;
+            max[index] = tMax;
         }
 
         private static void OctreeCreationGPU()
         {
+            bool xSplit, ySplit, zSplit;
+            int nX = (int)minConfig.Extent.X, nY = (int)minConfig.Extent.Y, nZ = (int)minConfig.Extent.Z;
+            int X = (int)minConfig.Extent.X, Y = (int)minConfig.Extent.Y, Z = (int)minConfig.Extent.Z;
+            Index3D index = new Index3D(nX, nY, nZ);
             nLayers = (ushort)(Math.Ceiling(Math.Log(OctreeSize, 2)) + 1);
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             accelerator.Synchronize();
-            for (int i = 1; i < 16; i++)
+            for (int i = 1; i < nLayers; i++)
             {
-                int l = Math.Max(OctreeSize / (int)Math.Pow(2, i), 1);
+                zSplit = ySplit = xSplit = false;
+                if ((xCode > 1 << (nLayers - i - 1)))
+                {
+                    zSplit = true;
+                    nZ = 1 << (nLayers - i - 1);
+                    Z = index.Z / 2;
+                }
+                if ((yCode > 1 << (nLayers - i - 1)))
+                {
+                    ySplit = true;
+                    nY = 1 << (nLayers - i - 1);
+                    Y = index.Y / 2;
+                }
+                if ((zCode > 1 << (nLayers - i - 1)))
+                {
+                    xSplit = true;
+                    nX = 1 << (nLayers - i - 1);
+                    X = index.X / 2;
+                }
                 if (i < nLayers)
                 {
-                    Index3D index = new Index3D(l);
+                    index = new Index3D(X, Y, Z);
                     getMinOctreeLayer(i) = accelerator.Allocate3DDenseXY<ushort>(index);
                     getMaxOctreeLayer(i) = accelerator.Allocate3DDenseXY<ushort>(index);
-
-
-                    octreeCreation(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View);
+                    if(zSplit && ySplit && xSplit)
+                        branchAll(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View);
+                    else if(xSplit && ySplit)
+                        branchXY(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View);
+                    else if (xSplit && zSplit)
+                        branchXZ(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View);
+                    else if (ySplit && zSplit)
+                        branchYZ(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View);
+                    else if (xSplit)
+                        branchX(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View);
+                    else if (ySplit)
+                        branchY(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View);
+                    else if (zSplit)
+                        branchZ(index, getMinOctreeLayer(i - 1).View, getMaxOctreeLayer(i - 1).View, getMinOctreeLayer(i).View, getMaxOctreeLayer(i).View);
                     accelerator.Synchronize();
                 }
             }
@@ -180,7 +329,175 @@ namespace MarchingCubes
                 nTri = data[0, 0, 0];
         }
 
-        public static void OctreeTraverseKernel(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
+        public static void OctreeTraverseKernelX(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
+        {
+            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
+            if (max[index3D] > threshold && min[index3D] < threshold)
+            {
+                newKeys[index * 8] = keys[index];
+                newKeys[index * 8 + 1] = 0;
+                newKeys[index * 8 + 2] = 0;
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = (uint)(keys[index] + (4 << (3 * n)));
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+                count[index] = 2;
+            }
+            else
+            {
+                newKeys[index * 8] = 0;
+                newKeys[index * 8 + 1] = 0;
+                newKeys[index * 8 + 2] = 0;
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = 0;
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+            }
+        }
+        
+        public static void OctreeTraverseKernelY(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
+        {
+            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
+            if (max[index3D] > threshold && min[index3D] < threshold)
+            {
+                newKeys[index * 8] = keys[index];
+                newKeys[index * 8 + 1] = 0;
+                newKeys[index * 8 + 2] = (uint)(keys[index] + (2 << (3 * n)));
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = 0;
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+                count[index] = 2;
+            }
+            else
+            {
+                newKeys[index * 8] = 0;
+                newKeys[index * 8 + 1] = 0;
+                newKeys[index * 8 + 2] = 0;
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = 0;
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+            }
+        }
+        
+        public static void OctreeTraverseKernelZ(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
+        {
+            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
+            if (max[index3D] > threshold && min[index3D] < threshold)
+            {
+                newKeys[index * 8] = keys[index];
+                newKeys[index * 8 + 1] = (uint)(keys[index] + (1 << (3 * n)));
+                newKeys[index * 8 + 2] = 0;
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = 0;
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+                count[index] = 2;
+            }
+            else
+            {
+                newKeys[index * 8] = 0;
+                newKeys[index * 8 + 1] = 0;
+                newKeys[index * 8 + 2] = 0;
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = 0;
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+            }
+        }
+
+        public static void OctreeTraverseKernelXY (Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
+        {
+            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
+            if (max[index3D] > threshold && min[index3D] < threshold)
+            {
+                newKeys[index * 8] = keys[index];
+                newKeys[index * 8 + 1] = 0;
+                newKeys[index * 8 + 2] = (uint)(keys[index] + (2 << (3 * n)));
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = (uint)(keys[index] + (4 << (3 * n)));
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = (uint)(keys[index] + (6 << (3 * n)));
+                newKeys[index * 8 + 7] = 0;
+                count[index] = 4;
+            }
+            else
+            {
+                newKeys[index * 8] = 0;
+                newKeys[index * 8 + 1] = 0;
+                newKeys[index * 8 + 2] = 0;
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = 0;
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+            }
+        }
+        
+        public static void OctreeTraverseKernelXZ(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
+        {
+            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
+            if (max[index3D] > threshold && min[index3D] < threshold)
+            {
+                newKeys[index * 8] = keys[index];
+                newKeys[index * 8 + 1] = (uint)(keys[index] + (1 << (3 * n)));
+                newKeys[index * 8 + 2] = 0;
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = (uint)(keys[index] + (4 << (3 * n)));
+                newKeys[index * 8 + 5] = (uint)(keys[index] + (5 << (3 * n)));
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+                count[index] = 4;
+            }
+            else
+            {
+                newKeys[index * 8] = 0;
+                newKeys[index * 8 + 1] = 0;
+                newKeys[index * 8 + 2] = 0;
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = 0;
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+            }
+        }
+        
+        public static void OctreeTraverseKernelYZ(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
+        {
+            Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
+            if (max[index3D] > threshold && min[index3D] < threshold)
+            {
+                newKeys[index * 8] = keys[index];
+                newKeys[index * 8 + 1] = (uint)(keys[index] + (1 << (3 * n)));
+                newKeys[index * 8 + 2] = (uint)(keys[index] + (2 << (3 * n)));
+                newKeys[index * 8 + 3] = (uint)(keys[index] + (3 << (3 * n)));
+                newKeys[index * 8 + 4] = 0;
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+                count[index] = 4;
+            }
+            else
+            {
+                newKeys[index * 8] = 0;
+                newKeys[index * 8 + 1] = 0;
+                newKeys[index * 8 + 2] = 0;
+                newKeys[index * 8 + 3] = 0;
+                newKeys[index * 8 + 4] = 0;
+                newKeys[index * 8 + 5] = 0;
+                newKeys[index * 8 + 6] = 0;
+                newKeys[index * 8 + 7] = 0;
+            }
+        }
+        
+        public static void OctreeTraverseKernelAll(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
         {
             Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
             if (max[index3D] > threshold && min[index3D] < threshold)
@@ -284,28 +601,52 @@ namespace MarchingCubes
         private static void OctreeTraversalGPU(StreamWriter fs)
         {
             int n;
-            var cnt = accelerator.Allocate1D<uint>(8);
+            var cnt = accelerator.Allocate1D<uint>(1);
             cnt.MemSetToZero();
             var newKeys = accelerator.Allocate1D<uint>(new uint[] { 0 });
-            uint[] k = { 0, 1, 2, 3, 4, 5, 6, 7 };
-            for (int i = 0; i < 8; i++)
-                k[i] <<= ((nLayers - 1) * 3);
+            uint[] k = { 0 };
+            k[0] <<= ((nLayers - 1) * 3);
 
             var keys = accelerator.Allocate1D<uint>(k);
-            Index1D index = new Index1D(8);
+            Index1D index = new Index1D(1);
             uint[] karray = Enumerable.Range(0, nTri).Select(x => (uint)x).ToArray();
             MemoryBuffer<ArrayView1D<uint, Stride1D.Dense>> sum = accelerator.Allocate1D<uint>(1);
             accelerator.Synchronize();
             var radixSort = accelerator.CreateRadixSort<uint, Stride1D.Dense, DescendingUInt32>();
             var prefixSum = accelerator.CreateReduction<uint, Stride1D.Dense, AddUInt32>();
 
-
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            for (n = nLayers - 2; n > 0; n--)
+            for (n = nLayers - 1; n > 0; n--)
             {
+                bool xSplit = true, ySplit = true, zSplit = true;
+                if ((zCode < 1 << (n - 1)))
+                {
+                    zSplit = false;
+                }
+                if ((yCode < 1 << (n - 1)))
+                {
+                    ySplit = false;
+                }
+                if ((xCode < 1 << (n - 1)))
+                {
+                    xSplit = false;
+                }
                 newKeys = accelerator.Allocate1D<uint>(index.Size * 8);
-                traversalKernel(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                if (zSplit && ySplit && xSplit)
+                    traversalKernelAll(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                else if (xSplit && ySplit)
+                    traversalKernelXY(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                else if (xSplit && zSplit)
+                    traversalKernelXZ(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                else if (ySplit && zSplit)
+                    traversalKernelYZ(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                else if (xSplit)
+                    traversalKernelX(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                else if (ySplit)
+                    traversalKernelY(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                else if (zSplit)
+                    traversalKernelZ(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
                 accelerator.Synchronize();
 
                 var tempMemSize = accelerator.ComputeRadixSortTempStorageSize<uint, DescendingUInt32>((Index1D)newKeys.Length);
@@ -412,6 +753,10 @@ namespace MarchingCubes
         {
             Index3D index = new Index3D(slices.GetLength(2) - 1, slices.GetLength(1) - 1, slices.GetLength(0) - 1);;
 
+            int Z = (int)Math.Pow(2, Math.Ceiling(Math.Log(slices.GetLength(0), 2)));
+            int Y = (int)Math.Pow(2, Math.Ceiling(Math.Log(slices.GetLength(1), 2)));
+            int X = (int)Math.Pow(2, Math.Ceiling(Math.Log(slices.GetLength(2), 2)));
+
             //bit order 
             // i,j,k 
             // i+1,j,k
@@ -422,12 +767,12 @@ namespace MarchingCubes
             // i+1,j+1,k+1
             // i,j+1,k+1
 
-            var octreeMin = new ushort[OctreeSize, OctreeSize, OctreeSize];
-            var octreeMax = new ushort[OctreeSize, OctreeSize, OctreeSize];
+            var octreeMin = new ushort[Z, Y, X];
+            var octreeMax = new ushort[Z, Y, X];
             var minPinned = GCHandle.Alloc(octreeMin, GCHandleType.Pinned);
             var maxPinned = GCHandle.Alloc(octreeMax, GCHandleType.Pinned);
-            PageLockedArray3D<ushort> minLocked = accelerator.AllocatePageLocked3D<ushort>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
-            PageLockedArray3D<ushort> maxLocked = accelerator.AllocatePageLocked3D<ushort>(new Index3D(OctreeSize, OctreeSize, OctreeSize));
+            PageLockedArray3D<ushort> minLocked = accelerator.AllocatePageLocked3D<ushort>(new Index3D(Z, Y, X));
+            PageLockedArray3D<ushort> maxLocked = accelerator.AllocatePageLocked3D<ushort>(new Index3D(Z, Y, X));
             minConfig = accelerator.Allocate3DDenseXY<ushort>(minLocked.Extent);
             maxConfig = accelerator.Allocate3DDenseXY<ushort>(maxLocked.Extent);
             var minScope = accelerator.CreatePageLockFromPinned<ushort>(minPinned.AddrOfPinnedObject(), octreeMin.Length);

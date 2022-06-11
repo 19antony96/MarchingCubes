@@ -280,9 +280,13 @@
     <Compile Include="HistoPyramid.cs" />
     <Compile Include="HistoPyramid3D.cs" />
     <Compile Include="MarchingCubes.cs" />
+    <Compile Include="NaiveCPU.cs" />
     <Compile Include="NaiveGPU.cs" />
     <Compile Include="NaiveCPUMemMax .cs" />
     <Compile Include="NaiveGPUMemMax.cs" />
+    <Compile Include="OctreeBONOwPrior.cs" />
+    <Compile Include="OctreeTest.cs" />
+    <Compile Include="OctreeEvenSubdiv.cs" />
     <Compile Include="Octree.cs" />
     <Compile Include="OctreeWPrefixOnly.cs" />
     <Compile Include="OctreeWPrior.cs" />

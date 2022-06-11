@@ -23,6 +23,7 @@ namespace MarchingCubes
 
         public NaiveCPUMemMax(int size)
         {
+            Console.WriteLine("CPU Mem");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
 

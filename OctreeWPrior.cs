@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using ILGPU.Runtime.Cuda;
 using ILGPU.Runtime;
 using ILGPU.Algorithms.ScanReduceOperations;
 using ILGPU.Algorithms;
@@ -46,7 +44,8 @@ namespace MarchingCubes
 
         public OctreeWPrior(int size)
         {
-            ushort i;
+            Console.WriteLine("Octree W Prior Knowledge");
+            ushort i = 0;
             FileInfo fi = CreateVolume(size);
 
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
@@ -221,25 +220,24 @@ namespace MarchingCubes
                         (vertice[i + 1].X > 0 || vertice[i + 1].Y > 0 || vertice[i + 1].Z > 0) ||
                         (vertice[i + 2].X > 0 || vertice[i + 2].Y > 0 || vertice[i + 2].Z > 0))
                     {
-                        //}
                         triangles[index * 5 + (i / 3)] = new Triangle(vertice[i], vertice[i + 1], vertice[i + 2]);
                     }
-                }
             }
         }
+    }
 
         private static void OctreeTraversalGPU(StreamWriter fs)
         {
             int n;
-            var cnt = accelerator.Allocate1D<uint>(8);
+            var cnt = accelerator.Allocate1D<uint>(1);
             cnt.MemSetToZero();
             var newKeys = accelerator.Allocate1D<uint>(new uint[] { 0 });
-            uint[] k = { 0, 1, 2, 3, 4, 5, 6, 7 };
-            for (int i = 0; i < 8; i++)
-                k[i] <<= ((nLayers - 1) * 3);
+            uint[] k = { 0 };
+            //for (int i = 0; i < 8; i++)
+                k[0] <<= ((nLayers - 1) * 3);
 
             var keys = accelerator.Allocate1D<uint>(k);
-            Index1D index = new Index1D(8);
+            Index1D index = new Index1D(1);
             uint[] karray = Enumerable.Range(0, nTri).Select(x => (uint)x).ToArray();
             MemoryBuffer<ArrayView1D<uint, Stride1D.Dense>> sum = accelerator.Allocate1D<uint>(1);
             accelerator.Synchronize();
@@ -249,30 +247,22 @@ namespace MarchingCubes
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            for (n = nLayers - 2; n > 0; n--)
+            for (n = nLayers - 1; n > 0; n--)
             {
                 newKeys = accelerator.Allocate1D<uint>(index.Size * 8);
-                traversalKernel(index, getByteOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
-                accelerator.Synchronize();
-
                 var tempMemSize = accelerator.ComputeRadixSortTempStorageSize<uint, DescendingUInt32>((Index1D)newKeys.Length);
-                using (var tempBuffer = accelerator.Allocate1D<int>(tempMemSize))
-                {
+                traversalKernel(index, getByteOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                var tempBuffer = accelerator.Allocate1D<int>(tempMemSize);
+                accelerator.Synchronize();
+                prefixSum(accelerator.DefaultStream, cnt, sum.View);
+                keys = newKeys;
+
                     radixSort(
                         accelerator.DefaultStream,
                         newKeys.View,
                         tempBuffer.View);
-                }
-
-                prefixSum(accelerator.DefaultStream, cnt, sum.View);
-
+                
                 accelerator.Synchronize();
-                if (n > 0)
-                {
-                    getByteOctreeLayer(n).Dispose();
-                }
-
-                keys = newKeys;
                 index = new Index1D((int)sum.GetAsArray1D()[0]);
                 cnt = accelerator.Allocate1D<uint>(index.Size);
                 cnt.MemSetToZero();
@@ -285,6 +275,10 @@ namespace MarchingCubes
                 ts.Milliseconds / 10);
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
             stopWatch.Reset();
+            for(n = nLayers -2; n > 0; n--)
+            {
+                getByteOctreeLayer(n).Dispose();
+            }
 
             Triangle[] tri = new Triangle[index * 5];
             PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(index * 5);

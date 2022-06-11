@@ -30,7 +30,8 @@ namespace MarchingCubes
 
         public OctreeWPrefixOnly(int size)
         {
-            ushort i;
+            Console.WriteLine("Octree One Layer");
+            ushort i = 0;
             FileInfo fi = CreateVolume(size);
 
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));

@@ -58,6 +58,7 @@ namespace MarchingCubes
 
         public HistoPyramid3D(int size)
         {
+            Console.WriteLine("HistoPyramid 3D");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
             HPsize = width;
@@ -405,7 +406,6 @@ namespace MarchingCubes
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
             stopWatch.Reset();
             stopWatch.Start();
-            HPBaseConfig.AsContiguous().GetAsArray().Max();
             hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, threshold, (int)Math.Sqrt(HPsize));
 
             accelerator.Synchronize();
