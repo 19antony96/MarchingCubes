@@ -21,9 +21,9 @@ namespace MarchingCubes
         //public static CPUAccelerator accelerator;
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
         public static MemoryBuffer3D<ushort, Stride3D.DenseXY> sliced;
-        public static readonly ushort threshold = 1280;
-        public static int length = 440;
-        public static int width = 440;
+        public static readonly ushort threshold = 300;
+        public static int length = 256;
+        public static int width = 256;
         public static ushort[,,] slices;
         public static int batchSize ;
         public static int sliceSize = 127;
@@ -40,10 +40,10 @@ namespace MarchingCubes
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
             Console.WriteLine("Threshold:" + (threshold - 1024));
 
-            //length = size;
-            //width = size;
-            //var sphere = MarchingCubes.CreateSphere(size);
-            //slices = sphere;
+            length = size;
+            width = size;
+            var sphere = MarchingCubes.CreateSphere(size);
+            slices = sphere;
 
             OctreeSize = width;
             if (Math.Log(width, 2) % 1 > 0)
@@ -53,24 +53,24 @@ namespace MarchingCubes
 
             DicomFile dicoms;
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
-            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
+            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\DICOM\\DICOM\\ST000000\\SE000001\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Resources\\");
 
 
             //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\PVSJ_882\\";
-            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
-            string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\bunny\\";
+            string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
+            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\bunny\\";
             //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\CThead\\";
             //OctreeSize = 512;
-            //DirectoryInfo d = new DirectoryInfo(path);
+            DirectoryInfo d = new DirectoryInfo(path);
 
 
 
-            FileInfo[] files = d.GetFiles("*.dcm");
+            //FileInfo[] files = d.GetFiles("*.dcm");
             //FileInfo[] files = d.GetFiles("*.tif");
-            //FileInfo[] files = d.GetFiles();
-            //files = files.OrderBy(x => int.Parse(x.Name.Replace("MRbrain.", ""))).ToArray();
+            FileInfo[] files = d.GetFiles();
+            files = files.OrderBy(x => int.Parse(x.Name.Replace("MRbrain.", ""))).ToArray();
 
             string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
             FileInfo fi = new FileInfo(fileName);
@@ -78,17 +78,17 @@ namespace MarchingCubes
             ushort k = 0;
 
 
-            slices = new ushort[files.Length, length, width];
+            //slices = new ushort[files.Length, length, width];
 
-            foreach (var file in files)
-            {
-                dicoms = DicomFile.Open(file.FullName);
-                CreateBmp(dicoms, k);
-                //Decode(file.FullName, k);
-                k++;
-                if (k > 1023)
-                    break;
-            }
+            //foreach (var file in files)
+            //{
+            //    //dicoms = DicomFile.Open(file.FullName);
+            //    //CreateBmp(dicoms, k);
+            //    Decode(file.FullName, k);
+            //    k++;
+            //    if (k > 1023)
+            //        break;
+            //}
 
             sliced = accelerator.Allocate3DDenseXY<ushort>(slices);
             return fi;
@@ -174,6 +174,21 @@ namespace MarchingCubes
                 xyz >>= 3;
             }
             return new Index3D((int)X, (int)Y, (int)Z);
+        }
+
+        public static Index1D get1D(Index3D index3D, Index3D size)
+        {
+            return new Index1D(index3D.Z * size.Y * size.X + index3D.Y * size.X + index3D.X);
+        }
+
+        public static Index3D get3D(Index1D index1D, Index3D size)
+        {
+            int index = index1D.X;
+            int z = index1D / (size.Y * size.X);
+            index -= z * size.Y * size.X;
+            int y = index / size.X;
+            int x = index % size.X;
+            return new Index3D(x, y, z);
         }
 
         public static void CreateBmp(DicomFile dicom, int k)

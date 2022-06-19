@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace MarchingCubes
 {
-    class HistoPyramid: MarchingCubes
+    class HistoPyramid3Dlim: MarchingCubes
     {
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView2D<byte, Stride2D.DenseX>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int> assign;
         public static Action<Index2D, ArrayView2D<uint, Stride2D.DenseX>, ArrayView2D<byte, Stride2D.DenseX>> hpFirstLayer;
@@ -56,7 +56,7 @@ namespace MarchingCubes
         public static byte[,,] cubes;
         public static int count = 0;
 
-        public HistoPyramid(int size)
+        public HistoPyramid3Dlim(int size)
         {
             Console.WriteLine("HistoPyramid Flat 3D");
             ushort i = 0;
@@ -121,7 +121,7 @@ namespace MarchingCubes
 
         private static void HPCreationGPU()
         {
-            nLayers = (ushort)(Math.Ceiling(Math.Log(HPBaseLayer.GetLength(0), 5)) + 1);
+            nLayers = (ushort)(Math.Ceiling(Math.Log(HPBaseLayer.GetLength(0), 2)) + 1);
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
