@@ -384,7 +384,6 @@ namespace MarchingCubes
             int sum = 0;
             Triangle[] tri = new Triangle[nTri];
             PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(nTri);
-            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(nTri);
             p.MemSetToZero();
             accelerator.Synchronize();
 
@@ -404,6 +403,12 @@ namespace MarchingCubes
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
+            for (int i = 1; i < nLayers; i++)
+            {
+                if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
+                    getHPLayer(i).Dispose();
+            }
+            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(nTri);
             stopWatch.Reset();
             stopWatch.Start();
             hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, threshold, (int)Math.Sqrt(HPsize));

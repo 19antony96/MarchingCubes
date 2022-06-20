@@ -44,6 +44,18 @@ namespace MarchingCubes
         }
     }
 
+    public struct FlatPoint2D
+    {
+        public int X;
+        public int Y;
+
+        public FlatPoint2D(int i, int j)
+        {
+            this.X = i;
+            this.Y = j;
+        }
+    }
+
     public struct Point
     {
         //const ushort epsilon = 0;

@@ -195,8 +195,6 @@ namespace MarchingCubes
             int HPSqrt, int factor, int x, int y, int z)
         {
             uint comp = 0;
-            if (index > 109)
-                ;
             for (int i = 0; i < factor; i++)
             {
                 if (k[index] < comp + HPLayer[p[index] + i])
@@ -274,7 +272,6 @@ namespace MarchingCubes
             MemoryBuffer1D<long, Stride1D.Dense> p = accelerator.Allocate1D<long>(nTri);
             Triangle[] tri = new Triangle[nTri];
             PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(nTri);
-            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(nTri);
             p.MemSetToZero();
             accelerator.Synchronize();
 
@@ -293,6 +290,12 @@ namespace MarchingCubes
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.Milliseconds / 10);
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
+            for (int i = 1; i < nLayers; i++)
+            {
+                if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
+                    getHPLayer(i).Dispose();
+            }
+            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(nTri);
             stopWatch.Reset();
             stopWatch.Start();
 
@@ -344,10 +347,6 @@ namespace MarchingCubes
             config += (input[(index.X) + 1, (index.Y) + 1, (index.Z)] < thresh) ? (byte)0x80 : (byte)0;
             edges[index.X, index.Y, (index.Z)] = config;
             HPindices[get1D(index, new Index3D(x, y, z))] = (byte)(triTable[(int)config].getn() / 3);
-            if((byte)(triTable[(int)config].getn() / 3) > 0)
-            {
-                var l = get1D(index, new Index3D(x, y, z));
-            }
         }
 
         public static byte[,,] MarchingCubesGPU()
