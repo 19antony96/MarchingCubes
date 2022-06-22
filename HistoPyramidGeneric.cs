@@ -30,6 +30,16 @@ namespace MarchingCubes
         public static MemoryBuffer3D<byte, Stride3D.DenseXY> cubeConfig;
         private static MemoryBuffer1D<byte, Stride1D.Dense> HPBaseConfig;
         public static MemoryBuffer3D<Normal, Stride3D.DenseXY> gradConfig;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer25;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer24;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer23;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer22;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer21;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer20;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer19;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer18;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer17;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer16;
         public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer15;
         public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer14;
         public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer13;
@@ -47,14 +57,14 @@ namespace MarchingCubes
         public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer1;
 
         public static byte[,,] cubeBytes;
-        public static byte[,] HPBaseLayer;
+        public static byte[] HPBaseLayer;
         public static int HPsize;
 
         public static TimeSpan ts = new TimeSpan();
 
         public static List<Point> vertices = new List<Point>();
         public static byte[,,] cubes;
-        public static int factor = 5;
+        public static int factor = 2;
         public static int X, Y, Z;
 
         public static int count = 0;
@@ -70,9 +80,9 @@ namespace MarchingCubes
             Z = slices.GetLength(0) - 1;
 
             HPsize = width;
-            if (Math.Log(width, 5) % 1 > 0)
+            if (Math.Log(X * Y * Z, factor) % 1 > 0)
             {
-                HPsize = (int)Math.Pow(5, (int)Math.Log(width - 1, 5) + 1);
+                HPsize = (int)Math.Pow(factor, (int)Math.Log(X * Y * Z - 1, factor) + 1);
             }
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
@@ -134,7 +144,7 @@ namespace MarchingCubes
 
         private static void HPCreationGPU()
         {
-            nLayers = (ushort)(Math.Ceiling(Math.Log(HPBaseConfig.Extent, 5)));
+            nLayers = (ushort)(Math.Ceiling(Math.Log(HPBaseConfig.Extent, factor) + 1));
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
@@ -143,7 +153,7 @@ namespace MarchingCubes
             hpFirstLayer(getHPLayer(1).IntExtent, getHPLayer(1).View, HPBaseConfig.View, factor);
             accelerator.Synchronize();
             int l = getHPLayer(1).IntExtent;
-            for (int i = 2; i < 16; i++)
+            for (int i = 2; i < nLayers; i++)
             {
                 l /= factor; 
                 if (i < nLayers)
@@ -325,11 +335,11 @@ namespace MarchingCubes
             foreach (var triangle in tri)
             {
                 fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
-                fs.WriteLine("vn " + triangle.vertex1.normal.X + " " + triangle.vertex1.normal.Y + " " + triangle.vertex1.normal.Z);
+                fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
                 fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
-                fs.WriteLine("vn " + triangle.vertex2.normal.X + " " + triangle.vertex2.normal.Y + " " + triangle.vertex2.normal.Z);
+                fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
                 fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
-                fs.WriteLine("vn " + triangle.vertex3.normal.X + " " + triangle.vertex3.normal.Y + " " + triangle.vertex3.normal.Z);
+                fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
                 count += 3;
             }
         }
@@ -364,13 +374,13 @@ namespace MarchingCubes
             // i+1,j+1,k+1
             // i,j+1,k+1
 
-            HPBaseLayer = new byte[HPsize * (int)Math.Sqrt(HPsize), HPsize * (int)Math.Sqrt(HPsize)];
+            HPBaseLayer = new byte[HPsize];
 
             cubeBytes = new byte[(index.X), (index.Y), (index.Z)];
             var cubePinned = GCHandle.Alloc(cubeBytes, GCHandleType.Pinned);
             var HPPinned = GCHandle.Alloc(HPBaseLayer, GCHandleType.Pinned);
             PageLockedArray3D<byte> cubeLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(index.X, index.Y, index.Z));
-            PageLockedArray2D<byte> HPLocked = accelerator.AllocatePageLocked2D<byte>(new Index2D(HPBaseLayer.GetLength(0)));
+            PageLockedArray1D<byte> HPLocked = accelerator.AllocatePageLocked1D<byte>(new Index1D(HPBaseLayer.GetLength(0)));
             cubeConfig = accelerator.Allocate3DDenseXY<byte>(cubeLocked.Extent);
             HPBaseConfig = accelerator.Allocate1D<byte>(HPLocked.Extent.Size);
             var cubeScope = accelerator.CreatePageLockFromPinned<byte>(cubePinned.AddrOfPinnedObject(), cubeBytes.Length);
@@ -435,8 +445,28 @@ namespace MarchingCubes
                     return ref uintLayer14;
                 case 15:
                     return ref uintLayer15;
+                case 16:
+                    return ref uintLayer16;
+                case 17:
+                    return ref uintLayer17;
+                case 18:
+                    return ref uintLayer18;
+                case 19:
+                    return ref uintLayer19;
+                case 20:
+                    return ref uintLayer20;
+                case 21:
+                    return ref uintLayer21;
+                case 22:
+                    return ref uintLayer22;
+                case 23:
+                    return ref uintLayer23;
+                case 24:
+                    return ref uintLayer24;
+                case 25:
+                    return ref uintLayer25;
                 default:
-                    return ref uintLayer15;
+                    return ref uintLayer25;
             }
         }
     }

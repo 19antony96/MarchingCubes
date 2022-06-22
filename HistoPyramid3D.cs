@@ -437,11 +437,11 @@ namespace MarchingCubes
             foreach (var triangle in tri)
             {
                 fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
-                fs.WriteLine("vn " + triangle.vertex1.normal.X + " " + triangle.vertex1.normal.Y + " " + triangle.vertex1.normal.Z);
+                fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
                 fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
-                fs.WriteLine("vn " + triangle.vertex2.normal.X + " " + triangle.vertex2.normal.Y + " " + triangle.vertex2.normal.Z);
+                fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
                 fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
-                fs.WriteLine("vn " + triangle.vertex3.normal.X + " " + triangle.vertex3.normal.Y + " " + triangle.vertex3.normal.Z);
+                fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
                 count += 3;
             }
         }
