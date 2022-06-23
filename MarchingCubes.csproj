@@ -278,6 +278,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HistoPyramid3Dlim.cs" />
+    <Compile Include="HistoPyramidExtra.cs" />
     <Compile Include="HistoPyramidGeneric.cs" />
     <Compile Include="HistoPyramid.cs" />
     <Compile Include="HistoPyramid3D.cs" />
