@@ -111,6 +111,8 @@ namespace MarchingCubes
                 if (getMaxOctreeLayer(i) != null && !getMaxOctreeLayer(i).IsDisposed)
                     getMaxOctreeLayer(i).Dispose();
             }
+            accelerator.Dispose();
+            context.Dispose();
         }
 
         public static void BuildOctree(Index3D index, ArrayView3D<ushort, Stride3D.DenseXY> minPrev, ArrayView3D<ushort, Stride3D.DenseXY> maxPrev, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max)

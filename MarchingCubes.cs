@@ -21,9 +21,9 @@ namespace MarchingCubes
         //public static CPUAccelerator accelerator;
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
         public static MemoryBuffer3D<ushort, Stride3D.DenseXY> sliced;
-        public static readonly ushort threshold = 1538;
-        public static int length = 256;
-        public static int width = 256;
+        public static readonly ushort threshold = 800;
+        public static int length = 512;
+        public static int width = 512;
         public static ushort[,,] slices;
         public static int batchSize ;
         public static int sliceSize = 127;
@@ -40,10 +40,16 @@ namespace MarchingCubes
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
             Console.WriteLine("Threshold:" + (threshold - 1024));
 
-            //length = size;
-            //width = size;
-            //var sphere = MarchingCubes.CreateSphere(size);
-            //slices = sphere;
+            string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
+            FileInfo fi = new FileInfo(fileName);
+
+            if(slices == null)
+            {
+
+                ReadDCM();
+                //ReadFile();
+                //CreateSphere(width);
+            }
 
             OctreeSize = width;
             if (Math.Log(width, 2) % 1 > 0)
@@ -51,69 +57,86 @@ namespace MarchingCubes
                 OctreeSize = (int)Math.Pow(2, (int)Math.Log(width, 2) + 1);
             }
 
+            sliced = accelerator.Allocate3DDenseXY<ushort>(slices);
+            return fi;
+        }
+
+        public static void ReadDCM()
+        {
+            ushort k = 0;
             DicomFile dicoms;
-            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
+            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\DICOM\\DICOM\\ST000000\\SE000001\\");
             //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Resources\\");
 
-
-            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\PVSJ_882\\";
-            string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
-            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\bunny\\";
-            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\CThead\\";
-            //OctreeSize = 512;
-            DirectoryInfo d = new DirectoryInfo(path);
-
-
-
-            //FileInfo[] files = d.GetFiles("*.dcm");
-            //FileInfo[] files = d.GetFiles("*.tif");
-            FileInfo[] files = d.GetFiles();
-            files = files.OrderBy(x => int.Parse(x.Name.Replace("MRbrain.", ""))).ToArray();
-
-            string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
-            FileInfo fi = new FileInfo(fileName);
-
-            ushort k = 0;
-
+            FileInfo[] files = d.GetFiles("*.dcm");
+            var header = DicomPixelData.Create(DicomFile.Open(files.First().FullName).Dataset);
+            length = header.Height;
+            width = header.Width;
 
             slices = new ushort[files.Length, length, width];
 
             foreach (var file in files)
             {
-                //dicoms = DicomFile.Open(file.FullName);
-                //CreateBmp(dicoms, k);
+                dicoms = DicomFile.Open(file.FullName);
+                CreateBmp(dicoms, k);
+                k++;
+                if (k > 1023)
+                    break;
+            }
+
+        }
+
+        public static void ReadFile()
+        {
+            ushort k = 0;
+            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\PVSJ_882\\";
+            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
+            string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\bunny\\";
+            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\CThead\\";
+            //OctreeSize = 512;
+            DirectoryInfo d = new DirectoryInfo(path);
+
+            FileInfo[] files = d.GetFiles();
+            files = files.OrderBy(x => int.Parse(x.Name.Replace("CThead.", ""))).ToArray();
+
+            slices = new ushort[files.Length, length, width];
+
+            foreach (var file in files)
+            {
+
                 Decode(file.FullName, k);
                 k++;
                 if (k > 1023)
                     break;
             }
 
-            sliced = accelerator.Allocate3DDenseXY<ushort>(slices);
-            return fi;
         }
 
 
-        public static ushort[,,] CreateSphere(int size)
+        public static void CreateSphere(int size)
         {
+            length = size;
+            width = size;
+
             double factor = Math.Sqrt(size / 2 * (size / 2) * 5);
-            ushort[,,] slice = new ushort[size / 2, size, size];
+            ushort[,,] sphere = new ushort[size / 2, size, size];
             for (int k = 0; k < size / 2; k++)
             {
                 for (int i = 0; i < size; i++)
                 {
                     for (int j = 0; j < size; j++)
                     {
-                        slice[k, j, i] = (ushort)Math.Round(Math.Sqrt((i - size / 2) * (i - size / 2) + (j - size / 2) * (j - size / 2) + (k - size / 2) * (k - size / 2)) * (2000 / factor));
+                        sphere[k, j, i] = (ushort)Math.Round(Math.Sqrt((i - size / 2) * (i - size / 2) + (j - size / 2) * (j - size / 2) + (k - size / 2) * (k - size / 2)) * (2000 / factor));
                         //double h = (k + i) * 60;
                         //bool p = h > (double)threshold;
-                        //slice[k, j, i] = (ushort)(p ? threshold - 50 : threshold + 50);
-                        //slice[k, j, i] = (ushort)(((j - size / 2) + (i - size / 2) + (k - size / 2)) * 20);
+                        //sphere[k, j, i] = (ushort)(p ? threshold - 50 : threshold + 50);
+                        //sphere[k, j, i] = (ushort)(((j - size / 2) + (i - size / 2) + (k - size / 2)) * 20);
                     }
                 }
             }
-            return slice;
+            slices = sphere;
         }
         public static ushort[,,] CreateCayley(int size)
         {
@@ -176,9 +199,9 @@ namespace MarchingCubes
             return new Index3D((int)X, (int)Y, (int)Z);
         }
 
-        public static Index1D get1D(Index3D index3D, Index3D size)
+        public static int get1D(Index3D index3D, Index3D size)
         {
-            return new Index1D(index3D.Z * size.Y * size.X + index3D.Y * size.X + index3D.X);
+            return index3D.Z * size.Y * size.X + index3D.Y * size.X + index3D.X;
         }
 
         public static Index3D get3D(Index1D index1D, Index3D size)

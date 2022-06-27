@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 
 namespace MarchingCubes
 {
-    class OctreeWPrior : MarchingCubes
+    class Tree : MarchingCubes
     {
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> assign;
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>> octreeCreation;
@@ -42,7 +42,7 @@ namespace MarchingCubes
 
         public static int count = 0;
 
-        public OctreeWPrior(int size)
+        public Tree(int size)
         {
             Console.WriteLine("Octree W Prior Knowledge");
             ushort i = 0;
@@ -78,8 +78,6 @@ namespace MarchingCubes
                 if (getByteOctreeLayer(i) != null && !getByteOctreeLayer(i).IsDisposed)
                     getByteOctreeLayer(i).Dispose();
             }
-            accelerator.Dispose();
-            context.Dispose();
         }
 
         public static void BuildOctree(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> bytePrev, ArrayView3D<byte, Stride3D.DenseXY> layer)
@@ -246,18 +244,17 @@ namespace MarchingCubes
             var radixSort = accelerator.CreateRadixSort<uint, Stride1D.Dense, DescendingUInt32>();
             var prefixSum = accelerator.CreateReduction<uint, Stride1D.Dense, AddUInt32>();
 
-            var tempMemSize = accelerator.ComputeRadixSortTempStorageSize<uint, DescendingUInt32>((Index1D)slices.Length / 5);
 
-            var tempBuffer = accelerator.Allocate1D<int>(tempMemSize);
-            cnt = accelerator.Allocate1D<uint>(slices.Length / 5);
-            cnt.MemSetToZero();
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             for (n = nLayers - 1; n > 0; n--)
             {
                 newKeys = accelerator.Allocate1D<uint>(index.Size * 8);
+                var tempMemSize = accelerator.ComputeRadixSortTempStorageSize<uint, DescendingUInt32>((Index1D)newKeys.Length);
                 traversalKernel(index, getByteOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                var tempBuffer = accelerator.Allocate1D<int>(tempMemSize);
                 accelerator.Synchronize();
+                prefixSum(accelerator.DefaultStream, cnt, sum.View);
                 keys = newKeys;
 
                     radixSort(
@@ -265,10 +262,9 @@ namespace MarchingCubes
                         newKeys.View,
                         tempBuffer.View);
                 
-                prefixSum(accelerator.DefaultStream, cnt, sum.View);
-
                 accelerator.Synchronize();
                 index = new Index1D((int)sum.GetAsArray1D()[0]);
+                cnt = accelerator.Allocate1D<uint>(index.Size);
                 cnt.MemSetToZero();
             }
 

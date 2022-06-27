@@ -106,6 +106,8 @@ namespace MarchingCubes
                 if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
                     getHPLayer(i).Dispose();
             }
+            accelerator.Dispose();
+            context.Dispose();
         }
 
         public static void BuildHP(Index2D index, ArrayView2D<uint, Stride2D.DenseX> HPLayer, ArrayView2D<uint, Stride2D.DenseX> HPLayerPrev)

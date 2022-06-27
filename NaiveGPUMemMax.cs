@@ -55,6 +55,8 @@ namespace MarchingCubes
                 }
                 Console.WriteLine(count);
             }
+            accelerator.Dispose();
+            context.Dispose();
         }
 
         public static void Assign(Index3D index, ArrayView3D<Normal, Stride3D.DenseXY> normals, ArrayView3D<Edge, Stride3D.DenseXY> edges, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int width, Point offset)

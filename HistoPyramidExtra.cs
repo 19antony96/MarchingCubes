@@ -74,12 +74,12 @@ namespace MarchingCubes
 
         public static int count = 0;
 
-        public static List<int> factorOpt = new List<int> { 8, 5, 3, 4, 2 };
+        public static List<int> factorOpt = new List<int> { 8, 7, 5, 3, 4, 2 };
         public static List<int> factors = new List<int>();
 
         public HistoPyramidExtra(int size)
         {
-            Console.WriteLine("HistoPyramid Generic");
+            Console.WriteLine("Adaptive HistoPyramid");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
 
@@ -101,15 +101,18 @@ namespace MarchingCubes
                     if (LayerSize % factor < LayerSize % temp)
                         temp = factor;
                 }
+                Console.WriteLine(temp);
                 factors.Add(temp);
                 LayerSize = (int)Math.Ceiling((double)LayerSize / (double)temp);
             }
+
             int product = 1;
             foreach(int fac in factors)
             {
                 product *= fac;
             }
             HPsize = product;
+            Console.WriteLine(HPsize);
             nLayers = (ushort)(factors.Count() + 1);
             factors.Sort();
             factors.Reverse();
@@ -153,6 +156,8 @@ namespace MarchingCubes
                 if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
                     getHPLayer(i).Dispose();
             }
+            accelerator.Dispose();
+            context.Dispose();
         }
 
         public static void BuildHP(Index1D index, ArrayView1D<uint, Stride1D.Dense> HPLayer, ArrayView1D<uint, Stride1D.Dense> HPLayerPrev, int factor)

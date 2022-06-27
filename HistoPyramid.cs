@@ -100,6 +100,8 @@ namespace MarchingCubes
                 }
                 Console.WriteLine(count);
             }
+            accelerator.Dispose();
+            context.Dispose();
 
         }
 

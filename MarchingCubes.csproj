@@ -292,6 +292,7 @@
     <Compile Include="OctreeEvenSubdiv.cs" />
     <Compile Include="Octree.cs" />
     <Compile Include="OctreeWPrefixOnly.cs" />
+    <Compile Include="Tree.cs" />
     <Compile Include="OctreeWPrior.cs" />
     <Compile Include="Geometries.cs" />
     <Compile Include="Program.cs" />

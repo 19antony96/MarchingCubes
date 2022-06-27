@@ -16,13 +16,13 @@ namespace MarchingCubes
                 Console.WriteLine(i);
                 //NaiveCPU run1 = new NaiveCPU(i);
                 //NaiveGPU run2 = new NaiveGPU(i);
-                //HistoPyramid run5 = new HistoPyramid(i);
-                //HistoPyramid3D run6 = new HistoPyramid3D(i);
                 //HistoPyramidGeneric run11 = new HistoPyramidGeneric(i);
-                //Octree run7 = new Octree(i);
                 //OctreeEvenSubdiv run8 = new OctreeEvenSubdiv(i);
-                //OctreeWPrior run9 = new OctreeWPrior(i);
-                //OctreeBONOwPrior run10 = new OctreeBONOwPrior(i);
+                HistoPyramid run5 = new HistoPyramid(i);
+                HistoPyramid3D run6 = new HistoPyramid3D(i);
+                Octree run7 = new Octree(i);
+                OctreeWPrior run9 = new OctreeWPrior(i);
+                OctreeBONOwPrior run10 = new OctreeBONOwPrior(i);
                 HistoPyramidExtra run12 = new HistoPyramidExtra(i);
             }
             while (true) 

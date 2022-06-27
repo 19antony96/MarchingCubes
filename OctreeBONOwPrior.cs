@@ -108,6 +108,8 @@ namespace MarchingCubes
                 if (getByteOctreeLayer(i) != null && !getByteOctreeLayer(i).IsDisposed)
                     getByteOctreeLayer(i).Dispose();
             }
+            accelerator.Dispose();
+            context.Dispose();
         }
 
         public static void BranchX(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> bytePrev, ArrayView3D<byte, Stride3D.DenseXY> layer)
@@ -195,25 +197,26 @@ namespace MarchingCubes
             accelerator.Synchronize();
             for (int i = 1; i < nLayers; i++)
             {
-                zSplit = ySplit = xSplit = false;
-                if ((xCode > 1 << (nLayers - i - 1)))
-                {
-                    zSplit = true;
-                    nZ = 1 << (nLayers - i - 1);
-                    Z = index.Z / 2;
-                }
-                if ((yCode > 1 << (nLayers - i - 1)))
-                {
-                    ySplit = true;
-                    nY = 1 << (nLayers - i - 1);
-                    Y = index.Y / 2;
-                }
-                if ((zCode > 1 << (nLayers - i - 1)))
-                {
-                    xSplit = true;
-                    nX = 1 << (nLayers - i - 1);
-                    X = index.X / 2;
-                }
+                zSplit = ySplit = xSplit = true;
+                //zSplit = ySplit = xSplit = false;
+                //if ((xCode > 1 << (nLayers - i - 1)))
+                //{
+                //    zSplit = true;
+                nZ = 1 << (nLayers - i - 1);
+                Z = index.Z / 2;
+                //}
+                //if ((yCode > 1 << (nLayers - i - 1)))
+                //{
+                //    ySplit = true;
+                nY = 1 << (nLayers - i - 1);
+                Y = index.Y / 2;
+                //}
+                //if ((zCode > 1 << (nLayers - i - 1)))
+                //{
+                //    xSplit = true;
+                nX = 1 << (nLayers - i - 1);
+                X = index.X / 2;
+                //}
                 if (i < nLayers)
                 {
                     index = new Index3D(X, Y, Z);
@@ -538,18 +541,18 @@ namespace MarchingCubes
             for (n = nLayers - 1; n > 0; n--)
             {
                 bool xSplit = true, ySplit = true, zSplit = true;
-                if ((zCode <= 1 << (n - 1)))
-                {
-                    zSplit = false;
-                }
-                if ((yCode <= 1 << (n - 1)))
-                {
-                    ySplit = false;
-                }
-                if ((xCode <= 1 << (n - 1)))
-                {
-                    xSplit = false;
-                }
+                //if ((zCode <= 1 << (n - 1)))
+                //{
+                //    zSplit = false;
+                //}
+                //if ((yCode <= 1 << (n - 1)))
+                //{
+                //    ySplit = false;
+                //}
+                //if ((xCode <= 1 << (n - 1)))
+                //{
+                //    xSplit = false;
+                //}
                 newKeys = accelerator.Allocate1D<uint>(index.Size * 8);
                 if (zSplit && ySplit && xSplit)
                     traversalKernelAll(index, getByteOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
@@ -669,6 +672,8 @@ namespace MarchingCubes
             int Z = (int)Math.Pow(2, Math.Ceiling(Math.Log(slices.GetLength(0), 2)));
             int Y = (int)Math.Pow(2, Math.Ceiling(Math.Log(slices.GetLength(1), 2)));
             int X = (int)Math.Pow(2, Math.Ceiling(Math.Log(slices.GetLength(2), 2)));
+            int max = Math.Max(Z, X);
+            Z = Y = X = max;
 
             //bit order 
             // i,j,k 
