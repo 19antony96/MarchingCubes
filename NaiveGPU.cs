@@ -108,9 +108,9 @@ namespace MarchingCubes
             ts = stopWatch.Elapsed;
             cubeConfig.CopyToCPU(cubeBytes);
 
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
+                ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime " + elapsedTime);
             return (cubeBytes);
         }
@@ -267,9 +267,9 @@ namespace MarchingCubes
                 stopWatch.Stop();
                 ts = stopWatch.Elapsed;
                 count = 0;
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                     ts.Hours, ts.Minutes, ts.Seconds,
-                    ts.Milliseconds / 10);
+                    ts.TotalMilliseconds * 10000);
                 Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
 
                 triConfig.Dispose();
@@ -409,9 +409,9 @@ namespace MarchingCubes
                 triangleList = triConfig.GetAsArray1D();
                      
                 count = 0;
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                     ts.Hours, ts.Minutes, ts.Seconds,
-                    ts.Milliseconds / 10);
+                    ts.TotalMilliseconds * 10000);
                 Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
 
                 triConfig.Dispose();

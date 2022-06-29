@@ -46,8 +46,8 @@ namespace MarchingCubes
             if(slices == null)
             {
 
-                ReadDCM();
-                //ReadFile();
+                //ReadDCM();
+                ReadFile();
                 //CreateSphere(width);
             }
 

@@ -18,12 +18,12 @@ namespace MarchingCubes
                 //NaiveGPU run2 = new NaiveGPU(i);
                 //HistoPyramidGeneric run11 = new HistoPyramidGeneric(i);
                 //OctreeEvenSubdiv run8 = new OctreeEvenSubdiv(i);
-                HistoPyramid run5 = new HistoPyramid(i);
-                HistoPyramid3D run6 = new HistoPyramid3D(i);
-                Octree run7 = new Octree(i);
-                OctreeWPrior run9 = new OctreeWPrior(i);
-                OctreeBONOwPrior run10 = new OctreeBONOwPrior(i);
-                HistoPyramidExtra run12 = new HistoPyramidExtra(i);
+                //HistoPyramid run5 = new HistoPyramid(i);
+                //HistoPyramid3D run6 = new HistoPyramid3D(i);
+                //Octree run7 = new Octree(i);
+                //OctreeWPrior run9 = new OctreeWPrior(i);
+                //OctreeBONOwPrior run10 = new OctreeBONOwPrior(i);
+                AdaptiveHistoPyramid run12 = new AdaptiveHistoPyramid(i);
             }
             while (true) 
                 ;

@@ -152,9 +152,9 @@ namespace MarchingCubes
             stopWatch.Stop();
             ts += stopWatch.Elapsed;
 
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
+                ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime " + elapsedTime);
             uint[,,] data = getHPLayer(nLayers - 1).GetAsArray3D();
             if (data.Length == 1)
@@ -401,9 +401,9 @@ namespace MarchingCubes
 
             ts = stopWatch.Elapsed;
             count = 0;
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
+                ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
             for (int i = 1; i < nLayers; i++)
             {
@@ -419,9 +419,9 @@ namespace MarchingCubes
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
             count = 0;
-            elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
+                ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
 
 
@@ -507,9 +507,9 @@ namespace MarchingCubes
             cubePinned.Free();
             HPPinned.Free();
 
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
+                ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime " + elapsedTime);
             return (cubeBytes);
         }

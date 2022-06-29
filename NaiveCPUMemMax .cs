@@ -101,9 +101,9 @@ namespace MarchingCubes
             stopWatch.Stop();
             ts += stopWatch.Elapsed;
 
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
+                ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime " + elapsedTime);
             return (grads, edges);
         }
@@ -142,9 +142,9 @@ namespace MarchingCubes
             }
             ts = stopWatch.Elapsed;
 
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
+                ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime " + elapsedTime);
             foreach (var vertex in vertices)
             {
