@@ -102,7 +102,7 @@ namespace MarchingCubes
                     if (LayerSize % factor < LayerSize % temp)
                         temp = factor;
                 }
-                Console.WriteLine(temp);
+                //Console.WriteLine(temp);
                 factors.Add(temp);
                 LayerSize = (int)Math.Ceiling((double)LayerSize / (double)temp);
             }
@@ -114,6 +114,7 @@ namespace MarchingCubes
             }
             HPsize = product;
             Console.WriteLine(HPsize);
+            Console.WriteLine($"n Layers: {factors.Count}");
             nLayers = (ushort)(factors.Count() + 1);
             factors.Sort();
             factors.Reverse();

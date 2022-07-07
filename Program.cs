@@ -41,6 +41,7 @@ namespace MarchingCubes
 
                 MarchingCubes.SetValues(ds, "HP");
                 HistoPyramid run5 = new HistoPyramid(0);
+                Thread.Sleep(1000);
                 MarchingCubes.SetValues(ds, "HP3D");
                 HistoPyramid3D run6 = new HistoPyramid3D(0);
                 MarchingCubes.SetValues(ds, "Octree");
