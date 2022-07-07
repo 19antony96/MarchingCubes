@@ -66,7 +66,7 @@ namespace MarchingCubes
                     length = 512;
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\bunny_{suffix}.obj";
-                    repStr = "";
+                    repStr = "repStr";
                     isDCM = false;
                     break;
                 case dataset.CThead:
@@ -172,8 +172,8 @@ namespace MarchingCubes
                 case dataset.MRbrain:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
                     thresh = 1538;
-                    length = 512;
-                    width = 512;
+                    length = 256;
+                    width = 256;
                     outFilename = $"D:\\College Work\\MP\\MRbrain_{suffix}.obj";
                     repStr = "MRbrain.";
                     isDCM = false;
@@ -185,7 +185,7 @@ namespace MarchingCubes
                     length = 512;
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\ChestSmall_{suffix}.obj";
-                    repStr = "";
+                    repStr = "repStr";
                     isDCM = true; 
                     break;
                 case dataset.ChestCT:
@@ -194,7 +194,7 @@ namespace MarchingCubes
                     length = 512;
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\ChestCT_{suffix}.obj";
-                    repStr = "";
+                    repStr = "repStr";
                     isDCM = true;
                     break;
                 case dataset.WristCT:
@@ -203,7 +203,7 @@ namespace MarchingCubes
                     length = 440;
                     width = 440;
                     outFilename = $"D:\\College Work\\MP\\WristCT_{suffix}.obj";
-                    repStr = "";
+                    repStr = "repStr";
                     isDCM = true;
                     break;
             }
@@ -222,6 +222,7 @@ namespace MarchingCubes
 
             if(slices == null)
             {
+                Console.WriteLine(outFilename);
                 if (isDCM)
                 {
                     ReadDCM();

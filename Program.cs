@@ -14,14 +14,14 @@ namespace MarchingCubes
         {
             List<dataset> dList = new List<dataset>()
             {
-                dataset.bunny,
-                dataset.CThead,
-                dataset.F_Ankle,
-                dataset.F_Head,
-                //dataset.F_Hip,
-                //dataset.F_Knee,
-                dataset.F_Pelvis,
-                dataset.F_Shoulder,
+                //dataset.bunny,
+                //dataset.CThead,
+                //dataset.F_Ankle,
+                //dataset.F_Head,
+                ////dataset.F_Hip,
+                ////dataset.F_Knee,
+                //dataset.F_Pelvis,
+                //dataset.F_Shoulder,
                 //dataset.M_Head,
                 //dataset.M_Hip,
                 //dataset.M_Pelvis,
