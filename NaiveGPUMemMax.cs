@@ -114,7 +114,7 @@ namespace MarchingCubes
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            assign(index, gradConfig.View, cubeConfig.View, sliced.View, triTable.View, threshold, width, new Point());
+            assign(index, gradConfig.View, cubeConfig.View, sliced.View, triTable.View, thresh, width, new Point());
 
             accelerator.Synchronize();
             stopWatch.Stop();
@@ -173,7 +173,7 @@ namespace MarchingCubes
                                 input[((index.Z + (int)offset.Z) + 1), (index.Y + (int)offset.Y) + 1, (index.X + (int)offset.X)],
                                 normals[((index.Z + (int)offset.Z) + 1), ((index.Y + (int)offset.Y) + 1), (index.X + (int)offset.X)])
                             );
-            Point[] vertice = tempCube.MarchGPU(threshold, edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]);
+            Point[] vertice = tempCube.MarchGPU((ushort)thresh, edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]);
             int i;
             for (i = 0; i < 12; i += 3)
             {
@@ -230,7 +230,7 @@ namespace MarchingCubes
                             {
                                 Point offset = new Point() { X = i * batchSize, Y = j * batchSize, Z = k * batchSize };
 
-                                get_verts(index, triConfig.View, gradConfig.View, cubeConfig.View, sliced.View, flag.View, offset, threshold, batchSize, width);
+                                get_verts(index, triConfig.View, gradConfig.View, cubeConfig.View, sliced.View, flag.View, offset, thresh, batchSize, width);
 
                                 accelerator.Synchronize();
                                 if (flag.GetAsArray1D()[0] > 0)

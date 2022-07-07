@@ -63,7 +63,7 @@ namespace MarchingCubes
 
         public static byte[,,] cubeBytes;
         public static byte[] HPBaseLayer;
-        public static int HPsize;
+        public static long HPsize;
 
         public static TimeSpan ts = new TimeSpan();
 
@@ -211,7 +211,7 @@ namespace MarchingCubes
             ArrayView3D<byte, Stride3D.DenseXY> edges,
             ArrayView1D<Edge, Stride1D.Dense> triTable,
             ArrayView3D<ushort, Stride3D.DenseXY> input,
-            int HPSqrt, int factor, int x, int y, int z)
+            int thresh, int factor, int x, int y, int z)
         {
             uint comp = 0;
             for (int i = 0; i < factor; i++)
@@ -278,7 +278,7 @@ namespace MarchingCubes
                                 input[Math.Min((int)input.Extent.X - 1, (index3D.Z + 1) + 1), (index3D.Y + 1), index3D.X] - input[Math.Max((index3D.Z + 1) - 1, 0), (index3D.Y + 1), index3D.X]
                             ))
                            );
-            triangles[index] = tempCube.MarchHP(threshold, triTable[edges[index3D.Z, index3D.Y, index3D.X]], (int)k[index]);
+            triangles[index] = tempCube.MarchHP((ushort)thresh, triTable[edges[index3D.Z, index3D.Y, index3D.X]], (int)k[index]);
         }
 
         private static void HPTraversalGPU(StreamWriter fs)
@@ -318,7 +318,7 @@ namespace MarchingCubes
             stopWatch.Reset();
             stopWatch.Start();
 
-            hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, threshold, factor, X, Y, Z);
+            hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, thresh, factor, X, Y, Z);
 
             accelerator.Synchronize();
             stopWatch.Stop();
@@ -400,7 +400,7 @@ namespace MarchingCubes
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            assign(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, threshold, index.X, index.Y, index.Z);
+            assign(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, thresh, index.X, index.Y, index.Z);
 
             accelerator.Synchronize();
             stopWatch.Stop();

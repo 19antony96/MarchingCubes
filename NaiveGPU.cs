@@ -13,7 +13,7 @@ namespace MarchingCubes
     class NaiveGPU : MarchingCubes
     {
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int> assign;
-        public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, int> get_verts;
+        public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, int, int> get_verts;
         public static Action<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, Point, int, int, int> getBatch_verts;
 
 
@@ -38,7 +38,7 @@ namespace MarchingCubes
             //var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
 
             assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int>(Assign);
-            get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, int>(getVertices);
+            get_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, int, int>(getVertices);
             getBatch_verts = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView<Triangle>, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<Edge, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, Point, int, int, int>(getBatchVertices);
 
             cubes = MarchingCubesGPU();
@@ -101,7 +101,7 @@ namespace MarchingCubes
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            assign(index, cubeConfig.View, sliced.View, triTable.View, threshold, width);
+            assign(index, cubeConfig.View, sliced.View, triTable.View, thresh, width);
 
             accelerator.Synchronize();
             stopWatch.Stop();
@@ -185,7 +185,7 @@ namespace MarchingCubes
                                     input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + (int)offset.Z + 1) + 1), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)] - input[Math.Max((index.Z + (int)offset.Z + 1) - 1, 0), (index.Y + (int)offset.Y + 1), (index.X + (int)offset.X)]
                                 ))
                             );
-                Point[] vertice = tempCube.MarchGPU(threshold, triTable[edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]]);
+                Point[] vertice = tempCube.MarchGPU((ushort)thresh, triTable[edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)]]);
                 int i;
                 for (i = 0; i < 12; i += 3)
                 {
@@ -244,7 +244,7 @@ namespace MarchingCubes
                             {
                                 Point offset = new Point() { X = i * batchSize, Y = j * batchSize, Z = k * batchSize };
 
-                                getBatch_verts(index, triConfig.View, cubeConfig.View, triTable, sliced.View, flag.View, offset, threshold, batchSize, width);
+                                getBatch_verts(index, triConfig.View, cubeConfig.View, triTable, sliced.View, flag.View, offset, thresh, batchSize, width);
 
                                 accelerator.Synchronize();
                                 if (flag.GetAsArray1D()[0] > 0)
@@ -291,7 +291,7 @@ namespace MarchingCubes
                 }
             }
         }
-        public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<Edge, Stride1D.Dense> triTable, ArrayView3D<ushort, Stride3D.DenseXY> input, int width)
+        public static void getVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<Edge, Stride1D.Dense> triTable, ArrayView3D<ushort, Stride3D.DenseXY> input, int width, int thresh)
         {
             if (edges[(index.Z), (index.Y), (index.X)] != 0 && edges[(index.Z), (index.Y), (index.X)] != byte.MaxValue)
             {
@@ -361,7 +361,7 @@ namespace MarchingCubes
                                     input[Math.Min((int)input.Length / ((width) * (width)) - 1, (index.Z + 1) + 1), (index.Y + 1), (index.X)] - input[Math.Max((index.Z + 1) - 1, 0), (index.Y + 1), (index.X)]
                                 ))
                             );
-                Point[] vertice = tempCube.MarchGPU(threshold, triTable[edges[(index.Z), (index.Y), (index.X)]]);
+                Point[] vertice = tempCube.MarchGPU((ushort)thresh, triTable[edges[(index.Z), (index.Y), (index.X)]]);
                 int i;
                 for (i = 0; i < 12; i += 3)
                 {
@@ -399,7 +399,7 @@ namespace MarchingCubes
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
 
-                get_verts(Nindex, triConfig.View, cubeConfig.View, triTable, sliced.View, width);
+                get_verts(Nindex, triConfig.View, cubeConfig.View, triTable, sliced.View, width, thresh);
 
                 accelerator.Synchronize();
 

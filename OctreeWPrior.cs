@@ -14,7 +14,7 @@ namespace MarchingCubes
 {
     class OctreeWPrior : MarchingCubes
     {
-        public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> assign;
+        public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, int> assign;
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>> octreeCreation;
         public static Action<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernel;
         public static Action<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ushort, int> octreeFinalLayer;
@@ -52,7 +52,7 @@ namespace MarchingCubes
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
             //var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
 
-            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(Assign);
+            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, int>(Assign);
             octreeCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView3D<byte, Stride3D.DenseXY>>(BuildOctree);
             traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernel);
             octreeFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ushort, int>(OctreeFinalLayer);
@@ -290,7 +290,7 @@ namespace MarchingCubes
 
             stopWatch.Start();
 
-            octreeFinalLayer(index, getByteOctreeLayer(0).View, keys.View, sliced.View, triConfig.View, triTable.View, threshold, nLayers - 1);
+            octreeFinalLayer(index, getByteOctreeLayer(0).View, keys.View, sliced.View, triConfig.View, triTable.View, thresh, nLayers - 1);
 
             accelerator.Synchronize();
             stopWatch.Stop();
@@ -326,17 +326,17 @@ namespace MarchingCubes
             }
         }
 
-        public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> layer, ArrayView3D<ushort, Stride3D.DenseXY> input)
+        public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> layer, ArrayView3D<ushort, Stride3D.DenseXY> input, int thresh)
         {
             byte cubeByte = 0;
-            cubeByte += (input[(index.Z), (index.Y), (index.X)] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z), (index.Y), (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X)] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X)] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X)] < threshold) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y), (index.X)] < (ushort)thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y), (index.X) + 1] < (ushort)thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X) + 1] < (ushort)thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X)] < (ushort)thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X)] < (ushort)thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X) + 1] < (ushort)thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1] < (ushort)thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X)] < (ushort)thresh) ? (byte)0x01 : (byte)0;
 
             if (cubeByte == 0 || cubeByte == 8)
                 layer[(index.Z), (index.Y), (index.X)] = 0;
@@ -368,7 +368,7 @@ namespace MarchingCubes
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            assign(index, layerConfig.View, sliced.View);
+            assign(index, layerConfig.View, sliced.View, thresh);
 
             accelerator.Synchronize();
             stopWatch.Stop();

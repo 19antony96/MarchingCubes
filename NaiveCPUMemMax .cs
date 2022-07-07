@@ -84,14 +84,14 @@ namespace MarchingCubes
                         if (k != slices.GetLength(0) - 1 && j != slices.GetLength(1) - 1 && i != slices.GetLength(2) - 1)
                         {
                             cubeBytes = 0;
-                            cubeBytes += (slices[k, j, i] < threshold) ? (byte)0x01 : (byte)0;
-                            cubeBytes += (slices[k, j, i + 1] < threshold) ? (byte)0x02 : (byte)0;
-                            cubeBytes += (slices[k, j + 1, i + 1] < threshold) ? (byte)0x04 : (byte)0;
-                            cubeBytes += (slices[k, j + 1, i] < threshold) ? (byte)0x08 : (byte)0;
-                            cubeBytes += (slices[k + 1, j, i] < threshold) ? (byte)0x10 : (byte)0;
-                            cubeBytes += (slices[k + 1, j, i + 1] < threshold) ? (byte)0x20 : (byte)0;
-                            cubeBytes += (slices[k + 1, j + 1, i + 1] < threshold) ? (byte)0x40 : (byte)0;
-                            cubeBytes += (slices[k + 1, j + 1, i] < threshold) ? (byte)0x80 : (byte)0;
+                            cubeBytes += (slices[k, j, i] < thresh) ? (byte)0x01 : (byte)0;
+                            cubeBytes += (slices[k, j, i + 1] < thresh) ? (byte)0x02 : (byte)0;
+                            cubeBytes += (slices[k, j + 1, i + 1] < thresh) ? (byte)0x04 : (byte)0;
+                            cubeBytes += (slices[k, j + 1, i] < thresh) ? (byte)0x08 : (byte)0;
+                            cubeBytes += (slices[k + 1, j, i] < thresh) ? (byte)0x10 : (byte)0;
+                            cubeBytes += (slices[k + 1, j, i + 1] < thresh) ? (byte)0x20 : (byte)0;
+                            cubeBytes += (slices[k + 1, j + 1, i + 1] < thresh) ? (byte)0x40 : (byte)0;
+                            cubeBytes += (slices[k + 1, j + 1, i] < thresh) ? (byte)0x80 : (byte)0;
 
                             edges[k, j, i] = triangleTable[cubeBytes];
                         }
@@ -131,7 +131,7 @@ namespace MarchingCubes
                             new Point(i, (ushort)(j + 1), (k + 1), slices[(k + 1), j + 1, i], normals[(k + 1), (j + 1), i])
                             );
                         //var l = cubes[k, j, i];
-                        vertice = tempCube.March(threshold, cubes[k, j, i]);
+                        vertice = tempCube.March(thresh, cubes[k, j, i]);
 
                         foreach (var vertex in vertice)
                         {

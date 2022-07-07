@@ -17,7 +17,7 @@ namespace MarchingCubes
     {
         public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> assign;
         public static Action<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>> octreeCreation;
-        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernel;
+        public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int, int> traversalKernel;
         public static Action<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ushort, int> octreeFinalLayer;
 
 
@@ -85,7 +85,7 @@ namespace MarchingCubes
 
             assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(Assign);
             octreeCreation = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>>(BuildOctree);
-            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(OctreeTraverseKernel);
+            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int, int>(OctreeTraverseKernel);
             octreeFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<uint, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView1D<Triangle, Stride1D.Dense>, ArrayView1D<Edge, Stride1D.Dense>, ushort, int>(OctreeFinalLayer);
 
             MarchingCubesGPU();
@@ -182,10 +182,10 @@ namespace MarchingCubes
                 nTri = data[0, 0, 0];
         }
 
-        public static void OctreeTraverseKernel(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
+        public static void OctreeTraverseKernel(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n, int thresh)
         {
             Index3D index3D = getFromShuffleXYZ(keys[index] >> ((n) * 3), (int)XMath.Log2(max.Extent.X));
-            if (max[index3D] > threshold && min[index3D] < threshold)
+            if (max[index3D] > (ushort)thresh && min[index3D] < (ushort)thresh)
             {
                 newKeys[index * 8] = keys[index];
                 newKeys[index * 8 + 1] = (uint)(keys[index] + (1 << (3 * n)));
@@ -307,7 +307,7 @@ namespace MarchingCubes
             for (n = nLayers - 2; n > 0; n--)
             {
                 newKeys = accelerator.Allocate1D<uint>(index.Size * 8);
-                traversalKernel(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n);
+                traversalKernel(index, getMinOctreeLayer(n).View, getMaxOctreeLayer(n).View, keys.View.SubView(0, index.Size), newKeys.View, cnt.View, n, thresh);
                 accelerator.Synchronize();
 
                 var tempMemSize = accelerator.ComputeRadixSortTempStorageSize<uint, DescendingUInt32>((Index1D)newKeys.Length);
@@ -353,7 +353,7 @@ namespace MarchingCubes
 
             stopWatch.Start();
 
-            octreeFinalLayer(index, getMinOctreeLayer(0).View, getMaxOctreeLayer(0).View, keys.View, sliced.View, triConfig, triTable.View, threshold, nLayers - 1);
+            octreeFinalLayer(index, getMinOctreeLayer(0).View, getMaxOctreeLayer(0).View, keys.View, sliced.View, triConfig, triTable.View, thresh, nLayers - 1);
 
             accelerator.Synchronize();
             stopWatch.Stop();

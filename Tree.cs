@@ -286,7 +286,7 @@ namespace MarchingCubes
 
             stopWatch.Start();
 
-            octreeFinalLayer(index, getByteOctreeLayer(0).View, keys.View, sliced.View, triConfig.View, triTable.View, threshold, nLayers - 1);
+            octreeFinalLayer(index, getByteOctreeLayer(0).View, keys.View, sliced.View, triConfig.View, triTable.View, thresh, nLayers - 1);
 
             accelerator.Synchronize();
             stopWatch.Stop();
@@ -325,14 +325,14 @@ namespace MarchingCubes
         public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> layer, ArrayView3D<ushort, Stride3D.DenseXY> input)
         {
             byte cubeByte = 0;
-            cubeByte += (input[(index.Z), (index.Y), (index.X)] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z), (index.Y), (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X)] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X)] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1] < threshold) ? (byte)0x01 : (byte)0;
-            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X)] < threshold) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y), (index.X)] < thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y), (index.X) + 1] < thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X) + 1] < thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z), (index.Y) + 1, (index.X)] < thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X)] < thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y), (index.X) + 1] < thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X) + 1] < thresh) ? (byte)0x01 : (byte)0;
+            cubeByte += (input[(index.Z) + 1, (index.Y) + 1, (index.X)] < thresh) ? (byte)0x01 : (byte)0;
 
             if (cubeByte == 0 || cubeByte == 8)
                 layer[(index.Z), (index.Y), (index.X)] = 0;

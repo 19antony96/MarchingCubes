@@ -14,6 +14,25 @@ using System.Linq;
 
 namespace MarchingCubes
 {
+    public enum dataset
+    {
+        bunny,
+        CThead,
+        F_Ankle,
+        F_Head,
+        F_Hip,
+        F_Knee,
+        F_Pelvis,
+        F_Shoulder,
+        M_Head,
+        M_Hip,
+        M_Pelvis,
+        M_Shoulder,
+        MRbrain,
+        ChestSmall,
+        ChestCT,
+        WristCT
+    }
     class MarchingCubes
     {
         public static Context context;
@@ -21,7 +40,7 @@ namespace MarchingCubes
         //public static CPUAccelerator accelerator;
         public static MemoryBuffer1D<Edge, Stride1D.Dense> triTable;
         public static MemoryBuffer3D<ushort, Stride3D.DenseXY> sliced;
-        public static readonly ushort threshold = 800;
+        public static ushort thresh = 800;
         public static int length = 512;
         public static int width = 512;
         public static ushort[,,] slices;
@@ -30,7 +49,165 @@ namespace MarchingCubes
         public static int OctreeSize;
         public static ushort nLayers;
         public static int nTri;
+        public static string outFilename;
+        public static string filePath;
+        public static string repStr;
+        public static DirectoryInfo d;
+        public static bool isDCM;
+        public static int scaling = 1;
 
+        public static void SetValues(dataset ds, string suffix)
+        {
+            switch (ds)
+            {
+                case dataset.bunny:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\bunny\\";
+                    thresh = 512;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\bunny_{suffix}.obj";
+                    repStr = "";
+                    isDCM = false;
+                    break;
+                case dataset.CThead:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\CThead\\";
+                    thresh = 512;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\CThead_{suffix}.obj";
+                    repStr = "CThead.";
+                    isDCM = false;
+                    scaling = 2;
+                    break;
+                case dataset.F_Ankle:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Ankle\\Ankle\\";
+                    thresh = 1240;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\F_Ankle_{suffix}.obj";
+                    repStr = "vhf.";
+                    isDCM = true;
+                    break;
+                case dataset.F_Head:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Head\\Head\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\F_Head_{suffix}.obj";
+                    repStr = "vhf.";
+                    isDCM = true;
+                    break;
+                case dataset.F_Hip:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Hip\\Hip\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\F_Hip_{suffix}.obj";
+                    repStr = "vhf.";
+                    isDCM = true;
+                    break;
+                case dataset.F_Knee:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Knee\\Knee\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\F_Knee_{suffix}.obj";
+                    repStr = "vhf.";
+                    isDCM = true; 
+                    break;
+                case dataset.F_Pelvis:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Pelvis\\Pelvis\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\F_Pelvis_{suffix}.obj";
+                    repStr = "vhf.";
+                    isDCM = true;
+                    break;
+                case dataset.F_Shoulder:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Shoulder\\Shoulder\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\F_Shoulder_{suffix}.obj";
+                    repStr = "vhf.";
+                    isDCM = true;
+                    break;
+                case dataset.M_Head:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\M_Head\\Head\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\M_Head_{suffix}.obj";
+                    repStr = "vhm.";
+                    isDCM = true;
+                    break; 
+                case dataset.M_Hip:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\M_Hip\\Hip\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\M_Hip_{suffix}.obj";
+                    repStr = "vhm.";
+                    isDCM = true;
+                    break;
+                case dataset.M_Pelvis:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\M_Pelvis\\Pelvis\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\M_Pelvis_{suffix}.obj";
+                    repStr = "vhm.";
+                    isDCM = true; 
+                    break;
+                case dataset.M_Shoulder:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\M_Shoulder\\Shoulder\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\M_Shoulder_{suffix}.obj";
+                    repStr = "vhm.";
+                    isDCM = true;
+                    break;
+                case dataset.MRbrain:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
+                    thresh = 1538;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\MRbrain_{suffix}.obj";
+                    repStr = "MRbrain.";
+                    isDCM = false;
+                    scaling = 2;
+                    break;
+                case dataset.ChestSmall:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Resources\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\ChestSmall_{suffix}.obj";
+                    repStr = "";
+                    isDCM = true; 
+                    break;
+                case dataset.ChestCT:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Subject (1)\\98.12.2\\";
+                    thresh = 1280;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\ChestCT_{suffix}.obj";
+                    repStr = "";
+                    isDCM = true;
+                    break;
+                case dataset.WristCT:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\w3568970\\batch3\\";
+                    thresh = 1280;
+                    length = 440;
+                    width = 440;
+                    outFilename = $"D:\\College Work\\MP\\WristCT_{suffix}.obj";
+                    repStr = "";
+                    isDCM = true;
+                    break;
+            }
+        }
 
         public static FileInfo CreateVolume(int size)
         {
@@ -38,16 +215,21 @@ namespace MarchingCubes
             accelerator = context.CreateCudaAccelerator(0);
             //accelerator = context.CreateCPUAccelerator(0);
             triTable = accelerator.Allocate1D<Edge>(triangleTable);
-            Console.WriteLine("Threshold:" + (threshold - 1024));
+            Console.WriteLine("Threshold:" + (thresh - 1024));
 
-            string fileName = @"C:\\Users\\antonyDev\\Desktop\\timetest3.obj";
+            string fileName = outFilename;
             FileInfo fi = new FileInfo(fileName);
 
             if(slices == null)
             {
-
-                //ReadDCM();
-                ReadFile();
+                if (isDCM)
+                {
+                    ReadDCM();
+                }
+                else
+                {
+                    ReadFile();
+                }
                 //CreateSphere(width);
             }
 
@@ -65,12 +247,13 @@ namespace MarchingCubes
         {
             ushort k = 0;
             DicomFile dicoms;
-            DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Subject (1)\\98.12.2\\");
-            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\w3568970\\batch3\\");
-            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\DICOM\\DICOM\\ST000000\\SE000001\\");
-            //DirectoryInfo d = new DirectoryInfo("C:\\Users\\antonyDev\\Downloads\\Resources\\");
+            DirectoryInfo d = new DirectoryInfo(filePath);
 
             FileInfo[] files = d.GetFiles("*.dcm");
+            if(repStr == "vhm." || repStr == "vhf.")
+            {
+                files = files.OrderBy(x => int.Parse(x.Name.Replace(repStr, "").Replace(".dcm", ""))).ToArray();
+            }
             var header = DicomPixelData.Create(DicomFile.Open(files.First().FullName).Dataset);
             length = header.Height;
             width = header.Width;
@@ -91,15 +274,10 @@ namespace MarchingCubes
         public static void ReadFile()
         {
             ushort k = 0;
-            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\PVSJ_882\\";
-            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
-            string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\bunny\\";
-            //string path = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\CThead\\";
-            //OctreeSize = 512;
-            DirectoryInfo d = new DirectoryInfo(path);
+            DirectoryInfo d = new DirectoryInfo(filePath);
 
             FileInfo[] files = d.GetFiles();
-            files = files.OrderBy(x => int.Parse(x.Name.Replace("CThead.", ""))).ToArray();
+            files = files.OrderBy(x => int.Parse(x.Name.Replace(repStr, ""))).ToArray();
 
             slices = new ushort[files.Length, length, width];
 

@@ -185,7 +185,7 @@ namespace MarchingCubes
         public static void OctreeTraverseKernel(Index1D index, ArrayView3D<ushort, Stride3D.DenseXY> min, ArrayView3D<ushort, Stride3D.DenseXY> max, ArrayView1D<uint, Stride1D.Dense> keys, ArrayView1D<uint, Stride1D.Dense> newKeys, ArrayView1D<uint, Stride1D.Dense> count, int n)
         {
             Index3D index3D = getFromShuffleXYZ(keys[index], (int)XMath.Log2(max.Extent.X));
-            if (max[index3D] > threshold && min[index3D] < threshold)
+            if (max[index3D] > thresh && min[index3D] < thresh)
             {
                 newKeys[index * 8] = keys[index] << 3;
                 newKeys[index * 8 + 1] = (uint)((keys[index] << 3) + 1);
@@ -353,7 +353,7 @@ namespace MarchingCubes
 
             stopWatch.Start();
 
-            octreeFinalLayer(index, getMinOctreeLayer(0).View, getMaxOctreeLayer(0).View, keys.View, sliced.View, triConfig, triTable.View, threshold, nLayers - 1);
+            octreeFinalLayer(index, getMinOctreeLayer(0).View, getMaxOctreeLayer(0).View, keys.View, sliced.View, triConfig, triTable.View, thresh, nLayers - 1);
 
             accelerator.Synchronize();
             stopWatch.Stop();

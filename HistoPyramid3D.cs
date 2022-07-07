@@ -48,7 +48,7 @@ namespace MarchingCubes
         public static byte[,,] cubeBytes;
         public static byte[,,] HPBaseLayer;
         public static uint[][,,] HP;
-        public static int HPsize;
+        public static long HPsize;
 
         public static TimeSpan ts = new TimeSpan();
 
@@ -372,7 +372,7 @@ namespace MarchingCubes
                                 input[Math.Min((int)input.Extent.X - 1, (index3D.Z + 1) + 1), (index3D.Y + 1), index3D.X] - input[Math.Max((index3D.Z + 1) - 1, 0), (index3D.Y + 1), index3D.X]
                             ))
                            );
-            triangles[index] = tempCube.MarchHP(threshold, triTable[edges[index3D.Z, index3D.Y, index3D.X]], (int)k[index]);
+            triangles[index] = tempCube.MarchHP((ushort)thresh, triTable[edges[index3D.Z, index3D.Y, index3D.X]], (int)k[index]);
         }
 
         private static void HPTraversalGPU(StreamWriter fs)
@@ -413,7 +413,7 @@ namespace MarchingCubes
             MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(nTri);
             stopWatch.Reset();
             stopWatch.Start();
-            hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, threshold, (int)Math.Sqrt(HPsize));
+            hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, thresh, (int)Math.Sqrt(HPsize));
 
             accelerator.Synchronize();
             stopWatch.Stop();
@@ -497,7 +497,7 @@ namespace MarchingCubes
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            assign(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, threshold, width, (int)Math.Sqrt(HPsize));
+            assign(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, thresh, width, (int)Math.Sqrt(HPsize));
 
             accelerator.Synchronize();
             stopWatch.Stop();
