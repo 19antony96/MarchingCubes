@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MarchingCubes
@@ -44,14 +45,19 @@ namespace MarchingCubes
                 Thread.Sleep(1000);
                 MarchingCubes.SetValues(ds, "HP3D");
                 HistoPyramid3D run6 = new HistoPyramid3D(0);
+                Thread.Sleep(1000);
                 MarchingCubes.SetValues(ds, "Octree");
                 Octree run7 = new Octree(0);
+                Thread.Sleep(1000);
                 MarchingCubes.SetValues(ds, "OctreewPrior");
                 OctreeWPrior run9 = new OctreeWPrior(0);
+                Thread.Sleep(1000);
                 MarchingCubes.SetValues(ds, "OctreeBONO");
                 OctreeBONOwPrior run10 = new OctreeBONOwPrior(0);
+                Thread.Sleep(1000);
                 MarchingCubes.SetValues(ds, "AdaptiveHP");
                 AdaptiveHistoPyramid run12 = new AdaptiveHistoPyramid(0);
+                Thread.Sleep(1000);
                 MarchingCubes.slices = null;
             }
             while (true) 
