@@ -81,7 +81,7 @@ namespace MarchingCubes
                     break;
                 case dataset.F_Ankle:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Ankle\\Ankle\\";
-                    thresh = 1240;
+                    thresh = 1230;
                     length = 512;
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\F_Ankle_{suffix}.obj";
@@ -90,7 +90,7 @@ namespace MarchingCubes
                     break;
                 case dataset.F_Head:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Head\\Head\\";
-                    thresh = 1280;
+                    thresh = 1200;
                     length = 512;
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\F_Head_{suffix}.obj";
@@ -117,7 +117,7 @@ namespace MarchingCubes
                     break;
                 case dataset.F_Pelvis:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Pelvis\\Pelvis\\";
-                    thresh = 1280;
+                    thresh = 1220;
                     length = 512;
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\F_Pelvis_{suffix}.obj";
@@ -126,7 +126,7 @@ namespace MarchingCubes
                     break;
                 case dataset.F_Shoulder:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Shoulder\\Shoulder\\";
-                    thresh = 1280;
+                    thresh = 1180;
                     length = 512;
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\F_Shoulder_{suffix}.obj";
@@ -181,7 +181,7 @@ namespace MarchingCubes
                     break;
                 case dataset.ChestSmall:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Resources\\";
-                    thresh = 1280;
+                    thresh = 1220;
                     length = 512;
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\ChestSmall_{suffix}.obj";
