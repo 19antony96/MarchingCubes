@@ -18,18 +18,25 @@ namespace MarchingCubes
                 dataset.CThead,
                 dataset.F_Ankle,
                 dataset.F_Head,
-                //dataset.F_Hip,
-                //dataset.F_Knee,
                 dataset.F_Pelvis,
                 dataset.F_Shoulder,
+                dataset.MRbrain,
+                dataset.ChestSmall,
+                dataset.ChestCT,
+                dataset.WristCT,
+                dataset.MRHead40,
+                dataset.SkullLrg
+
+                //dataset.F_Hip,
+                //dataset.F_Knee,
                 //dataset.M_Head,
                 //dataset.M_Hip,
                 //dataset.M_Pelvis,
                 //dataset.M_Shoulder,
-                dataset.MRbrain,
-                dataset.ChestSmall,
-                dataset.ChestCT,
-                dataset.WristCT
+                //dataset.VolFlip3,
+                //dataset.VolFlip5,
+                //dataset.VolFlip20,
+                //dataset.VolFlip30,
             };
             foreach (dataset ds in dList)
             {

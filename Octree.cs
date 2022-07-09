@@ -78,7 +78,11 @@ namespace MarchingCubes
             Console.WriteLine("Octree");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
-
+            if (OctreeSize > 512)
+            {
+                Console.WriteLine("Skipped Octree");
+                return;
+            }
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
             //var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));

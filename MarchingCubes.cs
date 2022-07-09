@@ -31,7 +31,14 @@ namespace MarchingCubes
         MRbrain,
         ChestSmall,
         ChestCT,
-        WristCT
+        WristCT,
+        MRHead3,
+        MRHead5,
+        MRHead20,
+        MRHead30,
+        MRHead40,
+        SkullLrg,
+
     }
     class MarchingCubes
     {
@@ -206,6 +213,60 @@ namespace MarchingCubes
                     repStr = "repStr";
                     isDCM = true;
                     break;
+                case dataset.MRHead3:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 005 [MR - SAG RF FAST VOL FLIP 3]\\";
+                    thresh = 10;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\VolFlip3_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    break;
+                case dataset.MRHead5:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 003 [MR - SAG RF FAST VOL FLIP 5]\\";
+                    thresh = 30;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\VolFlip5_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    break;
+                case dataset.MRHead20:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 004 [MR - SAG RF FAST VOL FLIP 20]\\";
+                    thresh = 20;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\VolFlip20_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    break;
+                case dataset.MRHead30:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 002 [MR - SAG RF FAST VOL FLIP 30]\\";
+                    thresh = 20;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\VolFlip30_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    break;
+                case dataset.MRHead40:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 006 [MR - SAG RF FAST VOL FLIP 40]\\";
+                    thresh = 100;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\VolFlip40_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    break;
+                case dataset.SkullLrg:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\DICOM\\";
+                    thresh = 1320;
+                    length = 400;
+                    width = 400;
+                    outFilename = $"D:\\College Work\\MP\\SkullLrg_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    break;
             }
         }
 
@@ -234,10 +295,10 @@ namespace MarchingCubes
                 //CreateSphere(width);
             }
 
-            OctreeSize = width;
-            if (Math.Log(width, 2) % 1 > 0)
+            OctreeSize = Math.Max(width, slices.GetLength(0));
+            if (Math.Log(Math.Max(width, slices.GetLength(0)), 2) % 1 > 0)
             {
-                OctreeSize = (int)Math.Pow(2, (int)Math.Log(width, 2) + 1);
+                OctreeSize = (int)Math.Pow(2, (int)Math.Log(Math.Max(width, slices.GetLength(0)), 2) + 1);
             }
 
             sliced = accelerator.Allocate3DDenseXY<ushort>(slices);
@@ -259,14 +320,14 @@ namespace MarchingCubes
             length = header.Height;
             width = header.Width;
 
-            slices = new ushort[files.Length, length, width];
+            slices = new ushort[Math.Min(files.Length, 512), length, width];
 
             foreach (var file in files)
             {
                 dicoms = DicomFile.Open(file.FullName);
                 CreateBmp(dicoms, k);
                 k++;
-                if (k > 1023)
+                if (k > 511)
                     break;
             }
 
@@ -398,6 +459,7 @@ namespace MarchingCubes
             var decomp = dicom.Clone();
 
             var header = DicomPixelData.Create(decomp.Dataset);
+            header.PhotometricInterpretation = PhotometricInterpretation.Monochrome2;
             var h = header.GetFrame(0);
 
             GrayscalePixelDataU16 pixelData = new GrayscalePixelDataU16(header.Width, header.Width, header.BitDepth, h);

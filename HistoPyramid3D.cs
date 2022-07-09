@@ -61,10 +61,10 @@ namespace MarchingCubes
             Console.WriteLine("HistoPyramid 3D");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
-            HPsize = width;
-            if (Math.Log(width, 2) % 1 > 0)
+            HPsize = Math.Max(width, slices.GetLength(0));
+            if (Math.Log(Math.Max(width, slices.GetLength(0)), 2) % 1 > 0)
             {
-                HPsize = (int)Math.Pow(2, (int)Math.Log(width, 2) + 1);
+                HPsize = (int)Math.Pow(2, (int)Math.Log(Math.Max(width, slices.GetLength(0)), 2) + 1);
             }
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));

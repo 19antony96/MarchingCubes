@@ -246,7 +246,7 @@ namespace MarchingCubes
             var radixSort = accelerator.CreateRadixSort<uint, Stride1D.Dense, DescendingUInt32>();
             var prefixSum = accelerator.CreateReduction<uint, Stride1D.Dense, AddUInt32>();
 
-            var tempMemSize = accelerator.ComputeRadixSortTempStorageSize<uint, DescendingUInt32>((Index1D)slices.Length / 5);
+            var tempMemSize = accelerator.ComputeRadixSortTempStorageSize<uint, DescendingUInt32>((Index1D)slices.Length / 3);
 
             var tempBuffer = accelerator.Allocate1D<int>(tempMemSize);
             cnt = accelerator.Allocate1D<uint>(slices.Length / 5);
