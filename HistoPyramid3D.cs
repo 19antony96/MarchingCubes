@@ -87,6 +87,9 @@ namespace MarchingCubes
             cubes = MarchingCubesGPU();
 
             HPCreationGPU();
+            Console.WriteLine("Layers: " + (nLayers - 1));
+            Console.WriteLine("Size: " + HPBaseConfig.Extent.Size);
+            Console.WriteLine("Padding: " + (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1))));
 
             using (StreamWriter fs = fi.CreateText())
             {

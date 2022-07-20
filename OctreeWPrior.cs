@@ -60,6 +60,9 @@ namespace MarchingCubes
             MarchingCubesGPU();
 
             OctreeCreationGPU();
+            Console.WriteLine("Layers: " + (nLayers - 1));
+            Console.WriteLine("Size: " + getByteOctreeLayer(0).Extent.Size);
+            Console.WriteLine("Padding: " + (getByteOctreeLayer(0).Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1))));
 
             using (StreamWriter fs = fi.CreateText())
             {

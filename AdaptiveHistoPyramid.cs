@@ -74,7 +74,7 @@ namespace MarchingCubes
 
         public static int count = 0;
 
-        public static List<int> factorOpt = new List<int> { 8, 7, 5, 3, 4, 2 };
+        public static List<int> factorOpt = new List<int> { 5, 7, 8, 4, 2, 3 };
         public static List<int> factors = new List<int>();
 
         public AdaptiveHistoPyramid(int size)
@@ -140,6 +140,9 @@ namespace MarchingCubes
             cubes = MarchingCubesGPU();
 
             HPCreationGPU();
+            Console.WriteLine("Layers: " + (nLayers - 1));
+            Console.WriteLine("Size: " + HPBaseConfig.Extent.Size);
+            Console.WriteLine("Padding: " + (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1))));
 
             using (StreamWriter fs = fi.CreateText())
             {

@@ -76,7 +76,8 @@ namespace MarchingCubes
 
         public HistoPyramidGeneric(int size)
         {
-            Console.WriteLine("HistoPyramid Generic");
+            factor = size;
+            Console.WriteLine($"HistoPyramid Generic {factor}");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
 
@@ -110,6 +111,9 @@ namespace MarchingCubes
             cubes = MarchingCubesGPU();
 
             HPCreationGPU();
+            Console.WriteLine("Layers: " + (nLayers - 1));
+            Console.WriteLine("Size: " + HPBaseConfig.Extent.Size);
+            Console.WriteLine("Padding: " + (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1))));
 
             using (StreamWriter fs = fi.CreateText())
             {
@@ -182,6 +186,10 @@ namespace MarchingCubes
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime " + elapsedTime);
+            if(getHPLayer(nLayers - 1) == null || getHPLayer(nLayers - 1).Extent < 1)
+            {
+                nLayers--;
+            }
             uint[] data = getHPLayer(nLayers - 1).GetAsArray1D();
             if (data.Length == 1)
                 nTri = (int)data[0];

@@ -218,7 +218,7 @@ namespace MarchingCubes
                     thresh = 10;
                     length = 256;
                     width = 256;
-                    outFilename = $"D:\\College Work\\MP\\VolFlip3_{suffix}.obj";
+                    outFilename = $"D:\\College Work\\MP\\MRHead3_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
                     break;
@@ -227,7 +227,7 @@ namespace MarchingCubes
                     thresh = 30;
                     length = 256;
                     width = 256;
-                    outFilename = $"D:\\College Work\\MP\\VolFlip5_{suffix}.obj";
+                    outFilename = $"D:\\College Work\\MP\\MRHead5_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
                     break;
@@ -236,7 +236,7 @@ namespace MarchingCubes
                     thresh = 20;
                     length = 256;
                     width = 256;
-                    outFilename = $"D:\\College Work\\MP\\VolFlip20_{suffix}.obj";
+                    outFilename = $"D:\\College Work\\MP\\MRHead20_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
                     break;
@@ -245,16 +245,16 @@ namespace MarchingCubes
                     thresh = 20;
                     length = 256;
                     width = 256;
-                    outFilename = $"D:\\College Work\\MP\\VolFlip30_{suffix}.obj";
+                    outFilename = $"D:\\College Work\\MP\\MRHead30_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
                     break;
                 case dataset.MRHead40:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 006 [MR - SAG RF FAST VOL FLIP 40]\\";
-                    thresh = 100;
+                    thresh = 40;
                     length = 256;
                     width = 256;
-                    outFilename = $"D:\\College Work\\MP\\VolFlip40_{suffix}.obj";
+                    outFilename = $"D:\\College Work\\MP\\MRHead40_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
                     break;

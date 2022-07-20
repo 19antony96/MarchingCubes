@@ -45,30 +45,45 @@ namespace MarchingCubes
                 //NaiveGPU run2 = new NaiveGPU(i);
                 //HistoPyramidGeneric run11 = new HistoPyramidGeneric(i);
                 //OctreeEvenSubdiv run8 = new OctreeEvenSubdiv(i);
-
+                for (int i = 2; i < 9; i++)
+                {
+                    if (i != 6)
+                    {
+                        MarchingCubes.SetValues(ds, $"HP_{i}");
+                        HistoPyramidGeneric run11 = new HistoPyramidGeneric(i);
+                        Thread.Sleep(1000);
+                        Console.WriteLine("--------------------------------------------------------------------------------");
+                    }
+                }
 
                 MarchingCubes.SetValues(ds, "HP");
                 HistoPyramid run5 = new HistoPyramid(0);
                 Thread.Sleep(1000);
+                Console.WriteLine("--------------------------------------------------------------------------------");
                 MarchingCubes.SetValues(ds, "HP3D");
                 HistoPyramid3D run6 = new HistoPyramid3D(0);
                 Thread.Sleep(1000);
+                Console.WriteLine("--------------------------------------------------------------------------------");
                 MarchingCubes.SetValues(ds, "Octree");
                 Octree run7 = new Octree(0);
                 Thread.Sleep(1000);
+                Console.WriteLine("--------------------------------------------------------------------------------");
                 MarchingCubes.SetValues(ds, "OctreewPrior");
                 OctreeWPrior run9 = new OctreeWPrior(0);
                 Thread.Sleep(1000);
+                Console.WriteLine("--------------------------------------------------------------------------------");
                 MarchingCubes.SetValues(ds, "OctreeBONO");
                 OctreeBONOwPrior run10 = new OctreeBONOwPrior(0);
                 Thread.Sleep(1000);
+                Console.WriteLine("--------------------------------------------------------------------------------");
                 MarchingCubes.SetValues(ds, "AdaptiveHP");
                 AdaptiveHistoPyramid run12 = new AdaptiveHistoPyramid(0);
                 Thread.Sleep(1000);
+                Console.WriteLine("--------------------------------------------------------------------------------");
                 MarchingCubes.slices = null;
             }
-            while (true) 
-                ;
+            Console.WriteLine("Press any key to exit");
+            Console.ReadKey();
             Console.Out.WriteLine("DONE");
         }
     }
