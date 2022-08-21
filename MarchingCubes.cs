@@ -260,7 +260,7 @@ namespace MarchingCubes
                     break;
                 case dataset.SkullLrg:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\DICOM\\";
-                    thresh = 1320;
+                    thresh = 1350;
                     length = 400;
                     width = 400;
                     outFilename = $"D:\\College Work\\MP\\SkullLrg_{suffix}.obj";

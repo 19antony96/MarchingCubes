@@ -117,8 +117,8 @@ namespace MarchingCubes
 
         public static void getBatchVertices(Index3D index, ArrayView<Triangle> triangles, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<Edge, Stride1D.Dense> triTable, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView1D<byte, Stride1D.Dense> flag, Point offset, int thresh, int batchSize, int width)
         {
-            if (edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != 0 && edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != byte.MaxValue)
-            {
+            //if (edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != 0 && edges[(index.Z + (int)offset.Z), (index.Y + (int)offset.Y), (index.X + (int)offset.X)] != byte.MaxValue)
+            //{
                 Cube tempCube = new Cube(
                             new Point(
                                 (index.X + (int)offset.X), (index.Y + (int)offset.Y), (index.Z + (int)offset.Z),
@@ -195,17 +195,17 @@ namespace MarchingCubes
                     {
                         if (flag[0] == 0)
                             flag[0] = 1;
-                        triangles[(batchSize * batchSize * batchSize * (i / 3)) + (index.Z * batchSize * batchSize) + (index.Y * batchSize) + index.X] = new Triangle(vertice[i], vertice[i + 1], vertice[i + 2]);
+                        triangles[(index.Size * (i / 3)) + (index.Z * batchSize * batchSize) + (index.Y * batchSize) + index.X] = new Triangle(vertice[i], vertice[i + 1], vertice[i + 2]);
                     }
                 }
-            }
+            //}
         }
 
 
 
         public static void MarchBatchGPU(StreamWriter fs)
         {
-            ushort[] sizes = { 16 };
+            ushort[] sizes = { 128 };
             if (width < 300)
                 sizes = new ushort[] { (ushort)width };
             foreach (ushort size in sizes)
@@ -221,9 +221,9 @@ namespace MarchingCubes
                 int nY = (int)Math.Ceiling((double)(Y / batchSize));
                 int nZ = (int)Math.Ceiling((double)(Z / batchSize));
 
-                Triangle[] triangleList = new Triangle[Math.Max(Nindex.Size * 5, (nX + 1) * (nY + 1) * (nZ + 1) * batchSize * batchSize * batchSize)];
+                Triangle[] triangleList = new Triangle[Math.Max(Nindex.Size * 5, (nX + 1) * (nY + 1) * (nZ + 1) * batchSize * batchSize * batchSize) * 2];
                 int sum = 0;
-                Triangle[] tri = new Triangle[Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5, (batchSize) * (batchSize) * (batchSize) * 5)];
+                Triangle[] tri = new Triangle[Math.Min(((nX + 1) * (nY + 1) * (nZ + 1) * batchSize * batchSize * batchSize) * 5, (batchSize) * (batchSize) * (batchSize) * 5)];
                 //Triangle[][] tri = new Triangle[nZ][];
                 PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5, (batchSize) * (batchSize) * (batchSize) * 5));
                 MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(Math.Min((Nindex.X) * (Nindex.Y) * (Nindex.Z) * 5, (batchSize) * (batchSize) * (batchSize) * 5));
@@ -249,6 +249,7 @@ namespace MarchingCubes
                                 accelerator.Synchronize();
                                 if (flag.GetAsArray1D()[0] > 0)
                                 {
+                                    //stopWatch.Stop();
                                     triConfig.View.CopyToPageLockedAsync(triLocked);
                                     accelerator.Synchronize();
                                     tri = triLocked.GetArray();
@@ -259,6 +260,7 @@ namespace MarchingCubes
                                     triLocked.ArrayView.MemSetToZero();
                                     iX++;
                                     flag.MemSetToZero();
+                                    //stopWatch.Start();
                                 }
                             }
                         }

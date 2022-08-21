@@ -117,8 +117,8 @@ namespace MarchingCubes
                 {
                     for (j = 0; j < slices.GetLength(1) - 2; j++)
                     {
-                        if (cubes[k, j, i] != 0 && cubes[k, j, i] != byte.MaxValue)
-                        {
+                        //if (cubes[k, j, i] != 0 && cubes[k, j, i] != byte.MaxValue)
+                        //{
                             Cube tempCube = new Cube(
                                 new Point(i, j, k, slices[k, j, i],
                                 new Normal(
@@ -176,7 +176,7 @@ namespace MarchingCubes
                             {
                                 vertices.Add(vertex);
                             }
-                        }
+                        //}
                     }
                 }
             }
