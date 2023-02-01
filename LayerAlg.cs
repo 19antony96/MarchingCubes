@@ -9,7 +9,8 @@ namespace MarchingCubes
     public static class LayerAlg
     {
         //public static List<int> factorOpt = new List<int> { 5, 6, 7, 8, 4, 2, 3 };
-        public static List<int> factorOpt = new List<int> { 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+        public static List<int> factorOpt = new List<int> { 8,4,6,7,5,3,2,};
+        //public static List<int> factorOpt = new List<int> { 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
         //public static List<int> factorOpt = new List<int> { 23, 17, 13, 11, 8, 7, 6, 5, 4, 3, 2 };
 
         public static List<int> SimpleStochastic(long HPsize)

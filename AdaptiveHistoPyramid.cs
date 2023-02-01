@@ -107,7 +107,7 @@ namespace MarchingCubes
             Console.WriteLine($"n Layers: {factors.Count}");
             nLayers = (ushort)(factors.Count() + 1);
             factors.Sort();
-            factors.Reverse();
+            //factors.Reverse();
             foreach (int factor in factors)
             {
                 Console.WriteLine(factor);
