@@ -280,8 +280,9 @@
     <Compile Include="HistoPyramid3Dlim.cs" />
     <Compile Include="AdaptiveHistoPyramid.cs" />
     <Compile Include="HistoPyramidGeneric.cs" />
-    <Compile Include="HistoPyramid.cs" />
+    <Compile Include="HistoPyramid2D.cs" />
     <Compile Include="HistoPyramid3D.cs" />
+    <Compile Include="LayerAlg.cs" />
     <Compile Include="MarchingCubes.cs" />
     <Compile Include="NaiveCPU.cs" />
     <Compile Include="NaiveGPU.cs" />

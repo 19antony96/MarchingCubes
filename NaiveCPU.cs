@@ -70,6 +70,7 @@ namespace MarchingCubes
             // i,j+1,k+1
             int i, j, k;
 
+            int cub = 0;
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
             for (k = 0; k < slices.GetLength(0); k++)
@@ -91,6 +92,8 @@ namespace MarchingCubes
                             cubeByte += (slices[k + 1, j + 1, i] < thresh) ? (byte)0x80 : (byte)0;
 
                             cubeBytes[k, j, i] = cubeByte;
+                            if (cubeByte > 0 && cubeByte < 255)
+                                cub++;
                         }
                     }
                 }
@@ -102,6 +105,7 @@ namespace MarchingCubes
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime " + elapsedTime);
+            Console.WriteLine("Cubes: " + cub);
             return cubeBytes;
         }
 
@@ -111,11 +115,11 @@ namespace MarchingCubes
             stopWatch.Start();
             int i, j, k;
             Point[] vertice;
-            for (k = 0; k < slices.GetLength(0) - 2; k++)
+            for (k = 0; k < slices.GetLength(0) - 1; k++)
             {
-                for (i = 0; i < slices.GetLength(2) - 2; i++)
+                for (i = 0; i < slices.GetLength(2) - 1; i++)
                 {
-                    for (j = 0; j < slices.GetLength(1) - 2; j++)
+                    for (j = 0; j < slices.GetLength(1) - 1; j++)
                     {
                         //if (cubes[k, j, i] != 0 && cubes[k, j, i] != byte.MaxValue)
                         //{
@@ -188,8 +192,8 @@ namespace MarchingCubes
             Console.WriteLine("RunTime " + elapsedTime);
             foreach (var vertex in vertices)
             {
-                fs.WriteLine("v " + vertex.X + " " + vertex.Y + " " + vertex.Z * 10);
-                fs.WriteLine("vn " + vertex.normal.X + " " + vertex.normal.Y + " " + vertex.normal.Z);
+                fs.WriteLine("v " + vertex.X + " " + vertex.Y + " " + vertex.Z);
+                fs.WriteLine("vn " + -vertex.normal.X + " " + -vertex.normal.Y + " " + -vertex.normal.Z);
                 count++;
 
             }

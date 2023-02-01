@@ -282,7 +282,7 @@ namespace MarchingCubes
                 ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
             stopWatch.Reset();
-            for(n = nLayers -2; n > 0; n--)
+            for(n = nLayers - 2; n > 0; n--)
             {
                 getByteOctreeLayer(n).Dispose();
             }

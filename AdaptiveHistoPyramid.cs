@@ -67,6 +67,12 @@ namespace MarchingCubes
 
         public static TimeSpan ts = new TimeSpan();
 
+        public static TimeSpan FirstPassTime;
+        public static TimeSpan HPCreateTime;
+        public static TimeSpan HPTraverseTime;
+        public static TimeSpan HPExtractionTime;
+        public static TimeSpan TotalTime;
+
         public static List<Point> vertices = new List<Point>();
         public static byte[,,] cubes;
         public static int factor = 8;
@@ -74,7 +80,7 @@ namespace MarchingCubes
 
         public static int count = 0;
 
-        public static List<int> factorOpt = new List<int> { 5, 7, 8, 4, 2, 3 };
+        public static List<int> factorOpt = new List<int> { 5, 7, 6, 4, 2, 3 };
         public static List<int> factors = new List<int>();
 
         public AdaptiveHistoPyramid(int size)
@@ -88,27 +94,11 @@ namespace MarchingCubes
             Z = slices.GetLength(0) - 1;
 
             HPsize = X * Y * Z;
-            //if (Math.Log(X * Y * Z, factor) % 1 > 0)
-            //{
-            //    HPsize = (int)Math.Pow(factor, (int)Math.Log(X * Y * Z - 1, factor) + 1);
-            //}
-            long LayerSize = HPsize;
-            factors = new List<int>();
-            for (int nLayers = 0; LayerSize > 1; nLayers++)
-            {
-                int temp = 8;
-                foreach(int factor in factorOpt)
-                {
-                    if (LayerSize % factor < LayerSize % temp)
-                        temp = factor;
-                }
-                //Console.WriteLine(temp);
-                factors.Add(temp);
-                LayerSize = (int)Math.Ceiling((double)LayerSize / (double)temp);
-            }
+
+            factors = LayerAlg.SimpleStochastic(HPsize);
 
             long product = 1;
-            foreach(int fac in factors)
+            foreach (int fac in factors)
             {
                 product *= fac;
             }
@@ -118,6 +108,10 @@ namespace MarchingCubes
             nLayers = (ushort)(factors.Count() + 1);
             factors.Sort();
             factors.Reverse();
+            foreach (int factor in factors)
+            {
+                Console.WriteLine(factor);
+            }
 
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
@@ -163,6 +157,8 @@ namespace MarchingCubes
             }
             accelerator.Dispose();
             context.Dispose();
+
+            TotalTime = FirstPassTime + HPCreateTime + HPTraverseTime + HPExtractionTime;
         }
 
         public static void BuildHP(Index1D index, ArrayView1D<uint, Stride1D.Dense> HPLayer, ArrayView1D<uint, Stride1D.Dense> HPLayerPrev, int factor)
@@ -210,6 +206,8 @@ namespace MarchingCubes
 
             stopWatch.Stop();
             ts += stopWatch.Elapsed;
+
+            HPCreateTime = ts;
 
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
@@ -344,6 +342,9 @@ namespace MarchingCubes
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
             count = 0;
+
+            HPTraverseTime = ts;
+
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
@@ -363,15 +364,18 @@ namespace MarchingCubes
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
             count = 0;
+
+            HPExtractionTime = ts;
+            
             elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
 
 
-            triConfig.View.CopyToPageLockedAsync(triLocked);
-            accelerator.Synchronize();
-            tri = triLocked.GetArray();
+            //triConfig.View.CopyToPageLockedAsync(triLocked);
+            //accelerator.Synchronize();
+            //tri = triLocked.GetArray();
             triConfig.Dispose();
             cubeConfig.Dispose();
             sliced.Dispose();
@@ -380,16 +384,16 @@ namespace MarchingCubes
             triTable.Dispose();
             HPBaseConfig.Dispose();
 
-            foreach (var triangle in tri)
-            {
-                fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
-                fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
-                fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
-                fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
-                fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
-                fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
-                count += 3;
-            }
+            //foreach (var triangle in tri)
+            //{
+            //    fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
+            //    fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
+            //    fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
+            //    fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
+            //    fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
+            //    fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
+            //    count += 3;
+            //}
         }
 
         public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<byte, Stride1D.Dense> HPindices, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int x, int y, int z)
@@ -451,6 +455,8 @@ namespace MarchingCubes
             HPBaseLayer = HPLocked.GetArray();
             cubePinned.Free();
             HPPinned.Free();
+
+            FirstPassTime = ts;
 
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,

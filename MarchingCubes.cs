@@ -321,6 +321,11 @@ namespace MarchingCubes
             width = header.Width;
 
             slices = new ushort[Math.Min(files.Length, 512), length, width];
+            if (length == 256 && width == 256)
+                slices = new ushort[width, width, width];
+
+            if (length == 512 && width == 512)
+                slices = new ushort[width, width, width];
 
             foreach (var file in files)
             {
@@ -342,10 +347,14 @@ namespace MarchingCubes
             files = files.OrderBy(x => int.Parse(x.Name.Replace(repStr, ""))).ToArray();
 
             slices = new ushort[files.Length, length, width];
+            if (length == 256 && width == 256)
+                slices = new ushort[width, width, width];
+
+            if (length == 512 && width == 512)
+                slices = new ushort[width, width, width];
 
             foreach (var file in files)
             {
-
                 Decode(file.FullName, k);
                 k++;
                 if (k > 1023)

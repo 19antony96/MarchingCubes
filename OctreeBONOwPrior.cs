@@ -538,7 +538,7 @@ namespace MarchingCubes
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-            for (n = nLayers - 1; n > 0; n--)
+            for (n = nLayers - 1; n >= 0; n--)
             {
                 bool xSplit = true, ySplit = true, zSplit = true;
                 //if ((zCode <= 1 << (n - 1)))
@@ -593,6 +593,7 @@ namespace MarchingCubes
                 cnt.MemSetToZero();
             }
 
+            index = new Index1D(index.Size / 8);
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",

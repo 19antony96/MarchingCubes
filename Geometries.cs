@@ -94,6 +94,7 @@ namespace MarchingCubes
             //    x = 0;
             //if (x > 0.999)
             //    x = 1;
+            x = 0.5f;
 
             Point vertex = this + (other - this) * x;
 
