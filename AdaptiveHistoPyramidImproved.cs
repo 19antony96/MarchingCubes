@@ -144,7 +144,7 @@ namespace MarchingCubes
             HPCreationGPU();
             layerCount = nLayers - 1;
             baseLayerSize = HPBaseConfig.Extent.Size;
-            padding = (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1)))
+            padding = (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1)));
             Console.WriteLine("Layers: " + layerCount);
             Console.WriteLine("Size: " + baseLayerSize);
             Console.WriteLine("Padding: " + padding);
