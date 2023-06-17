@@ -277,6 +277,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdaptiveHistoPyramidImproved.cs" />
     <Compile Include="HistoPyramid3Dlim.cs" />
     <Compile Include="AdaptiveHistoPyramid.cs" />
     <Compile Include="HistoPyramidGeneric.cs" />

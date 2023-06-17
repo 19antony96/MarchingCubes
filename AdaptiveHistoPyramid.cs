@@ -72,6 +72,7 @@ namespace MarchingCubes
         public static TimeSpan HPTraverseTime;
         public static TimeSpan HPExtractionTime;
         public static TimeSpan TotalTime;
+        public static long padding, layerCount, baseLayerSize;
 
         public static List<Point> vertices = new List<Point>();
         public static byte[,,] cubes;
@@ -83,9 +84,12 @@ namespace MarchingCubes
         public static List<int> factorOpt = new List<int> { 5, 7, 6, 4, 2, 3 };
         public static List<int> factors = new List<int>();
 
-        public AdaptiveHistoPyramid(int size)
+        public AdaptiveHistoPyramid(int size, bool extend = false, bool reverse = false, bool byDim = false)
         {
             Console.WriteLine("Adaptive HistoPyramid");
+            Console.WriteLine(extend ? "Extended" : "Not Extended");
+            Console.WriteLine(reverse ? "Reversed" : "Not Reversed");
+            Console.WriteLine(byDim ? "Divided by Dimension" : "Flat Division");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
 
@@ -95,7 +99,7 @@ namespace MarchingCubes
 
             HPsize = X * Y * Z;
 
-            factors = LayerAlg.SimpleStochastic(HPsize);
+            factors = byDim ? LayerAlg.ByDim(X, Y, Z, extend) : LayerAlg.SimpleStochastic(HPsize, extend);
 
             long product = 1;
             foreach (int fac in factors)
@@ -106,8 +110,11 @@ namespace MarchingCubes
             Console.WriteLine(HPsize);
             Console.WriteLine($"n Layers: {factors.Count}");
             nLayers = (ushort)(factors.Count() + 1);
+
             factors.Sort();
-            //factors.Reverse();
+            if(reverse) 
+                factors.Reverse();
+
             foreach (int factor in factors)
             {
                 Console.WriteLine(factor);
@@ -134,9 +141,12 @@ namespace MarchingCubes
             cubes = MarchingCubesGPU();
 
             HPCreationGPU();
-            Console.WriteLine("Layers: " + (nLayers - 1));
-            Console.WriteLine("Size: " + HPBaseConfig.Extent.Size);
-            Console.WriteLine("Padding: " + (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1))));
+            layerCount = nLayers - 1;
+            baseLayerSize = HPBaseConfig.Extent.Size;
+            padding = (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1)))
+            Console.WriteLine("Layers: " + layerCount);
+            Console.WriteLine("Size: " + baseLayerSize);
+            Console.WriteLine("Padding: " + padding);
 
             using (StreamWriter fs = fi.CreateText())
             {
@@ -373,9 +383,9 @@ namespace MarchingCubes
             Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
 
 
-            //triConfig.View.CopyToPageLockedAsync(triLocked);
-            //accelerator.Synchronize();
-            //tri = triLocked.GetArray();
+            triConfig.View.CopyToPageLockedAsync(triLocked);
+            accelerator.Synchronize();
+            tri = triLocked.GetArray();
             triConfig.Dispose();
             cubeConfig.Dispose();
             sliced.Dispose();
@@ -384,16 +394,16 @@ namespace MarchingCubes
             triTable.Dispose();
             HPBaseConfig.Dispose();
 
-            //foreach (var triangle in tri)
-            //{
-            //    fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
-            //    fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
-            //    fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
-            //    fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
-            //    fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
-            //    fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
-            //    count += 3;
-            //}
+            foreach (var triangle in tri)
+            {
+                fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
+                fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
+                fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
+                fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
+                fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
+                fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
+                count += 3;
+            }
         }
 
         public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<byte, Stride1D.Dense> HPindices, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int x, int y, int z)

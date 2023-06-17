@@ -72,6 +72,7 @@ namespace MarchingCubes
         public static TimeSpan HPTraverseTime;
         public static TimeSpan HPExtractionTime;
         public static TimeSpan TotalTime;
+        public static long padding, layerCount, baseLayerSize;
 
         public static List<Point> vertices = new List<Point>();
         public static byte[,,] cubes;
@@ -117,9 +118,12 @@ namespace MarchingCubes
             cubes = MarchingCubesGPU();
 
             HPCreationGPU();
-            Console.WriteLine("Layers: " + (nLayers - 1));
-            Console.WriteLine("Size: " + HPBaseConfig.Extent.Size);
-            Console.WriteLine("Padding: " + (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1))));
+            layerCount = nLayers - 1;
+            baseLayerSize = HPBaseConfig.Extent.Size;
+            padding = (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1)))
+            Console.WriteLine("Layers: " + layerCount);
+            Console.WriteLine("Size: " + baseLayerSize);
+            Console.WriteLine("Padding: " + padding);
 
             using (StreamWriter fs = fi.CreateText())
             {

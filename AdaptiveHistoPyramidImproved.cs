@@ -10,44 +10,59 @@ using System.Runtime.InteropServices;
 
 namespace MarchingCubes
 {
-    class HistoPyramid2D: MarchingCubes
+    class AdaptiveHistoPyramidImproved: MarchingCubes
     {
-        public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView2D<byte, Stride2D.DenseX>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int> assign;
-        public static Action<Index2D, ArrayView2D<uint, Stride2D.DenseX>, ArrayView2D<byte, Stride2D.DenseX>> hpFirstLayer;
-        public static Action<Index2D, ArrayView2D<uint, Stride2D.DenseX>, ArrayView2D<uint, Stride2D.DenseX>> hpCreation;
-        public static Action<Index1D, ArrayView1D<FlatPoint2D, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView2D<uint, Stride2D.DenseX>> traversalKernel;
+        public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int, int> assign;
+        public static Action<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<byte, Stride1D.Dense>, int> hpFirstLayer;
+        public static Action<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> hpCreation;
+        public static Action<Index1D, ArrayView1D<long, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int, int> traversalKernel;
         public static Action<Index1D,
-            ArrayView1D<FlatPoint2D, Stride1D.Dense>,
+            ArrayView1D<long, Stride1D.Dense>,
             ArrayView1D<uint, Stride1D.Dense>,
-            ArrayView2D<byte, Stride2D.DenseX>,
+            ArrayView1D<byte, Stride1D.Dense>,
             ArrayView1D<Triangle, Stride1D.Dense>,
             ArrayView3D<byte, Stride3D.DenseXY>,
             ArrayView1D<Edge, Stride1D.Dense>,
             ArrayView3D<ushort, Stride3D.DenseXY>,
-            int, int, int> hpFinalLayer;
+            int, int, int, int, int> hpFinalLayer;
 
 
         public static MemoryBuffer3D<byte, Stride3D.DenseXY> cubeConfig;
-        private static MemoryBuffer2D<byte, Stride2D.DenseX> HPBaseConfig;
+        private static MemoryBuffer1D<byte, Stride1D.Dense> HPBaseConfig;
         public static MemoryBuffer3D<Normal, Stride3D.DenseXY> gradConfig;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer15;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer14;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer13;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer12;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer11;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer10;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer9;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer8;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer7;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer6;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer5;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer4;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer3;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer2;
-        public static MemoryBuffer2D<uint, Stride2D.DenseX> uintLayer1;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer30;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer29;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer28;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer27;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer26;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer25;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer24;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer23;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer22;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer21;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer20;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer19;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer18;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer17;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer16;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer15;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer14;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer13;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer12;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer11;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer10;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer9;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer8;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer7;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer6;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer5;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer4;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer3;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer2;
+        public static MemoryBuffer1D<uint, Stride1D.Dense> uintLayer1;
 
         public static byte[,,] cubeBytes;
-        public static byte[,] HPBaseLayer;
+        public static byte[] HPBaseLayer;
         public static long HPsize;
 
         public static TimeSpan ts = new TimeSpan();
@@ -57,49 +72,82 @@ namespace MarchingCubes
         public static TimeSpan HPTraverseTime;
         public static TimeSpan HPExtractionTime;
         public static TimeSpan TotalTime;
+        public static long padding, layerCount, baseLayerSize;
 
         public static List<Point> vertices = new List<Point>();
         public static byte[,,] cubes;
+        public static int factor = 8;
+        public static int X, Y, Z;
+
         public static int count = 0;
 
-        public HistoPyramid2D(int size)
+        public static List<int> factorOpt = new List<int> { 5, 7, 6, 4, 2, 3 };
+        public static List<int> factors = new List<int>();
+
+        public AdaptiveHistoPyramidImproved(int size, bool extend = false, bool reverse = false, bool randomInit = true, int factorInit = 5)
         {
-            Console.WriteLine("HistoPyramid Flat 3D");
+            Console.WriteLine("Adaptive HistoPyramid Improved");
+            Console.WriteLine(extend ? "Extended" : "Not Extended");
+            Console.WriteLine(reverse ? "Reversed" : "Not Reversed");
+            Console.WriteLine(randomInit ? "Random Factor Initialisation" : "Fixed Size Initialised to: " + factor);
+
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
 
-            long sqfactor = ((long)Math.Sqrt(MarchingCubes.slices.Length/(width*width)));
-            long square = (long)Math.Ceiling(Math.Log(sqfactor, 2));
-            //if(square % 1 != 0)
-            //{
-            //    square++;
-            //}
-            //if (Math.Log(HPsize, 2) % 1 > 0)
-            HPsize = (long)(width * Math.Pow(2, square));
+            X = slices.GetLength(2) - 1;
+            Y = slices.GetLength(1) - 1;
+            Z = slices.GetLength(0) - 1;
+
+            HPsize = X * Y * Z;
+
+            factors = randomInit ? LayerAlg.RandomRefined(HPsize, extend) : LayerAlg.FixedRefined(HPsize, factor, extend);
+
+            long product = 1;
+            foreach (int fac in factors)
+            {
+                product *= fac;
+            }
+            HPsize = product;
+            Console.WriteLine(HPsize);
+            Console.WriteLine($"n Layers: {factors.Count}");
+            nLayers = (ushort)(factors.Count() + 1);
+
+            factors.Sort();
+            if(reverse) 
+                factors.Reverse();
+
+            foreach (int factor in factors)
+            {
+                Console.WriteLine(factor);
+            }
+
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
             //var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
 
-            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView2D<byte, Stride2D.DenseX>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int>(Assign);
-            hpFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index2D, ArrayView2D<uint, Stride2D.DenseX>, ArrayView2D<byte, Stride2D.DenseX>>(BuildHPFirst);
-            hpCreation = accelerator.LoadAutoGroupedStreamKernel<Index2D, ArrayView2D<uint, Stride2D.DenseX>, ArrayView2D<uint, Stride2D.DenseX>>(BuildHP);
-            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<FlatPoint2D, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView2D<uint, Stride2D.DenseX>>(HPTraverseKernel);
+            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D< byte, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int, int>(Assign);
+            hpFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<byte, Stride1D.Dense>, int>(BuildHPFirst);
+            hpCreation = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(BuildHP);
+            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<long, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int, int>(HPTraverseKernel);
             hpFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D,
-            ArrayView1D<FlatPoint2D, Stride1D.Dense>,
+            ArrayView1D<long, Stride1D.Dense>,
             ArrayView1D<uint, Stride1D.Dense>,
-            ArrayView2D<byte, Stride2D.DenseX>,
+            ArrayView1D<byte, Stride1D.Dense>,
             ArrayView1D<Triangle, Stride1D.Dense>,
             ArrayView3D<byte, Stride3D.DenseXY>,
             ArrayView1D<Edge, Stride1D.Dense>,
             ArrayView3D<ushort, Stride3D.DenseXY>,
-            int, int, int>(HPFinalLayer);
+            int, int, int, int, int>(HPFinalLayer);
 
             cubes = MarchingCubesGPU();
 
             HPCreationGPU();
-            Console.WriteLine("Layers: " + (nLayers - 1));
-            Console.WriteLine("Size: " + HPBaseConfig.Extent.Size);
-            Console.WriteLine("Padding: " + (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1))));
+            layerCount = nLayers - 1;
+            baseLayerSize = HPBaseConfig.Extent.Size;
+            padding = (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1)))
+            Console.WriteLine("Layers: " + layerCount);
+            Console.WriteLine("Size: " + baseLayerSize);
+            Console.WriteLine("Padding: " + padding);
 
             using (StreamWriter fs = fi.CreateText())
             {
@@ -112,42 +160,57 @@ namespace MarchingCubes
                 }
                 Console.WriteLine(count);
             }
+
+            for (i = 1; i < nLayers; i++)
+            {
+                if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
+                    getHPLayer(i).Dispose();
+            }
             accelerator.Dispose();
             context.Dispose();
 
             TotalTime = FirstPassTime + HPCreateTime + HPTraverseTime + HPExtractionTime;
         }
 
-        public static void BuildHP(Index2D index, ArrayView2D<uint, Stride2D.DenseX> HPLayer, ArrayView2D<uint, Stride2D.DenseX> HPLayerPrev)
+        public static void BuildHP(Index1D index, ArrayView1D<uint, Stride1D.Dense> HPLayer, ArrayView1D<uint, Stride1D.Dense> HPLayerPrev, int factor)
         {
-            HPLayer[index] = HPLayerPrev[index.X * 2, index.Y * 2] + HPLayerPrev[index.X * 2 + 1, index.Y * 2] + HPLayerPrev[index.X * 2 + 1, index.Y * 2 + 1] + HPLayerPrev[index.X * 2, index.Y * 2 + 1];
+            uint tempSum = 0;
+            for(int i = 0; i < factor; i++)
+                tempSum += HPLayerPrev[index * factor + i];
+            HPLayer[index] = tempSum;
         }
 
 
-        public static void BuildHPFirst(Index2D index, ArrayView2D<uint, Stride2D.DenseX> HPLayer, ArrayView2D<byte, Stride2D.DenseX> HPLayerBase)
+        public static void BuildHPFirst(Index1D index, ArrayView1D<uint, Stride1D.Dense> HPLayer, ArrayView1D<byte, Stride1D.Dense> HPLayerBase, int factor)
         {
-            HPLayer[index] = (uint)(HPLayerBase[index.X * 2, index.Y * 2] + HPLayerBase[index.X * 2 + 1, index.Y * 2] + HPLayerBase[index.X * 2 + 1, index.Y * 2 + 1] + HPLayerBase[index.X * 2, index.Y * 2 + 1]);
+            uint tempSum = 0;
+            for (int i = 0; i < factor; i++)
+                tempSum += HPLayerBase[index * factor + i];
+            HPLayer[index] = tempSum;
         }
 
         private static void HPCreationGPU()
         {
-            nLayers = (ushort)(Math.Ceiling(Math.Log(HPBaseLayer.GetLength(0), 2)) + 1);
+            //nLayers = (ushort)(Math.Ceiling(Math.Log(HPBaseConfig.Extent, factor)));
+            //if (factor < 5)                
+                //nLayers++;
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            getHPLayer(1) = accelerator.Allocate2DDenseX<uint>(new Index2D((int)HPBaseConfig.Extent.X / 2));
-            hpFirstLayer(getHPLayer(1).IntExtent, getHPLayer(1).View, HPBaseConfig.View);
+            getHPLayer(1) = accelerator.Allocate1D<uint>(new Index1D((int)HPBaseConfig.Extent / factors[0]));
+            hpFirstLayer(getHPLayer(1).IntExtent, getHPLayer(1).View, HPBaseConfig.View, factors[0]);
             accelerator.Synchronize();
-            for (int i = 2; i < 16; i++)
+            int l = getHPLayer(1).IntExtent;
+            for (int i = 2; i < nLayers; i++)
             {
-                int l = Math.Max((int)HPBaseConfig.Extent.X / (int)Math.Pow(2, i), 1);
-                if (i < nLayers)
+                l /= factors[i-1]; 
+                if (i < nLayers && l > 0)
                 {
-                    Index2D index = new Index2D(l);
-                    getHPLayer(i) = accelerator.Allocate2DDenseX<uint>(index);
+                    Index1D index = new Index1D(l);
+                    getHPLayer(i) = accelerator.Allocate1D<uint>(index);
 
-                    hpCreation(index, getHPLayer(i).View, getHPLayer(i - 1).View);
+                    hpCreation(index, getHPLayer(i).View, getHPLayer(i - 1).View, factors[i - 1]);
                     accelerator.Synchronize();
                 }
             }
@@ -161,85 +224,56 @@ namespace MarchingCubes
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
             Console.WriteLine("RunTime " + elapsedTime);
-            uint[,] data = getHPLayer(nLayers - 1).GetAsArray2D();
+            uint[] data = getHPLayer(nLayers - 1).GetAsArray1D();
             if (data.Length == 1)
-                nTri = (int)data[0, 0];
+                nTri = (int)data[0];
         }
 
-        public static void HPTraverseKernel(Index1D index, ArrayView1D<FlatPoint2D, Stride1D.Dense> p, ArrayView1D<uint, Stride1D.Dense> k, ArrayView2D<uint, Stride2D.DenseX> HPLayer)
+        public static void HPTraverseKernel(Index1D index, ArrayView1D<long, Stride1D.Dense> p, ArrayView1D<uint, Stride1D.Dense> k, ArrayView1D<uint, Stride1D.Dense> HPLayer, int factor, int nextFactor)
         {
-            uint a = HPLayer[p[index].X, p[index].Y];
-            uint b = HPLayer[p[index].X + 1, p[index].Y] + a;
-            uint c = HPLayer[p[index].X, p[index].Y + 1] + b;
-            uint d = HPLayer[p[index].X + 1, p[index].Y + 1] + c;
-            if (d == 0 || index == 16)
-                ;
-            if (k[index] < a)
-                ;
-            else if (k[index] < b)
+            uint comp = 0;
+            for(int i = 0; i < factor; i++)
             {
-                if (k[index] == a)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - a;
-                p[index].X++;
+                if(k[index] < comp + HPLayer[p[index] + i])
+                {
+                    k[index] -= comp;
+                    p[index] += i;
+                    break;
+                }
+                //if(k[index] == comp + HPLayer[p[index] + i])
+                //{
+                //    k[index] = 0;
+                //    p[index] += i;
+                //    break;
+                //}
+                comp += HPLayer[p[index] + i];
             }
-            else if (k[index] < c)
-            {
-                if (k[index] == b)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - b;
-                p[index].Y++;
-            }
-            else if (k[index] < d)
-            {
-                if (k[index] == c)
-                    k[index] = 0;
-                else
-                    k[index] = k[index] - c;
-                p[index].X++;
-                p[index].Y++;
-            }
-            k[index] = k[index];
-            p[index].X *= 2;
-            p[index].Y *= 2;
+            p[index] *= nextFactor;
         }
 
         public static void HPFinalLayer(Index1D index,
-            ArrayView1D<FlatPoint2D, Stride1D.Dense> p,
+            ArrayView1D<long, Stride1D.Dense> p,
             ArrayView1D<uint, Stride1D.Dense> k,
-            ArrayView2D<byte, Stride2D.DenseX> HPLayer,
+            ArrayView1D<byte, Stride1D.Dense> HPLayer,
             ArrayView1D<Triangle, Stride1D.Dense> triangles,
             ArrayView3D<byte, Stride3D.DenseXY> edges,
             ArrayView1D<Edge, Stride1D.Dense> triTable,
             ArrayView3D<ushort, Stride3D.DenseXY> input,
-            int thresh, int width, int HPSizeFactor)
+            int thresh, int factor, int x, int y, int z)
         {
-            uint a = HPLayer[p[index].X, p[index].Y];
-            uint b = HPLayer[p[index].X + 1, p[index].Y] + a;
-            uint c = HPLayer[p[index].X, p[index].Y + 1] + b;
-            uint d = HPLayer[p[index].X + 1, p[index].Y + 1] + c;
-            if (k[index] < a)
-                ;
-            else if (k[index] < b)
+            uint comp = 0;
+            for (int i = 0; i < factor; i++)
             {
-                k[index] = k[index] - a;
-                p[index].X++;
-            }
-            else if (k[index] < c)
-            {
-                k[index] = k[index] - b;
-                p[index].Y++;
-            }
-            else if (k[index] < d)
-            {
-                k[index] = k[index] - c;
-                p[index].X++;
-                p[index].Y++;
+                if (k[index] < comp + HPLayer[p[index] + i])
+                {
+                    k[index] -= comp;
+                    p[index] += i;
+                    break;
+                }
+                comp += HPLayer[p[index] + i];
             }
 
-            Index3D index3D = new Index3D((HPSizeFactor / width) *(int)(p[index].X / (width)) + (int)(p[index].Y / (width)), p[index].X % (width), p[index].Y % (width));
+            Index3D index3D = get3D(new Index1D((int)p[index]), new Index3D(z, y, x));
             index3D = new Index3D(index3D.Z, index3D.Y, index3D.X);
 
             Cube tempCube = new Cube(
@@ -302,7 +336,7 @@ namespace MarchingCubes
             Index1D index = new Index1D(nTri);
             uint[] karray = Enumerable.Range(0, nTri).Select(x => (uint)x).ToArray();
             MemoryBuffer1D<uint, Stride1D.Dense> k = accelerator.Allocate1D<uint>(karray);
-            MemoryBuffer1D<FlatPoint2D, Stride1D.Dense> p = accelerator.Allocate1D<FlatPoint2D>(nTri);
+            MemoryBuffer1D<long, Stride1D.Dense> p = accelerator.Allocate1D<long>(nTri);
             Triangle[] tri = new Triangle[nTri];
             PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(nTri);
             p.MemSetToZero();
@@ -312,7 +346,7 @@ namespace MarchingCubes
             stopWatch.Start();
             for (n = nLayers - 2; n > 0; n--)
             {
-                traversalKernel(index, p.View, k.View, getHPLayer(n).View);
+                traversalKernel(index, p.View, k.View, getHPLayer(n).View, factors[n], factors[n - 1]);
                 accelerator.Synchronize();
             }
 
@@ -321,7 +355,7 @@ namespace MarchingCubes
             count = 0;
 
             HPTraverseTime = ts;
-            
+
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
@@ -335,7 +369,7 @@ namespace MarchingCubes
             stopWatch.Reset();
             stopWatch.Start();
 
-            hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, thresh, (int)width, (int)HPsize);
+            hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, thresh, factors[0], X, Y, Z);
 
             accelerator.Synchronize();
             stopWatch.Stop();
@@ -343,7 +377,7 @@ namespace MarchingCubes
             count = 0;
 
             HPExtractionTime = ts;
-
+            
             elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
@@ -373,7 +407,7 @@ namespace MarchingCubes
             }
         }
 
-        public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView2D<byte, Stride2D.DenseX> HPindices, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int width, int HPsizeFator)
+        public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<byte, Stride1D.Dense> HPindices, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int x, int y, int z)
         {
             byte config = 0;
             config += (input[(index.X), (index.Y), (index.Z)] < thresh) ? (byte)0x01 : (byte)0;
@@ -385,7 +419,7 @@ namespace MarchingCubes
             config += (input[(index.X) + 1, (index.Y) + 1, (index.Z) + 1] < thresh) ? (byte)0x40 : (byte)0;
             config += (input[(index.X) + 1, (index.Y) + 1, (index.Z)] < thresh) ? (byte)0x80 : (byte)0;
             edges[index.X, index.Y, (index.Z)] = config;
-            HPindices[index.Y + width * (int)((index.X * width) / HPsizeFator), index.Z + width * (int)(index.X % (HPsizeFator / width))] = (byte)(triTable[(int)config].getn() / 3);
+            HPindices[get1D(index, new Index3D(x, y, z))] = (byte)(triTable[(int)config].getn() / 3);
         }
 
         public static byte[,,] MarchingCubesGPU()
@@ -403,15 +437,15 @@ namespace MarchingCubes
             // i+1,j+1,k+1
             // i,j+1,k+1
 
-            HPBaseLayer = new byte[HPsize, HPsize];
+            HPBaseLayer = new byte[HPsize];
 
             cubeBytes = new byte[(index.X), (index.Y), (index.Z)];
             var cubePinned = GCHandle.Alloc(cubeBytes, GCHandleType.Pinned);
             var HPPinned = GCHandle.Alloc(HPBaseLayer, GCHandleType.Pinned);
             PageLockedArray3D<byte> cubeLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(index.X, index.Y, index.Z));
-            PageLockedArray2D<byte> HPLocked = accelerator.AllocatePageLocked2D<byte>(new Index2D(HPBaseLayer.GetLength(0)));
+            PageLockedArray1D<byte> HPLocked = accelerator.AllocatePageLocked1D<byte>(new Index1D(HPBaseLayer.GetLength(0)));
             cubeConfig = accelerator.Allocate3DDenseXY<byte>(cubeLocked.Extent);
-            HPBaseConfig = accelerator.Allocate2DDenseX<byte>(HPLocked.Extent);
+            HPBaseConfig = accelerator.Allocate1D<byte>(HPLocked.Extent.Size);
             var cubeScope = accelerator.CreatePageLockFromPinned<byte>(cubePinned.AddrOfPinnedObject(), cubeBytes.Length);
             var HPScope = accelerator.CreatePageLockFromPinned<byte>(HPPinned.AddrOfPinnedObject(), HPBaseLayer.Length);
             cubeConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
@@ -420,13 +454,14 @@ namespace MarchingCubes
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            assign(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, thresh, width, (int)HPsize);
+            assign(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, thresh, index.X, index.Y, index.Z);
 
             accelerator.Synchronize();
             stopWatch.Stop();
             ts = stopWatch.Elapsed;
             cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
             cubeBytes = cubeLocked.GetArray();
+            //cubeConfig.Dispose();
             HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
             HPBaseLayer = HPLocked.GetArray();
             cubePinned.Free();
@@ -441,7 +476,7 @@ namespace MarchingCubes
             return (cubeBytes);
         }
 
-        public static ref MemoryBuffer2D<uint, Stride2D.DenseX> getHPLayer(int index)
+        public static ref MemoryBuffer1D<uint, Stride1D.Dense> getHPLayer(int index)
         {
             switch (index)
             {
@@ -475,8 +510,38 @@ namespace MarchingCubes
                     return ref uintLayer14;
                 case 15:
                     return ref uintLayer15;
+                case 16:
+                    return ref uintLayer16;
+                case 17:
+                    return ref uintLayer17;
+                case 18:
+                    return ref uintLayer18;
+                case 19:
+                    return ref uintLayer19;
+                case 20:
+                    return ref uintLayer20;
+                case 21:
+                    return ref uintLayer21;
+                case 22:
+                    return ref uintLayer22;
+                case 23:
+                    return ref uintLayer23;
+                case 24:
+                    return ref uintLayer24;
+                case 25:
+                    return ref uintLayer25;
+                case 26:
+                    return ref uintLayer26;
+                case 27:
+                    return ref uintLayer27;
+                case 28:
+                    return ref uintLayer28;
+                case 29:
+                    return ref uintLayer29;
+                case 30:
+                    return ref uintLayer30;
                 default:
-                    return ref uintLayer15;
+                    return ref uintLayer30;
             }
         }
     }
