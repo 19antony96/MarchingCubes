@@ -143,9 +143,9 @@ namespace MarchingCubes
 
             int maxValue, maxIndex, minValue, minIndex;
             int padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);
-            int tol = (int)(HPsize / 100);
+            int tol = (int)(HPsize / 20);
             int count = 0;
-            while (padding > tol || padding < 0)
+            while ( padding < 0 || (padding > tol  && count < 100))
             {
                 if (padding > 0)
                 {
@@ -157,7 +157,7 @@ namespace MarchingCubes
                 {
                     minValue = factors.Min();
                     minIndex = factors.ToList().IndexOf(minValue);
-                    factors[minIndex]--;
+                    factors[minIndex]++;
                 }
 
                 padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);

@@ -89,7 +89,7 @@ namespace MarchingCubes
             Console.WriteLine("Adaptive HistoPyramid Improved");
             Console.WriteLine(extend ? "Extended" : "Not Extended");
             Console.WriteLine(reverse ? "Reversed" : "Not Reversed");
-            Console.WriteLine(randomInit ? "Random Factor Initialisation" : "Fixed Size Initialised to: " + factor);
+            Console.WriteLine(randomInit ? "Random Factor Initialisation" : "Fixed Size Initialised to: " + factorInit);
 
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
@@ -100,7 +100,7 @@ namespace MarchingCubes
 
             HPsize = X * Y * Z;
 
-            factors = randomInit ? LayerAlg.RandomRefined(HPsize, extend) : LayerAlg.FixedRefined(HPsize, factor, extend);
+            factors = randomInit ? LayerAlg.RandomRefined(HPsize, extend) : LayerAlg.FixedRefined(HPsize, factorInit, extend);
 
             long product = 1;
             foreach (int fac in factors)

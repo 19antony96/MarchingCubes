@@ -59,7 +59,7 @@ namespace MarchingCubes
                 //Console.WriteLine("--------------------------------------------------------------------------------");
                 //MarchingCubes.SetValues(ds, "GPU");
                 //NaiveGPU run2 = new NaiveGPU(25);
-                Console.WriteLine("--------------------------------------------------------------------------------");
+                //Console.WriteLine("--------------------------------------------------------------------------------");
                 for (int i = 4; i < 12; i++)
                 {
                     int s = i;
@@ -81,9 +81,9 @@ namespace MarchingCubes
                         OldAvg = (RunningAvg.Ticks * j / n);
                         RunningAvg += TimeSpan.FromTicks(HistoPyramidGeneric.TotalTime.Ticks / n);
                         RunningVariance = TimeSpan.FromTicks((long)((n / (n + 1)) * (RunningVariance.Ticks + ((Math.Pow(OldAvg - HistoPyramidGeneric.TotalTime.Ticks, 2) / n) + 1))));
-                        if(!(MaxTime == TimeSpan.Zero))
+                        if (!(MaxTime == TimeSpan.Zero))
                         {
-                            MaxTime = MaxTime > HistoPyramidGeneric.TotalTime ? MaxTime : HistoPyramidGeneric.TotalTime; 
+                            MaxTime = MaxTime > HistoPyramidGeneric.TotalTime ? MaxTime : HistoPyramidGeneric.TotalTime;
                         }
                         else
                         {
@@ -119,7 +119,7 @@ namespace MarchingCubes
                         , "HP Creation Avg Time: " + TimeSpan.FromTicks(HPCreateTime.Ticks / n)
                         , "HP Traversal Avg Time: " + TimeSpan.FromTicks(HPTraverseTime.Ticks / n)
                         , "HP Extraction Avg Time: " + TimeSpan.FromTicks(HPExtractionTime.Ticks / n)
-                        , "Total Avg Time: " + TimeSpan.FromTicks(TotalTime.Ticks / n) 
+                        , "Total Avg Time: " + TimeSpan.FromTicks(TotalTime.Ticks / n)
                         , "Variance: " + RunningVariance
                         , "Max Time: " + MaxTime
                         , "Min Time: " + MinTime
@@ -300,7 +300,7 @@ namespace MarchingCubes
                     baseLayerSize = 0;
                 }
 
-                for (int p = 0; p < 4; p++)
+                for (int p = 0; p < 5; p++)
                 {
                     bool extend = p % 2 == 0;
                     bool reverse = (p >> 1) % 2 == 0;
