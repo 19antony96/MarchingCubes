@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 
 namespace MarchingCubes
 {
-    class AdaptiveHistoPyramidImproved: MarchingCubes
+    class AdaptiveHistoPyramidDecision: MarchingCubes
     {
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int, int> assign;
         public static Action<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<byte, Stride1D.Dense>, int> hpFirstLayer;
@@ -72,7 +72,7 @@ namespace MarchingCubes
         public static TimeSpan HPTraverseTime;
         public static TimeSpan HPExtractionTime;
         public static TimeSpan TotalTime;
-        public static long padding, layerCount, baseLayerSize, volume, active_nh, n_triangle, avg_layer_size, range_layer_size;
+        public static long padding, layerCount, baseLayerSize, volume, active_nh, n_triangle;
 
         public static List<Point> vertices = new List<Point>();
         public static byte[,,] cubes;
@@ -84,7 +84,7 @@ namespace MarchingCubes
         public static List<int> factorOpt = new List<int> { 5, 7, 6, 4, 2, 3 };
         public static List<int> factors = new List<int>();
 
-        public AdaptiveHistoPyramidImproved(int size, bool extend = false, bool reverse = false, bool randomSel = false, bool randomInit = true, int factorInit = 5)
+        public AdaptiveHistoPyramidDecision(int size, bool extend = false, bool reverse = false, bool randomSel = false, bool randomInit = true, int factorInit = 5)
         {
             //Console.WriteLine("Adaptive HistoPyramid Improved");
             //Console.WriteLine(extend ? "Extended" : "Not Extended");
@@ -99,10 +99,25 @@ namespace MarchingCubes
             Z = slices.GetLength(0) - 1;
 
             HPsize = X * Y * Z;
+            Dictionary<int, int> sizes = new Dictionary<int, int>();
+            for (int r = 4; r < size; r++)
+            {
+                if (Math.Log(X * Y * Z, r) % 1 > 0)
+                {
+                    sizes.Add(r, (int)Math.Pow(r, (int)Math.Log(X * Y * Z - 1, r) + 1));
+                }
+            }
 
-            volume = HPsize;
+            Dictionary<int, int> best_fits = sizes.Where(x => x.Value == sizes.Values.Min()).ToDictionary(x => x.Key, x => x.Value);
 
-            factors = randomInit ? LayerAlg.RandomRefined(HPsize, extend) : LayerAlg.FixedRefined(HPsize, factorInit, extend);
+            factor = best_fits.Keys.Max();
+            HPsize = best_fits.Values.First();
+
+            factor = size;
+            Console.WriteLine($"Adaptive HistoPyramid Decision {factor}");
+
+
+            factors = LayerAlg.FixedRefined(HPsize, factorInit, extend);
 
             long product = 1;
             foreach (int fac in factors)
@@ -122,9 +137,6 @@ namespace MarchingCubes
             {
                 //Console.WriteLine(factor);
             }
-
-            avg_layer_size = (long)factors.Average();
-            range_layer_size = factors.Max() - factors.Min();
 
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));

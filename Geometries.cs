@@ -94,7 +94,7 @@ namespace MarchingCubes
             //    x = 0;
             //if (x > 0.999)
             //    x = 1;
-            x = 0.5f;
+            //x = 0.5f; // for midpoint no interpolation
 
             Point vertex = this + (other - this) * x;
 

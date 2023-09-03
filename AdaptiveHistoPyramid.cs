@@ -86,10 +86,10 @@ namespace MarchingCubes
 
         public AdaptiveHistoPyramid(int size, bool extend = false, bool reverse = false, bool byDim = false)
         {
-            Console.WriteLine("Adaptive HistoPyramid");
-            Console.WriteLine(extend ? "Extended" : "Not Extended");
-            Console.WriteLine(reverse ? "Reversed" : "Not Reversed");
-            Console.WriteLine(byDim ? "Divided by Dimension" : "Flat Division");
+            //Console.WriteLine("Adaptive HistoPyramid");
+            //Console.WriteLine(extend ? "Extended" : "Not Extended");
+            //Console.WriteLine(reverse ? "Reversed" : "Not Reversed");
+            //Console.WriteLine(byDim ? "Divided by Dimension" : "Flat Division");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
 
@@ -107,8 +107,8 @@ namespace MarchingCubes
                 product *= fac;
             }
             HPsize = product;
-            Console.WriteLine(HPsize);
-            Console.WriteLine($"n Layers: {factors.Count}");
+            //Console.WriteLine(HPsize);
+            //Console.WriteLine($"n Layers: {factors.Count}");
             nLayers = (ushort)(factors.Count() + 1);
 
             factors.Sort();
@@ -117,57 +117,65 @@ namespace MarchingCubes
 
             foreach (int factor in factors)
             {
-                Console.WriteLine(factor);
+                //Console.WriteLine(factor);
             }
 
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
             //var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
 
-            assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D< byte, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int, int>(Assign);
-            hpFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<byte, Stride1D.Dense>, int>(BuildHPFirst);
-            hpCreation = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(BuildHP);
-            traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<long, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int, int>(HPTraverseKernel);
-            hpFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D,
-            ArrayView1D<long, Stride1D.Dense>,
-            ArrayView1D<uint, Stride1D.Dense>,
-            ArrayView1D<byte, Stride1D.Dense>,
-            ArrayView1D<Triangle, Stride1D.Dense>,
-            ArrayView3D<byte, Stride3D.DenseXY>,
-            ArrayView1D<Edge, Stride1D.Dense>,
-            ArrayView3D<ushort, Stride3D.DenseXY>,
-            int, int, int, int, int>(HPFinalLayer);
-
-            cubes = MarchingCubesGPU();
-
-            HPCreationGPU();
-            layerCount = nLayers - 1;
-            baseLayerSize = HPBaseConfig.Extent.Size;
-            padding = (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1)));
-            Console.WriteLine("Layers: " + layerCount);
-            Console.WriteLine("Size: " + baseLayerSize);
-            Console.WriteLine("Padding: " + padding);
-
-            using (StreamWriter fs = fi.CreateText())
+            try
             {
-                HPTraversalGPU(fs);
+                assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int, int>(Assign);
+                hpFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<byte, Stride1D.Dense>, int>(BuildHPFirst);
+                hpCreation = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(BuildHP);
+                traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<long, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int, int>(HPTraverseKernel);
+                hpFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D,
+                ArrayView1D<long, Stride1D.Dense>,
+                ArrayView1D<uint, Stride1D.Dense>,
+                ArrayView1D<byte, Stride1D.Dense>,
+                ArrayView1D<Triangle, Stride1D.Dense>,
+                ArrayView3D<byte, Stride3D.DenseXY>,
+                ArrayView1D<Edge, Stride1D.Dense>,
+                ArrayView3D<ushort, Stride3D.DenseXY>,
+                int, int, int, int, int>(HPFinalLayer);
 
-                int f = 0;
-                for (f = 1; f < count - 1; f += 3)
+                cubes = MarchingCubesGPU();
+
+                HPCreationGPU();
+                layerCount = nLayers - 1;
+                baseLayerSize = HPBaseConfig.Extent.Size;
+                padding = (HPBaseConfig.Extent.Size - ((slices.GetLength(0) - 1) * (slices.GetLength(1) - 1) * (slices.GetLength(2) - 1)));
+                //Console.WriteLine("Layers: " + layerCount);
+                //Console.WriteLine("Size: " + baseLayerSize);
+                //Console.WriteLine("Padding: " + padding);
+
+                using (StreamWriter fs = fi.CreateText())
                 {
-                    fs.WriteLine("f " + f + " " + (f + 1) + " " + (f + 2));
+                    HPTraversalGPU(fs);
+
+                    int f = 0;
+                    for (f = 1; f < count - 1; f += 3)
+                    {
+                        fs.WriteLine("f " + f + " " + (f + 1) + " " + (f + 2));
+                    }
+                    //Console.WriteLine(count);
                 }
-                Console.WriteLine(count);
             }
-
-            for (i = 1; i < nLayers; i++)
+            catch (Exception ex)
             {
-                if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
-                    getHPLayer(i).Dispose();
-            }
-            accelerator.Dispose();
-            context.Dispose();
 
+            }
+            finally
+            {
+                for (i = 1; i < nLayers; i++)
+                {
+                    if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
+                        getHPLayer(i).Dispose();
+                }
+                accelerator.Dispose();
+                context.Dispose();
+            }
             TotalTime = FirstPassTime + HPCreateTime + HPTraverseTime + HPExtractionTime;
         }
 
@@ -222,7 +230,7 @@ namespace MarchingCubes
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
-            Console.WriteLine("RunTime " + elapsedTime);
+            //Console.WriteLine("RunTime " + elapsedTime);
             uint[] data = getHPLayer(nLayers - 1).GetAsArray1D();
             if (data.Length == 1)
                 nTri = (int)data[0];
@@ -333,77 +341,89 @@ namespace MarchingCubes
             int n;
 
             Index1D index = new Index1D(nTri);
+            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(1);
             uint[] karray = Enumerable.Range(0, nTri).Select(x => (uint)x).ToArray();
             MemoryBuffer1D<uint, Stride1D.Dense> k = accelerator.Allocate1D<uint>(karray);
             MemoryBuffer1D<long, Stride1D.Dense> p = accelerator.Allocate1D<long>(nTri);
+
             Triangle[] tri = new Triangle[nTri];
-            PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(nTri);
             p.MemSetToZero();
             accelerator.Synchronize();
 
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            for (n = nLayers - 2; n > 0; n--)
+            try
             {
-                traversalKernel(index, p.View, k.View, getHPLayer(n).View, factors[n], factors[n - 1]);
+
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
+                for (n = nLayers - 2; n > 0; n--)
+                {
+                    traversalKernel(index, p.View, k.View, getHPLayer(n).View, factors[n], factors[n - 1]);
+                    accelerator.Synchronize();
+                }
+
+                stopWatch.Stop();
+                ts = stopWatch.Elapsed;
+                count = 0;
+
+                HPTraverseTime = ts;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
+                    ts.Hours, ts.Minutes, ts.Seconds,
+                    ts.TotalMilliseconds * 10000);
+                //Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
+                for (int i = 1; i < nLayers; i++)
+                {
+                    if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
+                        getHPLayer(i).Dispose();
+                }
+
+                triConfig = accelerator.Allocate1D<Triangle>(nTri);
+                stopWatch.Reset();
+                stopWatch.Start();
+
+                hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, thresh, factors[0], X, Y, Z);
+
                 accelerator.Synchronize();
+                stopWatch.Stop();
+                ts = stopWatch.Elapsed;
+                count = 0;
+
+                HPExtractionTime = ts;
+
+                elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
+                    ts.Hours, ts.Minutes, ts.Seconds,
+                    ts.TotalMilliseconds * 10000);
+                //Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
+
             }
-
-            stopWatch.Stop();
-            ts = stopWatch.Elapsed;
-            count = 0;
-
-            HPTraverseTime = ts;
-
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.TotalMilliseconds * 10000);
-            Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
-            for (int i = 1; i < nLayers; i++)
+            catch (Exception ex)
             {
-                if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
-                    getHPLayer(i).Dispose();
+
             }
-            MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(nTri);
-            stopWatch.Reset();
-            stopWatch.Start();
-
-            hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, thresh, factors[0], X, Y, Z);
-
-            accelerator.Synchronize();
-            stopWatch.Stop();
-            ts = stopWatch.Elapsed;
-            count = 0;
-
-            HPExtractionTime = ts;
-            
-            elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.TotalMilliseconds * 10000);
-            Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
-
-
-            triConfig.View.CopyToPageLockedAsync(triLocked);
-            accelerator.Synchronize();
-            tri = triLocked.GetArray();
-            triConfig.Dispose();
-            cubeConfig.Dispose();
-            sliced.Dispose();
-            k.Dispose();
-            p.Dispose();
-            triTable.Dispose();
-            HPBaseConfig.Dispose();
-
-            foreach (var triangle in tri)
+            finally
             {
-                fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
-                fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
-                fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
-                fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
-                fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
-                fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
-                count += 3;
+                //triConfig.View.CopyToPageLockedAsync(triLocked);
+                //accelerator.Synchronize();
+                //tri = triLocked.GetArray();
+                triConfig.Dispose();
+                cubeConfig.Dispose();
+                sliced.Dispose();
+                k.Dispose();
+                p.Dispose();
+                triTable.Dispose();
+                HPBaseConfig.Dispose();
             }
+
+            //foreach (var triangle in tri)
+            //{
+            //    fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
+            //    fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
+            //    fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
+            //    fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
+            //    fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
+            //    fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
+            //    count += 3;
+            //}
         }
 
         public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<byte, Stride1D.Dense> HPindices, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int x, int y, int z)
@@ -441,38 +461,52 @@ namespace MarchingCubes
             cubeBytes = new byte[(index.X), (index.Y), (index.Z)];
             var cubePinned = GCHandle.Alloc(cubeBytes, GCHandleType.Pinned);
             var HPPinned = GCHandle.Alloc(HPBaseLayer, GCHandleType.Pinned);
-            PageLockedArray3D<byte> cubeLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(index.X, index.Y, index.Z));
-            PageLockedArray1D<byte> HPLocked = accelerator.AllocatePageLocked1D<byte>(new Index1D(HPBaseLayer.GetLength(0)));
-            cubeConfig = accelerator.Allocate3DDenseXY<byte>(cubeLocked.Extent);
-            HPBaseConfig = accelerator.Allocate1D<byte>(HPLocked.Extent.Size);
-            var cubeScope = accelerator.CreatePageLockFromPinned<byte>(cubePinned.AddrOfPinnedObject(), cubeBytes.Length);
-            var HPScope = accelerator.CreatePageLockFromPinned<byte>(HPPinned.AddrOfPinnedObject(), HPBaseLayer.Length);
-            cubeConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
-            HPBaseConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, HPScope);
+            try
+            {
+                PageLockedArray3D<byte> cubeLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(index.X, index.Y, index.Z));
+                PageLockedArray1D<byte> HPLocked = accelerator.AllocatePageLocked1D<byte>(new Index1D(HPBaseLayer.GetLength(0)));
+                cubeConfig = accelerator.Allocate3DDenseXY<byte>(cubeLocked.Extent);
+                HPBaseConfig = accelerator.Allocate1D<byte>(HPLocked.Extent.Size);
+                var cubeScope = accelerator.CreatePageLockFromPinned<byte>(cubePinned.AddrOfPinnedObject(), cubeBytes.Length);
+                var HPScope = accelerator.CreatePageLockFromPinned<byte>(HPPinned.AddrOfPinnedObject(), HPBaseLayer.Length);
+                cubeConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, cubeScope);
+                HPBaseConfig.AsContiguous().CopyFromPageLockedAsync(accelerator.DefaultStream, HPScope);
 
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
 
-            assign(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, thresh, index.X, index.Y, index.Z);
+                assign(index, cubeConfig.View, HPBaseConfig.View, sliced.View, triTable.View, thresh, index.X, index.Y, index.Z);
 
-            accelerator.Synchronize();
-            stopWatch.Stop();
-            ts = stopWatch.Elapsed;
-            cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
-            cubeBytes = cubeLocked.GetArray();
-            //cubeConfig.Dispose();
-            HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
-            HPBaseLayer = HPLocked.GetArray();
-            cubePinned.Free();
-            HPPinned.Free();
+                accelerator.Synchronize();
+                stopWatch.Stop();
+                ts = stopWatch.Elapsed;
+                cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
+                cubeBytes = cubeLocked.GetArray();
+                //cubeConfig.Dispose();
+                HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
+                HPBaseLayer = HPLocked.GetArray();
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+                cubePinned.Free();
+                HPPinned.Free();
+            }
 
             FirstPassTime = ts;
 
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
-            Console.WriteLine("RunTime " + elapsedTime);
+            //Console.WriteLine("RunTime " + elapsedTime);
             return (cubeBytes);
+        }
+
+        public static void DisposeAll()
+        {
         }
 
         public static ref MemoryBuffer1D<uint, Stride1D.Dense> getHPLayer(int index)

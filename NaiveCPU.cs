@@ -29,13 +29,24 @@ namespace MarchingCubes
         public static byte[,,] cubeBytes;
 
         public static TimeSpan ts = new TimeSpan();
-
         public static List<Point> vertices = new List<Point>();
+        public static TimeSpan FirstPassTime;
+        public static TimeSpan ExtractionTime;
+        public static TimeSpan TotalTime;
         public static byte[,,] cubes;
         public static int count = 0;
+        public static int maxX = 0, maxY = 0, maxZ = 0;
+        public static int minX = int.MaxValue, minY = int.MaxValue, minZ = int.MaxValue;
 
         public NaiveCPU(int size)
         {
+            vertices = new List<Point>();
+            maxX = 0;
+            maxY = 0;
+            maxZ = 0;
+            minX = int.MaxValue;
+            minY = int.MaxValue;
+            minZ = int.MaxValue;
             Console.WriteLine("CPU");
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
@@ -48,7 +59,7 @@ namespace MarchingCubes
                 int f = 0;
                 for (f = 1; f < count - 1; f += 3)
                 {
-                    fs.WriteLine("f " + f + " " + (f + 1) + " " + (f + 2));
+                    //fs.WriteLine("f " + f + " " + (f + 1) + " " + (f + 2));
                 }
                 Console.WriteLine(count);
             }
@@ -56,7 +67,7 @@ namespace MarchingCubes
 
         private static byte[,,] MarchingCubesCPU()
         {
-            cubeBytes = new byte[(slices.GetLength(0) - 1), (width - 1), (length - 1)];
+            cubeBytes = new byte[(slices.GetLength(0) - 1), (length - 1), (width - 1)];
             byte cubeByte;
 
             //bit order 
@@ -100,6 +111,7 @@ namespace MarchingCubes
             }
             stopWatch.Stop();
             ts += stopWatch.Elapsed;
+            FirstPassTime = ts;
 
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
@@ -121,8 +133,8 @@ namespace MarchingCubes
                 {
                     for (j = 0; j < slices.GetLength(1) - 1; j++)
                     {
-                        //if (cubes[k, j, i] != 0 && cubes[k, j, i] != byte.MaxValue)
-                        //{
+                        if (cubes[k, j, i] != 0 && cubes[k, j, i] != byte.MaxValue)
+                        {
                             Cube tempCube = new Cube(
                                 new Point(i, j, k, slices[k, j, i],
                                 new Normal(
@@ -180,11 +192,13 @@ namespace MarchingCubes
                             {
                                 vertices.Add(vertex);
                             }
-                        //}
+                        }
                     }
                 }
             }
             ts = stopWatch.Elapsed;
+
+            ExtractionTime = ts;
 
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                 ts.Hours, ts.Minutes, ts.Seconds,
@@ -192,8 +206,16 @@ namespace MarchingCubes
             Console.WriteLine("RunTime " + elapsedTime);
             foreach (var vertex in vertices)
             {
-                fs.WriteLine("v " + vertex.X + " " + vertex.Y + " " + vertex.Z);
-                fs.WriteLine("vn " + -vertex.normal.X + " " + -vertex.normal.Y + " " + -vertex.normal.Z);
+                //    fs.WriteLine("v " + vertex.X + " " + vertex.Y + " " + vertex.Z);
+                //    fs.WriteLine("vn " + -vertex.normal.X + " " + -vertex.normal.Y + " " + -vertex.normal.Z);
+
+                maxX = (int)Math.Max(maxX, vertex.X);
+                maxY = (int)Math.Max(maxY, vertex.Y);
+                maxZ = (int)Math.Max(maxZ, vertex.Z);
+                minX = (int)Math.Min(minX, vertex.X);
+                minY = (int)Math.Min(minY, vertex.Y);
+                minZ = (int)Math.Min(minZ, vertex.Z);
+                
                 count++;
 
             }

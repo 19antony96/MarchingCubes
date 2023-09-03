@@ -4,14 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace MarchingCubes
 {
     public static class LayerAlg
     {
         //public static List<int> factorOpt = new List<int> { 5, 6, 7, 8, 4, 2, 3 };
         //public static List<int> stdFactorOpt = new List<int> { 4, 8, 6, 7, 5, 3, 2 };
-        public static List<int> stdFactorOpt = new List<int> { 2, 3, 5, 6, 7, 8, 4 };
-        public static List<int> xtdFactorOpt = new List<int> { 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+        //public static List<int> stdFactorOpt = new List<int> { 5, 6, 7, 8, 4 };
+        public static List<int> xtdFactorOpt = new List<int> { 16, 15, 14, 13, 12, 11, 10, 9, 8 };
+        public static List<int> stdFactorOpt = new List<int> { 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5 };
         //public static List<int> xtdFactorOpt = new List<int> { 2, 3, 5, 6, 8, 7, 6, 5, 4, 3, 2 };
         //public static List<int> factorOpt = new List<int> { 23, 17, 13, 11, 8, 7, 6, 5, 4, 3, 2 };
 
@@ -107,19 +109,19 @@ namespace MarchingCubes
             int padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);
             int tol = (int)(HPsize / 100);
             int count = 0;
-            while (padding > tol || padding < 0)
+            while (padding < 0 || (padding > tol && count < 100))
             {
                 if(padding > 0)
                 {
-                    maxValue = factors.Max();
-                    maxIndex = factors.ToList().IndexOf(maxValue);
-                    factors[maxIndex]--;
+                    minValue = factors.Where(x => x > factorOpt.Min()).Min();
+                    minIndex = factors.ToList().IndexOf(minValue);
+                    factors[minIndex]--;
                 }
                 else
                 {
-                    minValue = factors.Min();
-                    minIndex = factors.ToList().IndexOf(minValue);
-                    factors[minIndex]--;
+                    maxValue = factors.Where(x => x < factorOpt.Max()).Max();
+                    maxIndex = factors.ToList().IndexOf(maxValue);
+                    factors[maxIndex]++;
                 }
                 padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);
                 count++;
@@ -127,6 +129,45 @@ namespace MarchingCubes
             Console.WriteLine("Process required " + count + "Iterations");
             return factors;
         }
+
+        public static List<int> TrueRandom(long HPsize, bool extend)
+        {
+            Random random = new Random();
+            stdFactorOpt.Reverse();
+            List<int> factors = new List<int>();
+            List<int> factorOpt = extend ? xtdFactorOpt : stdFactorOpt;
+            long LayerSize = HPsize;
+            for (int nLayers = 0; LayerSize > 1; nLayers++)
+            {
+                int index = random.Next(0, factorOpt.Count());
+                int temp = factorOpt[index];
+                //Console.WriteLine(temp);
+                factors.Add(temp);
+                LayerSize = (int)Math.Ceiling((double)LayerSize / (double)temp);
+            }
+
+            int randIndex;
+            int padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);
+            int tol = (int)(HPsize / 100);
+            int count = 0;
+            while (padding < 0 || (padding > tol && count < 100))
+            {
+                randIndex = random.Next(0, factors.Count());
+                if (padding > 0)
+                {
+                    factors[randIndex]--;
+                }
+                else
+                {
+                    factors[randIndex]++;
+                }
+                padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);
+                count++;
+            }
+            Console.WriteLine("Process required " + count + "Iterations");
+            return factors;
+        }
+
         public static List<int> FixedRefined(long HPsize, int factor, bool extend)
         {
             Random random = new Random();
@@ -143,23 +184,59 @@ namespace MarchingCubes
 
             int maxValue, maxIndex, minValue, minIndex;
             int padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);
-            int tol = (int)(HPsize / 20);
+            int tol = (int)(HPsize / 100);
             int count = 0;
-            while ( padding < 0 || (padding > tol  && count < 100))
+            while (padding < 0 || (padding > tol && count < 100))
             {
                 if (padding > 0)
                 {
-                    maxValue = factors.Max();
-                    maxIndex = factors.ToList().IndexOf(maxValue);
-                    factors[maxIndex]--;
+                    minValue = factors.Where(x => x > factor - (factor / 2)).Min();
+                    minIndex = factors.ToList().IndexOf(minValue);
+                    factors[minIndex]--;
                 }
                 else
                 {
-                    minValue = factors.Min();
-                    minIndex = factors.ToList().IndexOf(minValue);
-                    factors[minIndex]++;
+                    maxValue = factors.Where(x => x < factor + (factor / 2)).Max();
+                    maxIndex = factors.ToList().IndexOf(maxValue);
+                    factors[maxIndex]++;
                 }
 
+                padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);
+                count++;
+            }
+            Console.WriteLine("Process required " + count + "Iterations");
+            return factors;
+        }
+
+        public static List<int> FixedRandomSelection(long HPsize, int factor, bool extend)
+        {
+            Random random = new Random();
+            stdFactorOpt.Reverse();
+            List<int> factors = new List<int>();
+            List<int> factorOpt = extend ? xtdFactorOpt : stdFactorOpt;
+            long LayerSize = HPsize;
+            for (int nLayers = 0; LayerSize > 1; nLayers++)
+            {
+                //Console.WriteLine(temp);
+                factors.Add(factor);
+                LayerSize = (int)Math.Ceiling((double)LayerSize / (double)factor);
+            }
+
+            int randIndex;
+            int padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);
+            int tol = (int)(HPsize / 100);
+            int count = 0;
+            while (padding < 0 || (padding > tol && count < 100))
+            {
+                randIndex = random.Next(0, factors.Count());
+                if (padding > 0)
+                {
+                    factors[randIndex]--;
+                }
+                else
+                {
+                    factors[randIndex]++;
+                }
                 padding = (int)(factors.Aggregate(1, (a, b) => a * b) - HPsize);
                 count++;
             }

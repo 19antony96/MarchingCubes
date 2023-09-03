@@ -10,12 +10,12 @@ using System.Runtime.InteropServices;
 
 namespace MarchingCubes
 {
-    class AdaptiveHistoPyramidImproved: MarchingCubes
+    class HistoPyramidGenericDecision : MarchingCubes
     {
         public static Action<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int, int> assign;
         public static Action<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<byte, Stride1D.Dense>, int> hpFirstLayer;
         public static Action<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> hpCreation;
-        public static Action<Index1D, ArrayView1D<long, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int, int> traversalKernel;
+        public static Action<Index1D, ArrayView1D<long, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int> traversalKernel;
         public static Action<Index1D,
             ArrayView1D<long, Stride1D.Dense>,
             ArrayView1D<uint, Stride1D.Dense>,
@@ -72,7 +72,7 @@ namespace MarchingCubes
         public static TimeSpan HPTraverseTime;
         public static TimeSpan HPExtractionTime;
         public static TimeSpan TotalTime;
-        public static long padding, layerCount, baseLayerSize, volume, active_nh, n_triangle, avg_layer_size, range_layer_size;
+        public static long padding, layerCount, baseLayerSize;
 
         public static List<Point> vertices = new List<Point>();
         public static byte[,,] cubes;
@@ -81,16 +81,8 @@ namespace MarchingCubes
 
         public static int count = 0;
 
-        public static List<int> factorOpt = new List<int> { 5, 7, 6, 4, 2, 3 };
-        public static List<int> factors = new List<int>();
-
-        public AdaptiveHistoPyramidImproved(int size, bool extend = false, bool reverse = false, bool randomSel = false, bool randomInit = true, int factorInit = 5)
+        public HistoPyramidGenericDecision(int size)
         {
-            //Console.WriteLine("Adaptive HistoPyramid Improved");
-            //Console.WriteLine(extend ? "Extended" : "Not Extended");
-            //Console.WriteLine(reverse ? "Reversed" : "Not Reversed");
-            //Console.WriteLine(randomInit ? "Random Factor Initialisation" : "Fixed Size Initialised to: " + factorInit);
-
             ushort i = 0;
             FileInfo fi = CreateVolume(size);
 
@@ -99,43 +91,32 @@ namespace MarchingCubes
             Z = slices.GetLength(0) - 1;
 
             HPsize = X * Y * Z;
-
-            volume = HPsize;
-
-            factors = randomInit ? LayerAlg.RandomRefined(HPsize, extend) : LayerAlg.FixedRefined(HPsize, factorInit, extend);
-
-            long product = 1;
-            foreach (int fac in factors)
+            Dictionary<int, int> sizes = new Dictionary<int, int>();
+            for (int r = 4; r < size; r++)
             {
-                product *= fac;
-            }
-            HPsize = product;
-            //Console.WriteLine(HPsize);
-            //Console.WriteLine($"n Layers: {factors.Count}");
-            nLayers = (ushort)(factors.Count() + 1);
-
-            factors.Sort();
-            if(reverse) 
-                factors.Reverse();
-
-            foreach (int factor in factors)
-            {
-                //Console.WriteLine(factor);
+                if (Math.Log(X * Y * Z, r) % 1 > 0)
+                {
+                    sizes.Add(r, (int)Math.Pow(r, (int)Math.Log(X * Y * Z - 1, r) + 1));
+                }
             }
 
-            avg_layer_size = (long)factors.Average();
-            range_layer_size = factors.Max() - factors.Min();
+            Dictionary<int, int> best_fits = sizes.Where(x => x.Value == sizes.Values.Min()).ToDictionary(x => x.Key, x => x.Value);
+
+            factor = best_fits.Keys.Max();
+            HPsize = best_fits.Values.First();
+
+            factor = size;
+            Console.WriteLine($"HistoPyramid Generic Decision {factor}");
 
             //var s = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Triangle));
             //var p = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Point));
             //var n = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Normal));
             try
             {
-
                 assign = accelerator.LoadAutoGroupedStreamKernel<Index3D, ArrayView3D<byte, Stride3D.DenseXY>, ArrayView1D<byte, Stride1D.Dense>, ArrayView3D<ushort, Stride3D.DenseXY>, ArrayView<Edge>, int, int, int, int>(Assign);
                 hpFirstLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<byte, Stride1D.Dense>, int>(BuildHPFirst);
                 hpCreation = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(BuildHP);
-                traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<long, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int, int>(HPTraverseKernel);
+                traversalKernel = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<long, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, ArrayView1D<uint, Stride1D.Dense>, int>(HPTraverseKernel);
                 hpFinalLayer = accelerator.LoadAutoGroupedStreamKernel<Index1D,
                 ArrayView1D<long, Stride1D.Dense>,
                 ArrayView1D<uint, Stride1D.Dense>,
@@ -168,19 +149,22 @@ namespace MarchingCubes
                     //Console.WriteLine(count);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
-            for (i = 1; i < nLayers; i++)
+            finally
             {
-                if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
-                    getHPLayer(i).Dispose();
+                for (i = 1; i < nLayers; i++)
+                {
+                    if (getHPLayer(i) != null && !getHPLayer(i).IsDisposed)
+                        getHPLayer(i).Dispose();
+                }
+                accelerator.Dispose();
+                context.Dispose();
             }
-            accelerator.Dispose();
-            context.Dispose();
-
             TotalTime = FirstPassTime + HPCreateTime + HPTraverseTime + HPExtractionTime;
+            sliced.Dispose();
         }
 
         public static void BuildHP(Index1D index, ArrayView1D<uint, Stride1D.Dense> HPLayer, ArrayView1D<uint, Stride1D.Dense> HPLayerPrev, int factor)
@@ -202,26 +186,26 @@ namespace MarchingCubes
 
         private static void HPCreationGPU()
         {
-            //nLayers = (ushort)(Math.Ceiling(Math.Log(HPBaseConfig.Extent, factor)));
+            nLayers = (ushort)(Math.Ceiling(Math.Log(HPBaseConfig.Extent, factor)));
             //if (factor < 5)                
-                //nLayers++;
+                nLayers++;
 
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            getHPLayer(1) = accelerator.Allocate1D<uint>(new Index1D((int)HPBaseConfig.Extent / factors[0]));
-            hpFirstLayer(getHPLayer(1).IntExtent, getHPLayer(1).View, HPBaseConfig.View, factors[0]);
+            getHPLayer(1) = accelerator.Allocate1D<uint>(new Index1D((int)HPBaseConfig.Extent / factor));
+            hpFirstLayer(getHPLayer(1).IntExtent, getHPLayer(1).View, HPBaseConfig.View, factor);
             accelerator.Synchronize();
             int l = getHPLayer(1).IntExtent;
             for (int i = 2; i < nLayers; i++)
             {
-                l /= factors[i-1]; 
+                l /= factor; 
                 if (i < nLayers && l > 0)
                 {
                     Index1D index = new Index1D(l);
                     getHPLayer(i) = accelerator.Allocate1D<uint>(index);
 
-                    hpCreation(index, getHPLayer(i).View, getHPLayer(i - 1).View, factors[i - 1]);
+                    hpCreation(index, getHPLayer(i).View, getHPLayer(i - 1).View, factor);
                     accelerator.Synchronize();
                 }
             }
@@ -235,12 +219,16 @@ namespace MarchingCubes
                 ts.Hours, ts.Minutes, ts.Seconds,
                 ts.TotalMilliseconds * 10000);
             //Console.WriteLine("RunTime " + elapsedTime);
+            if(getHPLayer(nLayers - 1) == null || getHPLayer(nLayers - 1).Extent < 1)
+            {
+                nLayers--;
+            }
             uint[] data = getHPLayer(nLayers - 1).GetAsArray1D();
             if (data.Length == 1)
                 nTri = (int)data[0];
         }
 
-        public static void HPTraverseKernel(Index1D index, ArrayView1D<long, Stride1D.Dense> p, ArrayView1D<uint, Stride1D.Dense> k, ArrayView1D<uint, Stride1D.Dense> HPLayer, int factor, int nextFactor)
+        public static void HPTraverseKernel(Index1D index, ArrayView1D<long, Stride1D.Dense> p, ArrayView1D<uint, Stride1D.Dense> k, ArrayView1D<uint, Stride1D.Dense> HPLayer, int factor)
         {
             uint comp = 0;
             for(int i = 0; i < factor; i++)
@@ -251,15 +239,9 @@ namespace MarchingCubes
                     p[index] += i;
                     break;
                 }
-                //if(k[index] == comp + HPLayer[p[index] + i])
-                //{
-                //    k[index] = 0;
-                //    p[index] += i;
-                //    break;
-                //}
                 comp += HPLayer[p[index] + i];
             }
-            p[index] *= nextFactor;
+            p[index] *= factor;
         }
 
         public static void HPFinalLayer(Index1D index,
@@ -344,33 +326,31 @@ namespace MarchingCubes
         {
             int n;
 
-            if (nTri < 1) return;
             Index1D index = new Index1D(nTri);
             MemoryBuffer1D<Triangle, Stride1D.Dense> triConfig = accelerator.Allocate1D<Triangle>(1);
             uint[] karray = Enumerable.Range(0, nTri).Select(x => (uint)x).ToArray();
             MemoryBuffer1D<uint, Stride1D.Dense> k = accelerator.Allocate1D<uint>(karray);
             MemoryBuffer1D<long, Stride1D.Dense> p = accelerator.Allocate1D<long>(nTri);
             Triangle[] tri = new Triangle[nTri];
-            PageLockedArray1D<Triangle> triLocked = accelerator.AllocatePageLocked1D<Triangle>(nTri);
             p.MemSetToZero();
             accelerator.Synchronize();
+
             try
             {
-
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
                 for (n = nLayers - 2; n > 0; n--)
                 {
-                    traversalKernel(index, p.View, k.View, getHPLayer(n).View, factors[n], factors[n - 1]);
+                    traversalKernel(index, p.View, k.View, getHPLayer(n).View, factor);
                     accelerator.Synchronize();
                 }
 
                 stopWatch.Stop();
                 ts = stopWatch.Elapsed;
-                count = 0;
 
                 HPTraverseTime = ts;
 
+                count = 0;
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:0000000}",
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.TotalMilliseconds * 10000);
@@ -384,7 +364,7 @@ namespace MarchingCubes
                 stopWatch.Reset();
                 stopWatch.Start();
 
-                hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, thresh, factors[0], X, Y, Z);
+                hpFinalLayer(index, p.View, k.View, HPBaseConfig.View, triConfig.View, cubeConfig.View, triTable.View, sliced.View, thresh, factor, X, Y, Z);
 
                 accelerator.Synchronize();
                 stopWatch.Stop();
@@ -397,14 +377,15 @@ namespace MarchingCubes
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.TotalMilliseconds * 10000);
                 //Console.WriteLine("RunTime:" + elapsedTime + ", Batch Size:" + batchSize);
+
             }
             catch (Exception ex)
             {
 
             }
-            triConfig.View.CopyToPageLockedAsync(triLocked);
-            accelerator.Synchronize();
-            tri = triLocked.GetArray();
+            //triConfig.View.CopyToPageLockedAsync(triLocked);
+            //accelerator.Synchronize();
+            //tri = triLocked.GetArray();
             triConfig.Dispose();
             cubeConfig.Dispose();
             sliced.Dispose();
@@ -413,17 +394,16 @@ namespace MarchingCubes
             triTable.Dispose();
             HPBaseConfig.Dispose();
 
-            foreach (var triangle in tri)
-            {
-                //fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
-                //fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
-                //fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
-                //fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
-                //fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
-                //fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
-                //count += 3;
-            }
-            n_triangle = nTri;
+            //foreach (var triangle in tri)
+            //{
+            //    fs.WriteLine("v " + triangle.vertex1.X + " " + triangle.vertex1.Y + " " + triangle.vertex1.Z);
+            //    fs.WriteLine("vn " + -triangle.vertex1.normal.X + " " + -triangle.vertex1.normal.Y + " " + -triangle.vertex1.normal.Z);
+            //    fs.WriteLine("v " + triangle.vertex2.X + " " + triangle.vertex2.Y + " " + triangle.vertex2.Z);
+            //    fs.WriteLine("vn " + -triangle.vertex2.normal.X + " " + -triangle.vertex2.normal.Y + " " + -triangle.vertex2.normal.Z);
+            //    fs.WriteLine("v " + triangle.vertex3.X + " " + triangle.vertex3.Y + " " + triangle.vertex3.Z);
+            //    fs.WriteLine("vn " + -triangle.vertex3.normal.X + " " + -triangle.vertex3.normal.Y + " " + -triangle.vertex3.normal.Z);
+            //    count += 3;
+            //}
         }
 
         public static void Assign(Index3D index, ArrayView3D<byte, Stride3D.DenseXY> edges, ArrayView1D<byte, Stride1D.Dense> HPindices, ArrayView3D<ushort, Stride3D.DenseXY> input, ArrayView<Edge> triTable, int thresh, int x, int y, int z)
@@ -463,7 +443,6 @@ namespace MarchingCubes
             var HPPinned = GCHandle.Alloc(HPBaseLayer, GCHandleType.Pinned);
             try
             {
-
                 PageLockedArray3D<byte> cubeLocked = accelerator.AllocatePageLocked3D<byte>(new Index3D(index.X, index.Y, index.Z));
                 PageLockedArray1D<byte> HPLocked = accelerator.AllocatePageLocked1D<byte>(new Index1D(HPBaseLayer.GetLength(0)));
                 cubeConfig = accelerator.Allocate3DDenseXY<byte>(cubeLocked.Extent);
@@ -483,20 +462,16 @@ namespace MarchingCubes
                 ts = stopWatch.Elapsed;
                 cubeConfig.AsContiguous().CopyToPageLockedAsync(cubeLocked);
                 cubeBytes = cubeLocked.GetArray();
-
                 //cubeConfig.Dispose();
                 HPBaseConfig.AsContiguous().CopyToPageLockedAsync(HPLocked);
                 HPBaseLayer = HPLocked.GetArray();
-
-                active_nh = HPBaseLayer.Where(x => (x != byte.MinValue) && (x != byte.MaxValue)).Count();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
 
             }
             cubePinned.Free();
             HPPinned.Free();
-
 
             FirstPassTime = ts;
 

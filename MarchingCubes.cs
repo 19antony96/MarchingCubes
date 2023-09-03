@@ -14,6 +14,15 @@ using System.Linq;
 
 namespace MarchingCubes
 {
+    public enum Format
+    {
+        dat,
+        tiff,
+        dcm,
+        raw,
+        file
+    }
+
     public enum dataset
     {
         bunny,
@@ -39,7 +48,75 @@ namespace MarchingCubes
         MRHead40,
         SkullLrg,
 
+        PlaneScout,
+        WATERIDEAL_T2FSEASSET,
+        bval100260048008T22nexeDWI,
+        multiPhase,
+        FATIDEAL_T2FSEASSET,
+        InPhaseIDEAL_T2FSEASSET,
+        uni_lateral_cropped_SER_111387,
+        uni_lateral_cropped_PE2_55883,
+        uni_lateral_cropped_PE6_69418,
+        uni_lateral_cropped_original_DCE_21414,
+
+        STIR_ASSET,
+        ACRIN_6698_Ax_DWI,
+        Ax_VIBRANT_MPh,
+        Ph1Ax_VIBRANT_MPh,
+        Ph2Ax_VIBRANT_MPh,
+        Ph3Ax_VIBRANT_MPh,
+        Ph4Ax_VIBRANT_MPh,
+        Ph5Ax_VIBRANT_MPh,
+        Ph6Ax_VIBRANT_MPh,
+        uni_lateral_cropped_SER_18037,
+        uni_lateral_cropped_PE2_94980,
+        uni_lateral_cropped_PE5_92945,
+        uni_lateral_cropped_original_DCE_59184,
+
+        T2_TIRM_AX_75890,
+
+        DBT_slices,
+        PARENCHYMAAL_PHASE,
+        PET_IR_NE_AC_WB,
+        PET_AC_80118,
+        NEPHRO,
+        PET_CT,
+        oblProstate,
+        PET_AC_66518,
+        LIVER_PELVISHASTESAGPOS,
+        LIVER_PELVISHASTEAXIALP,
+        LIVER_KIDNEYTIFL2DAXIAL,
+
+        HELICAL_MODE_61766,
+        INSPIRATION_21722,
+        INSPIRATION_67948,
+        INSPIRATION_87999,
+        INSPIRATION_90906,
+        INSPIRATION_98909,
+        EXPIRATION_08393,
+        EXPIRATION_30420,
+        EXPIRATION_70053,
+        EXPIRATION_97449,
+        EXPIRATION_78701,
+        Recon_2_58420,
+        Recon_3_13992,
+        PRONE_INSPIRATION_07278,
+        PRONE_INSPIRATION_18886,
+        PRONE_INSPIRATION_50886,
+        PRONE_INSPIRATION_81487,
+        PRONE_INSPIRATION_89538,
+        Abd_CT_96816_89538,
+        PET_WB_60732,
+        PET_WB_44674,
+
+        stagbeetle,
+        present,
+        bonsai,
+        aneurism,
+        pawpawsaurus,
+        Spathorhynchus_fossorium
     }
+
     class MarchingCubes
     {
         public static Context context;
@@ -61,7 +138,28 @@ namespace MarchingCubes
         public static string repStr;
         public static DirectoryInfo d;
         public static bool isDCM;
+        public static Format format;
         public static int scaling = 1;
+
+        public static int maxX = 0, maxY = 0, maxZ = 0;
+        public static int minX = 0, minY = 0, minZ = 0;
+        public static bool bound = false;
+
+        public static void SetBound(int xMax, int yMax, int zMax, int xMin, int yMin, int zMin)
+        {
+            maxX = xMax;
+            maxY = yMax;
+            maxZ = zMax;
+            minX = xMin;
+            minY = yMin;
+            minZ = zMin;
+            bound = true;
+        }
+
+        public static void UnsetBound()
+        {
+            bound = false;
+        }
 
         public static void SetValues(dataset ds, string suffix)
         {
@@ -75,6 +173,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\bunny_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = false;
+                    format = Format.file;
                     break;
                 case dataset.CThead:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\CThead\\";
@@ -84,6 +183,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\CThead_{suffix}.obj";
                     repStr = "CThead.";
                     isDCM = false;
+                    format = Format.file;
                     scaling = 2;
                     break;
                 case dataset.F_Ankle:
@@ -94,6 +194,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\F_Ankle_{suffix}.obj";
                     repStr = "vhf.";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.F_Head:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Head\\Head\\";
@@ -103,6 +204,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\F_Head_{suffix}.obj";
                     repStr = "vhf.";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.F_Hip:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Hip\\Hip\\";
@@ -112,6 +214,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\F_Hip_{suffix}.obj";
                     repStr = "vhf.";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.F_Knee:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Knee\\Knee\\";
@@ -120,7 +223,8 @@ namespace MarchingCubes
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\F_Knee_{suffix}.obj";
                     repStr = "vhf.";
-                    isDCM = true; 
+                    isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.F_Pelvis:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Pelvis\\Pelvis\\";
@@ -130,6 +234,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\F_Pelvis_{suffix}.obj";
                     repStr = "vhf.";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.F_Shoulder:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\F_Shoulder\\Shoulder\\";
@@ -139,6 +244,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\F_Shoulder_{suffix}.obj";
                     repStr = "vhf.";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.M_Head:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\M_Head\\Head\\";
@@ -148,6 +254,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\M_Head_{suffix}.obj";
                     repStr = "vhm.";
                     isDCM = true;
+                    format = Format.dcm;
                     break; 
                 case dataset.M_Hip:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\M_Hip\\Hip\\";
@@ -157,6 +264,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\M_Hip_{suffix}.obj";
                     repStr = "vhm.";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.M_Pelvis:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\M_Pelvis\\Pelvis\\";
@@ -165,7 +273,8 @@ namespace MarchingCubes
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\M_Pelvis_{suffix}.obj";
                     repStr = "vhm.";
-                    isDCM = true; 
+                    isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.M_Shoulder:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\M_Shoulder\\Shoulder\\";
@@ -175,6 +284,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\M_Shoulder_{suffix}.obj";
                     repStr = "vhm.";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.MRbrain:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\MRbrain\\";
@@ -184,6 +294,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\MRbrain_{suffix}.obj";
                     repStr = "MRbrain.";
                     isDCM = false;
+                    format = Format.file;
                     scaling = 2;
                     break;
                 case dataset.ChestSmall:
@@ -193,7 +304,8 @@ namespace MarchingCubes
                     width = 512;
                     outFilename = $"D:\\College Work\\MP\\ChestSmall_{suffix}.obj";
                     repStr = "repStr";
-                    isDCM = true; 
+                    isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.ChestCT:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Subject (1)\\98.12.2\\";
@@ -203,6 +315,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\ChestCT_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.WristCT:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\w3568970\\batch3\\";
@@ -212,6 +325,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\WristCT_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.MRHead3:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 005 [MR - SAG RF FAST VOL FLIP 3]\\";
@@ -221,6 +335,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\MRHead3_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.MRHead5:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 003 [MR - SAG RF FAST VOL FLIP 5]\\";
@@ -230,6 +345,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\MRHead5_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.MRHead20:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 004 [MR - SAG RF FAST VOL FLIP 20]\\";
@@ -239,6 +355,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\MRHead20_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.MRHead30:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 002 [MR - SAG RF FAST VOL FLIP 30]\\";
@@ -248,6 +365,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\MRHead30_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.MRHead40:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Series 006 [MR - SAG RF FAST VOL FLIP 40]\\";
@@ -257,6 +375,7 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\MRHead40_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
+                    format = Format.dcm;
                     break;
                 case dataset.SkullLrg:
                     filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\DICOM\\";
@@ -266,46 +385,720 @@ namespace MarchingCubes
                     outFilename = $"D:\\College Work\\MP\\SkullLrg_{suffix}.obj";
                     repStr = "repStr";
                     isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.PlaneScout:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-21-2002-102212T3-ACRIN-6698ISPY2MRIT3-13902\\1.000000-ISPY2 3 Plane Scout-18415\\";
+                    thresh = 40;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\PlaneScout_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.WATERIDEAL_T2FSEASSET:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-21-2002-102212T3-ACRIN-6698ISPY2MRIT3-13902\\3.000000-ISPY2 WATERIDEAL T2FSEASSET no NP-35054\\";
+                    thresh = 40;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\WATERIDEAL_T2FSEASSET_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.bval100260048008T22nexeDWI:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-21-2002-102212T3-ACRIN-6698ISPY2MRIT3-13902\\5.000000-ACRIN-6698 4bval100260048008T22nexeDWI-63148\\";
+                    thresh = 40;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\bval100260048008T22nexeDWI_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.multiPhase:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-21-2002-102212T3-ACRIN-6698ISPY2MRIT3-13902\\6.000000-ISPY2 multiPhase38425680-100sec.Dyn.-27199\\";
+                    thresh = 256;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\multiPhase_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.FATIDEAL_T2FSEASSET:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-21-2002-102212T3-ACRIN-6698ISPY2MRIT3-13902\\300.000000-ISPY2 FATIDEAL T2FSEASSET no NP-34618\\";
+                    thresh = 40;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\FATIDEAL_T2FSEASSET_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.InPhaseIDEAL_T2FSEASSET:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-21-2002-102212T3-ACRIN-6698ISPY2MRIT3-13902\\301.000000-ISPY2 InPhaseIDEAL T2FSEASSET no NP-87919\\";
+                    thresh = 40;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\InPhaseIDEAL_T2FSEASSET_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.uni_lateral_cropped_PE2_55883:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-21-2002-102212T3-ACRIN-6698ISPY2MRIT3-13902\\61002.000000-ISPY2 VOLSER uni-lateral cropped PE2-55883\\";
+                    thresh = 40;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\uni_lateral_cropped_PE2_55883_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.uni_lateral_cropped_PE6_69418:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-21-2002-102212T3-ACRIN-6698ISPY2MRIT3-13902\\61006.000000-ISPY2 VOLSER uni-lateral cropped PE6-69418\\";
+                    thresh = 40;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\uni_lateral_cropped_PE6_69418_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.uni_lateral_cropped_original_DCE_21414:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-21-2002-102212T3-ACRIN-6698ISPY2MRIT3-13902\\61800.000000-ISPY2 VOLSER uni-lateral cropped original DCE-21414\\";
+                    thresh = 40;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\uni_lateral_cropped_original_DCE_21414_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+
+                case dataset.STIR_ASSET:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\4.000000-ISPY2 Ax T2 STIR ASSET-31580\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\STIR_ASSET_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.ACRIN_6698_Ax_DWI:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\5.000000-ACRIN-6698 Ax DWI 100600800 DE-79030\\";
+                    thresh = 100;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\ACRIN_6698_Ax_DWI_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.Ax_VIBRANT_MPh:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\600.000000-ISPY2 Ax VIBRANT MPh C-26652\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Ax_VIBRANT_MPh_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.Ph1Ax_VIBRANT_MPh:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\601.000000-ISPY2 Ph1Ax VIBRANT MPh C-02896\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Ph1Ax_VIBRANT_MPh_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.Ph2Ax_VIBRANT_MPh:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\602.000000-ISPY2 Ph2Ax VIBRANT MPh C-40608\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Ph2Ax_VIBRANT_MPh_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.Ph3Ax_VIBRANT_MPh:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\603.000000-ISPY2 Ph3Ax VIBRANT MPh C-55587\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Ph3Ax_VIBRANT_MPh_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.Ph4Ax_VIBRANT_MPh:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\604.000000-ISPY2 Ph4Ax VIBRANT MPh C-22587\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Ph4Ax_VIBRANT_MPh_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.Ph5Ax_VIBRANT_MPh:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\605.000000-ISPY2 Ph5Ax VIBRANT MPh C-87700\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Ph5Ax_VIBRANT_MPh_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.Ph6Ax_VIBRANT_MPh:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\606.000000-ISPY2 Ph6Ax VIBRANT MPh C-16436\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Ph6Ax_VIBRANT_MPh_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.uni_lateral_cropped_SER_18037:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\61000.000000-ISPY2 VOLSER uni-lateral cropped SER-18037\\";
+                    thresh = 100;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\uni_lateral_cropped_SER_18037_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.uni_lateral_cropped_PE2_94980:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\61002.000000-ISPY2 VOLSER uni-lateral cropped PE2-94980\\";
+                    thresh = 100;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\uni_lateral_cropped_PE2_94980_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.uni_lateral_cropped_PE5_92945:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\61005.000000-ISPY2 VOLSER uni-lateral cropped PE5-92945\\";
+                    thresh = 100;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\uni_lateral_cropped_PE5_92945_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.uni_lateral_cropped_original_DCE_59184:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\09-20-2003-103939T3-ACRIN-6698ISPY2MRIT3-16224\\61800.000000-ISPY2 VOLSER uni-lateral cropped original DCE-59184\\";
+                    thresh = 100;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\uni_lateral_cropped_original_DCE_59184_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.T2_TIRM_AX_75890:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\10.000000-ISPY2 T2 TIRM AX-75890\\";
+                    thresh = 100;
+                    length = 768;
+                    width = 768;
+                    outFilename = $"D:\\College Work\\MP\\T2_TIRM_AX_75890_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+
+                case dataset.DBT_slices:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\DBT slices-78838\\";
+                    thresh = 100;
+                    length = 1024;
+                    width = 1421;
+                    outFilename = $"D:\\College Work\\MP\\DBT_slices_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.PARENCHYMAAL_PHASE:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\3.000000-PARENCHYMAL PHASE Sep1999-95798\\";
+                    thresh = 1200;
+                    length = 1024;
+                    width = 1421;
+                    outFilename = $"D:\\College Work\\MP\\PARENCHYMAAL_PHASE_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.PET_IR_NE_AC_WB:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\PET IR NO AC WB-89718\\";
+                    thresh = 100;
+                    length = 128;
+                    width = 128;
+                    outFilename = $"D:\\College Work\\MP\\PET_IR_NE_AC_WB_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.PET_AC_80118:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\1.000000-PET AC-80118\\";
+                    thresh = 100;
+                    length = 128;
+                    width = 128;
+                    outFilename = $"D:\\College Work\\MP\\PET_AC_80118_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.NEPHRO:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\5.000000-NEPHRO  4.0  B40f  M0.4-18678\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\NEPHRO_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.PET_CT:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\603.000000-PET-CT SERIES-72118\\";
+                    thresh = 100;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\PET_CT_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.oblProstate:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\4.000000-t2spcrstaxial oblProstate-50358\\";
+                    thresh = 100;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\oblProstate_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.PET_AC_66518:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\3.000000-PET AC-66518\\";
+                    thresh = 100;
+                    length = 128;
+                    width = 128;
+                    outFilename = $"D:\\College Work\\MP\\PET_AC_66518_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.LIVER_PELVISHASTESAGPOS:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\16.000000-LIVER-PELVISHASTESAGPOS-74838\\";
+                    thresh = 1200;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\LIVER_PELVISHASTESAGPOS_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.LIVER_PELVISHASTEAXIALP:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\15.000000-LIVER-PELVISHASTEAXIALP-65398\\";
+                    thresh = 1200;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\LIVER_PELVISHASTEAXIALP_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+                case dataset.LIVER_KIDNEYTIFL2DAXIAL:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\6.000000-LIVER-KIDNEYTIFL2DAXIAL-30038\\";
+                    thresh = 1200;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\LIVER_KIDNEYTIFL2DAXIAL_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    scaling = 2;
+                    break;
+
+                case dataset.HELICAL_MODE_61766:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\2.000000-HELICAL MODE-61766\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\HELICAL_MODE_61766_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.INSPIRATION_21722:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\2.000000-INSPIRATION-21722\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\INSPIRATION_21722_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.INSPIRATION_67948:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\2.000000-INSPIRATION-67948\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\INSPIRATION_67948_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.INSPIRATION_87999:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\2.000000-INSPIRATION-87999\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\INSPIRATION_87999_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.INSPIRATION_90906:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\2.000000-INSPIRATION-90906\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\INSPIRATION_90906_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.INSPIRATION_98909:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\2.000000-INSPIRATION-98909\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\INSPIRATION_98909_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.EXPIRATION_08393:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\3.000000-EXPIRATION-08393\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\EXPIRATION_08393_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.EXPIRATION_30420:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\3.000000-EXPIRATION-30420\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\EXPIRATION_30420_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.EXPIRATION_70053:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\3.000000-EXPIRATION-70053\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\EXPIRATION_70053_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.EXPIRATION_97449:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\3.000000-EXPIRATION-97449\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\EXPIRATION_97449_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.EXPIRATION_78701:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\3.000000-EXPIRATION-78701\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\EXPIRATION_78701_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.Recon_2_58420:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\3.000000-Recon 2-58420\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Recon_2_58420_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.Recon_3_13992:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\4.000000-Recon 3-13992\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Recon_3_13992_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.PRONE_INSPIRATION_07278:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\5.000000-PRONE INSPRATION-07278\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\PRONE_INSPIRATION_07278_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.PRONE_INSPIRATION_18886:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\5.000000-PRONE INSPRATION-18886\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\PRONE_INSPIRATION_18886_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.PRONE_INSPIRATION_50886:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\5.000000-PRONE INSPRATION-50886\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\PRONE_INSPIRATION_50886_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.PRONE_INSPIRATION_81487:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\5.000000-PRONE INSPRATION-81487\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\PRONE_INSPIRATION_81487_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.PRONE_INSPIRATION_89538:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\5.000000-PRONE INSPRATION-89538\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\PRONE_INSPIRATION_89538_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.Abd_CT_96816_89538:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\2.000000-Abd.CT 5.0 B30s-96816\\";
+                    thresh = 1200;
+                    length = 512;
+                    width = 512;
+                    outFilename = $"D:\\College Work\\MP\\Abd_CT_96816_89538_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.PET_WB_60732:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\605.000000-PET WB-uncorrected-60732\\";
+                    thresh = 1200;
+                    length = 128;
+                    width = 128;
+                    outFilename = $"D:\\College Work\\MP\\PET_WB_60732_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+                case dataset.PET_WB_44674:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\tgca-luad\\606.000000-PET WB-44674\\";
+                    thresh = 1200;
+                    length = 128;
+                    width = 128;
+                    outFilename = $"D:\\College Work\\MP\\PET_WB_44674_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = true;
+                    format = Format.dcm;
+                    break;
+
+                case dataset.stagbeetle:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\stagbeetle832x832x494.dat";
+                    thresh = 800;
+                    length = 832;
+                    width = 832;
+                    outFilename = $"D:\\College Work\\MP\\stagbeetle_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = false;
+                    format = Format.dat;
+                    break;
+                case dataset.present:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\present492x492x442.dat";
+                    thresh = 300;
+                    length = 492;
+                    width = 492;
+                    outFilename = $"D:\\College Work\\MP\\present_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = false;
+                    format = Format.dat;
+                    break;
+                case dataset.bonsai:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\bonsai_256x256x256_uint8.raw";
+                    thresh = 50;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\bonsai_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = false;
+                    format = Format.raw;
+                    break;
+                case dataset.aneurism:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\aneurism_256x256x256_uint8.raw";
+                    thresh = 60;
+                    length = 256;
+                    width = 256;
+                    outFilename = $"D:\\College Work\\MP\\aneurism_{suffix}.obj";
+                    repStr = "repStr";
+                    isDCM = false;
+                    format = Format.raw;
+                    break;
+                case dataset.pawpawsaurus:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Pawpawsaurus\\";
+                    thresh = 1200;
+                    length = 646;
+                    width = 958;
+                    outFilename = $"D:\\College Work\\MP\\pawpawsaurus_{suffix}.obj";
+                    repStr = "pawpa";
+                    isDCM = false;
+                    format = Format.tiff;
+                    break;
+                case dataset.Spathorhynchus_fossorium:
+                    filePath = "C:\\Users\\antonyDev\\Downloads\\DICOMS\\Spathorhynchus_fossorium\\Spathorhynchus_fossorium\\8bitTIFF\\";
+                    thresh = 3000;
+                    length = 1024;
+                    width = 1024;
+                    outFilename = $"D:\\College Work\\MP\\Spathorhynchus_fossorium_{suffix}.obj";
+                    repStr = "spath";
+                    isDCM = false;
+                    format = Format.tiff;
                     break;
             }
         }
 
         public static FileInfo CreateVolume(int size)
         {
-            context = Context.Create(builder => builder.Default().EnableAlgorithms());
-            accelerator = context.CreateCudaAccelerator(0);
-            //accelerator = context.CreateCPUAccelerator(0);
-            triTable = accelerator.Allocate1D<Edge>(triangleTable);
-            Console.WriteLine("Threshold:" + (thresh - 1024));
-
             string fileName = outFilename;
-            FileInfo fi = new FileInfo(fileName);
-
-            if(slices == null)
+            FileInfo
+                fi = new FileInfo(fileName);
+            try
             {
-                Console.WriteLine(outFilename);
-                if (isDCM)
-                {
-                    ReadDCM();
-                }
-                else
-                {
-                    ReadFile();
-                }
-                //CreateSphere(width);
-            }
+                context = Context.Create(builder => builder.Default().EnableAlgorithms());
+                accelerator = context.CreateCudaAccelerator(0);
+                //accelerator = context.CreateCPUAccelerator(0);
+                triTable = accelerator.Allocate1D<Edge>(triangleTable);
+                //Console.WriteLine("Threshold:" + (thresh - 1024));
 
-            OctreeSize = Math.Max(width, slices.GetLength(0));
-            if (Math.Log(Math.Max(width, slices.GetLength(0)), 2) % 1 > 0)
+                if (slices == null)
+                {
+                    Console.WriteLine(outFilename);
+                    if (isDCM)
+                    {
+                        ReadDCM();
+                    }
+                    else
+                    {
+                        if (format == Format.dat || format == Format.raw)
+                            ReadFile();
+                        else
+                            ReadFiles();
+                    }
+                    //CreateSphere(width);
+                }
+
+                if (bound)
+                {
+
+                    Slice();
+                }
+
+                Console.WriteLine("Threshold: " + thresh);
+                //Console.WriteLine("MidPt Threshold: " + thresh);
+
+                OctreeSize = Math.Max(width, slices.GetLength(0));
+                if (Math.Log(Math.Max(width, slices.GetLength(0)), 2) % 1 > 0)
+                {
+                    OctreeSize = (int)Math.Pow(2, (int)Math.Log(Math.Max(width, slices.GetLength(0)), 2) + 1);
+                }
+
+                sliced = accelerator.Allocate3DDenseXY<ushort>(slices);
+            }
+            catch(Exception ex)
             {
-                OctreeSize = (int)Math.Pow(2, (int)Math.Log(Math.Max(width, slices.GetLength(0)), 2) + 1);
+                sliced.Dispose();
+                triTable.Dispose();
+                accelerator.Dispose();
+                context.Dispose();
             }
-
-            sliced = accelerator.Allocate3DDenseXY<ushort>(slices);
+            Console.WriteLine("X: " + slices.GetLength(0));
+            Console.WriteLine("Y: " + slices.GetLength(1));
+            Console.WriteLine("Z: " + slices.GetLength(2));
             return fi;
         }
 
-        public static void ReadDCM()
+        public static string ReadDCM()
         {
             ushort k = 0;
             DicomFile dicoms;
@@ -320,32 +1113,7 @@ namespace MarchingCubes
             length = header.Height;
             width = header.Width;
 
-            slices = new ushort[Math.Min(files.Length, 512), length, width];
-            //if (length == 256 && width == 256)
-            //    slices = new ushort[width, width, width];
-
-            //if (length == 512 && width == 512)
-            //    slices = new ushort[width, width, width];
-
-            foreach (var file in files)
-            {
-                dicoms = DicomFile.Open(file.FullName);
-                CreateBmp(dicoms, k);
-                k++;
-                if (k > 511)
-                    break;
-            }
-
-        }
-
-        public static void ReadFile()
-        {
-            ushort k = 0;
-            DirectoryInfo d = new DirectoryInfo(filePath);
-
-            FileInfo[] files = d.GetFiles();
-            files = files.OrderBy(x => int.Parse(x.Name.Replace(repStr, ""))).ToArray();
-
+            //slices = new ushort[Math.Min(files.Length, 512), length, width];
             slices = new ushort[files.Length, length, width];
             //if (length == 256 && width == 256)
             //    slices = new ushort[width, width, width];
@@ -353,13 +1121,68 @@ namespace MarchingCubes
             //if (length == 512 && width == 512)
             //    slices = new ushort[width, width, width];
 
+            string modality;
             foreach (var file in files)
             {
-                Decode(file.FullName, k);
+                dicoms = DicomFile.Open(file.FullName);
+                if (k == 0)
+                {
+                    Console.WriteLine(dicoms.Dataset.GetValue<string>(DicomTag.Modality, 0));
+                    modality = dicoms.Dataset.GetValue<string>(DicomTag.Modality, 0);
+                }
+
+                CreateBmp(dicoms, k);
                 k++;
-                if (k > 1023)
-                    break;
+                //if (k > 511)
+                //    break;
             }
+
+            return modality;
+
+        }
+
+        public static void ReadFiles()
+        {
+            ushort k = 0;
+            DirectoryInfo d = new DirectoryInfo(filePath);
+
+            FileInfo[] files = d.GetFiles().Where(file => !file.Attributes.HasFlag(FileAttributes.Hidden)).ToArray();
+            //string[] s = files.Select(x => x.Name.Replace(repStr, "").Split('.').First()).ToArray();
+            files = files.OrderBy(x => int.Parse(x.Name.Replace(repStr, "").Split('.').First())).ToArray();
+
+            slices = new ushort[files.Length, length, width];
+
+            //if (length == 256 && width == 256)
+            //    slices = new ushort[width, width, width];
+
+            //if (length == 512 && width == 512)
+            //    slices = new ushort[width, width, width];
+
+            foreach (var file in files)
+            {
+                if (format == Format.file)
+                    Decode(file.FullName, k);
+                else if (format == Format.tiff)
+                    DecodeTIFF(file.FullName, k);
+                k++;
+                //if (k > 1023)
+                //    break;
+            }
+
+        }
+
+        public static void ReadFile()
+        {
+            //if (length == 256 && width == 256)
+            //    slices = new ushort[width, width, width];
+
+            //if (length == 512 && width == 512)
+            //    slices = new ushort[width, width, width];
+
+            if (format == Format.dat)
+                DecodeDat(filePath);
+            else if (format == Format.raw)
+                DecodeRaw8(filePath);
 
         }
 
@@ -478,7 +1301,7 @@ namespace MarchingCubes
             List<byte> color = new List<byte>();
             //var pixelData = PixelDataFactory.Create(dicom.PixelData, 0); // returns IPixelData type
 
-
+            ushort max = 0;
             if (pixelData is GrayscalePixelDataU16)
             {
                 for (int i = 0; i < pixelData.Width; i++)
@@ -487,9 +1310,14 @@ namespace MarchingCubes
                     {
                         int index = j * header.Width + i;
                         slices[k, j, i] = (ushort)pixelData.Data[index];
+                        if(slices[k, j, i] > max)
+                        {
+                            max = slices[k, j, i];
+                        }
                     }
                 }
             }
+            //thresh = (ushort)(max / 4);
         }
 
         public static void DecodeTIFF(string path, int k)
@@ -497,6 +1325,7 @@ namespace MarchingCubes
             MagickImage image = new MagickImage(path);
             var pixelValues = image.GetPixels().GetValues();
 
+            ushort max = 0;
             if (true)
             {
                 for (int i = 0; i < image.Width; i++)
@@ -505,9 +1334,14 @@ namespace MarchingCubes
                     {
                         int index = j * image.Width + i;
                         slices[k, j, i] = (ushort)pixelValues[index];
+                        if (slices[k, j, i] > max)
+                        {
+                            max = slices[k, j, i];
+                        }
                     }
                 }
             }
+            //thresh = (ushort)(5 * max / 8);
         }
 
         public static void Decode(string path, int k)
@@ -522,6 +1356,7 @@ namespace MarchingCubes
             stream.Close();
             stream.Dispose();
 
+            ushort max = 0;
             if (true)
             {
                 for (int i = 0; i < width; i++)
@@ -532,9 +1367,102 @@ namespace MarchingCubes
                         slices[k, j, i] = (ushort)pixels[index];
                         if (slices[k, j, i] >= 4096)
                             slices[k, j, i] = 0;
+                        if (slices[k, j, i] > max)
+                        {
+                            max = slices[k, j, i];
+                        }
                     }
                 }
             }
+            //thresh = (ushort)(max / 4);
+        }
+
+        public static void DecodeRaw8(string path)
+        {
+            FileStream stream = File.OpenRead(path);
+
+            int sizeX = 256, sizeY = 256, sizeZ = 256; // declare variables for header information
+            slices = new ushort[256, 256, 256];
+
+            ushort max = 0;
+            for (int k = 0; k < sizeZ; k++)
+            {
+                for (int i = 0; i < sizeY; i++)
+                {
+                    for (int j = 0; j < sizeX; j++)
+                    {
+                        slices[k, j, i] = (ushort)stream.ReadByte();
+                        if (slices[k, j, i] > max)
+                        {
+                            max = slices[k, j, i];
+                        }
+                    }
+                }
+            }
+
+            //thresh = (ushort)(max / 4);
+
+            stream.Close();
+            stream.Dispose();
+        }
+
+        public static void DecodeDat(string path)
+        {
+            FileStream stream = File.OpenRead(path);
+
+            int sizeX, sizeY, sizeZ; // declare variables for header information
+            sizeX = stream.ReadByte();
+            sizeX += stream.ReadByte() * 256;
+            sizeY = stream.ReadByte();
+            sizeY += stream.ReadByte() * 256;
+            sizeZ = stream.ReadByte();
+            sizeZ += stream.ReadByte() * 256;
+
+            slices = new ushort[sizeZ, sizeY, sizeX];
+
+            ushort max = 0;
+            for (int k = 0; k < sizeZ; k++)
+            {
+                for (int i = 0; i < sizeY; i++)
+                {
+                    for (int j = 0; j < sizeX; j++)
+                    {
+                        slices[k, j, i] = (ushort)stream.ReadByte();
+                        slices[k, j, i] += (ushort)(stream.ReadByte() * 256);
+                        if (slices[k, j, i] > max)
+                        {
+                            max = slices[k, j, i];
+                        }
+                    }
+                }
+            }
+
+            //thresh = (ushort)(max / 4);
+
+            stream.Close();
+            stream.Dispose();
+        }
+
+        public static void Slice()
+        {
+            int xSize = maxX - minX;
+            int ySize = maxY - minY;
+            int zSize = maxZ - minZ;
+
+            ushort[,,] tempSlice = new ushort[zSize + 1, ySize + 1, xSize + 1];
+            
+            for(int i = 0; i < zSize; i++)
+            {
+                for (int j = 0; j < ySize; j++)
+                {
+                    for (int k = 0; k < xSize; k++)
+                    {
+                        tempSlice[i, j, k] = slices[i + minZ, j + minY, k + minX];
+                    }
+                }
+            }
+            slices = tempSlice;
+            UnsetBound();
         }
 
         public static Edge[] triangleTable =    
